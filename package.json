@@ -1,0 +1,29 @@
+{
+  "name": "capi-ui",
+  "description": "UI for the CAPI Turtles extension",
+  "version": "0.1.0",
+  "private": false,
+  "engines": {
+    "node": ">=12"
+  },
+  "dependencies": {
+    "@rancher/shell": "^0.3.24",
+    "core-js": "3.21.1",
+    "css-loader": "6.7.3",
+    "@types/lodash": "4.14.184",
+    "@rancher/components": "0.1.3"
+  },
+  "resolutions": {
+    "**/webpack": "4",
+    "@types/node": "^16"
+  },
+  "scripts": {
+    "dev": "NODE_ENV=dev ./node_modules/.bin/vue-cli-service serve",
+    "build": "./node_modules/.bin/vue-cli-service build",
+    "clean": "./node_modules/@rancher/shell/scripts/clean",
+    "build-pkg": "./node_modules/@rancher/shell/scripts/build-pkg.sh",
+    "serve-pkgs": "./node_modules/@rancher/shell/scripts/serve-pkgs",
+    "publish-pkgs": "./node_modules/@rancher/shell/scripts/extension/publish",
+    "parse-tag-name": "./node_modules/@rancher/shell/scripts/extension/parse-tag-name"
+  }
+}
