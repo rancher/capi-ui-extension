@@ -1,7 +1,6 @@
 <script>
 import { CATALOG, MANAGEMENT } from '@shell/config/types';
 import { allHash } from '@shell/utils/promise';
-import Vue, { defineComponent } from 'vue';
 
 import Banner from '@components/Banner/Banner.vue';
 
@@ -12,8 +11,6 @@ export default {
 
   async fetch() {
     const hash = {
-    // todo what if no permission to view installed apps?
-    // need to be connected to local cluster...
       installedApps: this.$store.dispatch('cluster/findAll', { type: CATALOG.APP }),
       features:      this.$store.dispatch('management/findAll', { type: MANAGEMENT.FEATURE }),
     };
@@ -35,7 +32,7 @@ export default {
     embeddedCapiEnabled() {
       const embeddedCapiFeature = this.features.find(f => f.id === 'embedded-cluster-api');
 
-      return !!embeddedCapiFeature?.spec?.value;
+      return embeddedCapiFeature?.spec?.value;
     },
 
     hasCapiOperator() {
@@ -44,7 +41,7 @@ export default {
 
     hasTurtlesOperator() {
       return !!this.installedApps.find(app => app.id === 'turtles/rancher-turtles');
-    },
+    }
   }
 
 };
@@ -52,6 +49,36 @@ export default {
 
 <template>
   <div>
-    <Banner v-if="!embeddedCapiEnabled" label-key="capi.installation.disableFeatureFlag" color="error" />
+    <div v-if="embeddedCapiEnabled || !hasTurtlesOperator || !hasCapiOperator" class="not-installed">
+      <h1 class="mb-20">
+        {{ t("capi.installation.title") }}
+      </h1>
+      <p
+        class="description"
+        v-html="t('capi.installation.description', {}, true)"
+      />
+      <Banner color="warning">
+        <div>
+          <t v-if="embeddedCapiEnabled" k="capi.installation.disableFeatureFlag" raw /><br />
+          <t v-if="!hasTurtlesOperator" k="capi.installation.turtlesNeeded" raw />
+        </div>
+      </Banner>
+    </div>
   </div>
 </template>
+
+<style lang="scss" scoped>
+.not-installed {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin: 100px 0;
+
+  .description {
+    line-height: 20px;
+  }
+}
+</style>

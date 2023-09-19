@@ -1,5 +1,4 @@
-import { CAPI_PRODUCT_NAME, BLANK_CLUSTER } from '../types/capi';
-import { rootCapiRoute } from '../utils/custom-routing';
+import { CAPI_PRODUCT_NAME } from '../types/capi';
 
 export function init($plugin: any, store: any) {
   const {
@@ -11,8 +10,6 @@ export function init($plugin: any, store: any) {
   } = $plugin.DSL(store, CAPI_PRODUCT_NAME);
 
   product({
-    // todo nb only show product if we can see the installed apps?
-    // ifHaveType:''
     inStore:             'management',
     icon:                'gear',
     weight:  100,
