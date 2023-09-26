@@ -23,7 +23,6 @@ export default Vue.extend({
 
   methods: {
     toggleCapiLabel(e) {
-      debugger;
       if (e) {
         this.$set(this.resource.metadata.labels, LABELS.AUTO_IMPORT, 'true');
       } else {

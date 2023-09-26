@@ -1,7 +1,14 @@
 capi:
   installation:
-    disableFeatureFlag: "The <code>embedded-cluster-api</code> feature flag must be disabled before installing the CAPI Turtles extension. Follow instructions in the <a href='https://danil-grigorev.github.io/rancher-turtles-docs/docs/getting-started/rancher#existing-rancher-installation'>documentation.</a>"
+    title: Rancher Turtles
+    description: The Rancher Turtles operator allows users to import CAPI-provisioned clusters into Rancher.
+    disableFeatureFlag: The <code>embedded-cluster-api</code> feature flag must be disabled before installing the CAPI Turtles extension. Follow instructions in the <a aria-label="Read how to disable the embedded CAPI feature flag" target="_blank" rel="noopener noreferrer nofollow" href="https://danil-grigorev.github.io/rancher-turtles-docs/docs/getting-started/rancher#existing-rancher-installation">here</a> to do so.
+    turtlesNeeded: Either the user doesn't have permission to run the Turtles extension or the Turtles operator isn't installed. To install the Rancher Turtles extension, read the <a aria-label="Read how to install the Rancher Turtles operator" href="https://danil-grigorev.github.io/rancher-turtles-docs/docs/getting-started/install_turtles_operator#install-rancher-turtles-operator-with-cluster-api-operator-as-a-helm-dependency" target="_blank" rel="noopener noreferrer nofollow">documentation.</a>
   autoImport:
     label: CAPI Auto-Import
     checkbox:
       label: Automatically import CAPI clusters created in this namespace
+    enableAction: Enable CAPI Auto-Import
+    disableAction: Disable CAPI Auto-Import
+  warnings:
+    embeddedFeatureFlag: "It looks like the Rancher-managed cluster API feature is disabled. To provision and manage RKE2 clusters you must either enable the embedded-cluster-api feature flag or install the Rancher Turtles extension."

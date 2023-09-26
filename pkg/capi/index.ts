@@ -1,5 +1,7 @@
 import { importTypes } from '@rancher/auto-import';
-import { IPlugin, TableColumnLocation, TabLocation } from '@shell/core/types';
+import {
+  ActionLocation, IPlugin, PanelLocation, TableColumnLocation, TabLocation
+} from '@shell/core/types';
 import { _CLONE, _CREATE, _EDIT } from '@shell/config/query-params';
 import { LABELS } from './types/capi';
 import capiRouting from './routes/capi-routing';
@@ -34,6 +36,56 @@ export default function(plugin: IPlugin): void {
     }
   );
 
+  // add enable action to namespace table
+  plugin.addAction(ActionLocation.TABLE,
+    { path: [{ urlPath: '/c/local/explorer/projectsnamespaces', exact: true }] },
+    {
+      labelKey: 'capi.autoImport.enableAction',
+      icon:     'icon-plus',
+      enabled(ns: any) {
+        return ns.metadata.labels[LABELS.AUTO_IMPORT] !== 'true';
+      },
+      invoke(opts, resources = []) {
+        resources.forEach((ns) => {
+          ns.metadata.labels[LABELS.AUTO_IMPORT] = 'true';
+          try {
+            ns.save();
+          } catch (err) {
+            const title = ns.t('resource.errors.update', { name: ns.name });
+
+            ns.$dispatch('growl/error', {
+              title, message: err, timeout: 5000
+            }, { root: true });
+          }
+        });
+      }
+    });
+
+  // add disable action to namespace table
+  plugin.addAction(ActionLocation.TABLE,
+    { path: [{ urlPath: '/c/local/explorer/projectsnamespaces', exact: true }] },
+    {
+      labelKey: 'capi.autoImport.disableAction',
+      icon:     'icon-minus',
+      enabled(ns: any) {
+        return ns.metadata.labels[LABELS.AUTO_IMPORT] === 'true';
+      },
+      invoke(opts, resources = []) {
+        resources.forEach((ns) => {
+          delete ns.metadata.labels[LABELS.AUTO_IMPORT];
+          try {
+            ns.save();
+          } catch (err) {
+            const title = ns.t('resource.errors.update', { name: ns.name });
+
+            ns.$dispatch('growl/error', {
+              title, message: err, timeout: 5000
+            }, { root: true });
+          }
+        });
+      }
+    });
+
   // add column to namespace table
   plugin.addTableColumn(
     TableColumnLocation.RESOURCE,
@@ -50,4 +102,8 @@ export default function(plugin: IPlugin): void {
   );
 
   // add warning to cluster mgmt resource list
+  plugin.addPanel(PanelLocation.RESOURCE_LIST,
+    { resource: ['provisioning.cattle.io.cluster'] },
+    { component: () => import('./components/ClusterListBanner.vue') }
+  );
 }
