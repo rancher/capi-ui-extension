@@ -1,26 +1,13 @@
-import { CAPI_PRODUCT_NAME } from '../types/capi';
+const CLUSTER_MGMT_PRODUCT = 'manager';
 
 export function init($plugin: any, store: any) {
   const {
-    product,
     basicType,
     // weightType,
+    weightGroup,
     virtualType,
     // headers,
-  } = $plugin.DSL(store, CAPI_PRODUCT_NAME);
-
-  product({
-    inStore:             'management',
-    icon:                'gear',
-    weight:  100,
-    to:                  {
-      name:   `${ CAPI_PRODUCT_NAME }-c-cluster-dashboard`,
-      params: {
-        product: CAPI_PRODUCT_NAME,
-        cluster: 'local'
-      }
-    }
-  });
+  } = $plugin.DSL(store, CLUSTER_MGMT_PRODUCT);
 
   virtualType({
     label:       'CAPI Turtles',
@@ -29,14 +16,23 @@ export function init($plugin: any, store: any) {
     namespaced:  false,
     weight:      99,
     route:                  {
-      name:   `${ CAPI_PRODUCT_NAME }-c-cluster-dashboard`,
-      params: {
-        product: CAPI_PRODUCT_NAME,
-        cluster: 'local'
-      }
+      name:   `c-cluster-${ CLUSTER_MGMT_PRODUCT }-capi`,
+      params: { cluster: '_' }
     },
-    overview: true
+    overview: true,
+    exact:    true,
   });
 
-  basicType(['capi-dashboard']);
+  // Interestingly, types can only appear in one place, so by adding machine deployment
+  // and others here, they will no longer show up in the Advanced section, which is
+  // quite nice for this use case
+  basicType([
+    'capi-dashboard',
+    'cluster.x-k8s.io.machinedeployment',
+    'cluster.x-k8s.io.machineset',
+    'cluster.x-k8s.io.machine'
+  ], 'CAPITurtles');
+
+  // Ensure CAPI group appears before the Advanced group
+  weightGroup('CAPITurtles', 10, true);
 }

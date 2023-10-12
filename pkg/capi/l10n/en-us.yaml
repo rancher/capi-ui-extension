@@ -12,3 +12,7 @@ capi:
     disableAction: Disable CAPI Auto-Import
   warnings:
     embeddedFeatureFlag: "It looks like the Rancher-managed cluster API feature is disabled. To provision and manage RKE2 clusters you must either enable the embedded-cluster-api feature flag or install the Rancher Turtles extension."
+
+nav:
+  group:
+    CAPITurtles: CAPI
