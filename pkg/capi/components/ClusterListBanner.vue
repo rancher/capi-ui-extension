@@ -1,6 +1,7 @@
 <script>
 import { MANAGEMENT } from '@shell/config/types';
 import Banner from '@components/Banner/Banner.vue';
+import { CAPI } from '../types/capi.ts';
 
 export default {
   name: 'ClusterListCAPIWarning',
@@ -14,10 +15,17 @@ export default {
   },
 
   computed: {
-    showWarning() {
+    capiFeatureDisabled() {
       const capiFeature = this.$store.getters['management/byId'](MANAGEMENT.FEATURE, 'embedded-cluster-api');
 
       return (capiFeature && !capiFeature?.spec?.value);
+    },
+
+    hasClusterClassSchema() {
+      return !!this.$store.getters['management/schemaFor'](CAPI.CLUSTER_CLASS);
+    },
+    showWarning() {
+      return this.capiFeatureDisabled && !this.hasClusterClassSchema;
     }
   }
 };

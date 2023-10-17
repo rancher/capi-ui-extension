@@ -1,47 +1,47 @@
 <script>
-import { CATALOG, MANAGEMENT } from '@shell/config/types';
-import { allHash } from '@shell/utils/promise';
-
+import { MANAGEMENT, CAPI as RANCHER_CAPI } from '@shell/config/types';
 import Banner from '@components/Banner/Banner.vue';
+import { CAPI } from '../types/capi.ts';
 
 export default {
   name: 'CAPITurtlesDashboard',
 
+  middleware({ redirect, route, store } ) {
+    if (!!store.getters['management/schemaFor'](CAPI.CLUSTER_CLASS)) {
+      return redirect({
+        name:   'c-cluster-product-resource',
+        params: {
+          ...route.params,
+          cluster:  '_',
+          resource: RANCHER_CAPI.CAPI_CLUSTER,
+          product:  'manager'
+        }
+      });
+    }
+  },
+
   components: { Banner },
 
   async fetch() {
-    const hash = {
-      installedApps: this.$store.dispatch('cluster/findAll', { type: CATALOG.APP }),
-      features:      this.$store.dispatch('management/findAll', { type: MANAGEMENT.FEATURE }),
-    };
-
-    try {
-      const res = await allHash(hash);
-
-      this.installedApps = res.installedApps;
-      this.features = res.features;
-    } catch (err) {
-      console.error(err);
+    if (this.$store.getters['management/canList'](MANAGEMENT.FEATURE)) {
+      this.features = await this.$store.dispatch('management/findAll', { type: MANAGEMENT.FEATURE });
     }
   },
   data() {
-    return { installedApps: [], features: [] };
+    return { features: [] };
   },
 
   computed: {
+    // if the flag is undefined that is equivalent to this feature being enabled
     embeddedCapiEnabled() {
       const embeddedCapiFeature = this.features.find(f => f.id === 'embedded-cluster-api');
 
-      return embeddedCapiFeature?.spec?.value;
+      return embeddedCapiFeature?.spec?.value || !embeddedCapiFeature;
     },
 
-    hasCapiOperator() {
-      return !!this.installedApps.find(app => app.id === 'capi-operator/cluster-api-operator');
+    hasClusterClassSchema() {
+      return !!this.$store.getters['management/schemaFor'](CAPI.CLUSTER_CLASS);
     },
-
-    hasTurtlesOperator() {
-      return !!this.installedApps.find(app => app.id === 'turtles/rancher-turtles');
-    }
   }
 
 };
@@ -49,7 +49,7 @@ export default {
 
 <template>
   <div>
-    <div v-if="embeddedCapiEnabled || !hasTurtlesOperator || !hasCapiOperator" class="not-installed">
+    <div v-if="embeddedCapiEnabled || !hasClusterClassSchema" class="centered">
       <h1 class="mb-20">
         {{ t("capi.installation.title") }}
       </h1>
@@ -60,7 +60,7 @@ export default {
       <Banner color="warning">
         <div>
           <t v-if="embeddedCapiEnabled" k="capi.installation.disableFeatureFlag" raw /><br />
-          <t v-if="!hasTurtlesOperator" k="capi.installation.turtlesNeeded" raw />
+          <t v-if="!hasClusterClassSchema" k="capi.installation.turtlesNeeded" raw />
         </div>
       </Banner>
     </div>
@@ -68,7 +68,7 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-.not-installed {
+.centered {
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;
