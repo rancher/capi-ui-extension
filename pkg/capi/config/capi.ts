@@ -1,9 +1,12 @@
+import { CAPI as RANCHER_CAPI } from '@shell/config/types';
+import { CAPI as TURTLES_CAPI } from '../types/capi';
+
 const CLUSTER_MGMT_PRODUCT = 'manager';
 
 export function init($plugin: any, store: any) {
   const {
     basicType,
-    // weightType,
+    weightType,
     weightGroup,
     virtualType,
     // headers,
@@ -28,10 +31,15 @@ export function init($plugin: any, store: any) {
   // quite nice for this use case
   basicType([
     'capi-dashboard',
-    'cluster.x-k8s.io.machinedeployment',
-    'cluster.x-k8s.io.machineset',
-    'cluster.x-k8s.io.machine'
+    RANCHER_CAPI.CAPI_CLUSTER,
+    TURTLES_CAPI.CLUSTER_CLASS,
+    TURTLES_CAPI.PROVIDER,
+    RANCHER_CAPI.MACHINE,
+    RANCHER_CAPI.MACHINE_SET,
+    RANCHER_CAPI.MACHINE_DEPLOYMENT,
   ], 'CAPITurtles');
+
+  weightType(RANCHER_CAPI.CAPI_CLUSTER, 10, true);
 
   // Ensure CAPI group appears before the Advanced group
   weightGroup('CAPITurtles', 10, true);
