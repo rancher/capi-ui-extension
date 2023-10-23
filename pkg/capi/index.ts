@@ -5,6 +5,7 @@ import {
 import { _CLONE, _CREATE, _EDIT } from '@shell/config/query-params';
 import { LABELS } from './types/capi';
 import capiRouting from './routes/capi-routing';
+import toggleAutoImport from './util/auto-import';
 
 // Init the package
 export default function(plugin: IPlugin): void {
@@ -36,52 +37,34 @@ export default function(plugin: IPlugin): void {
     }
   );
 
-  // add enable action to namespace table
+  // add enable auto-import action to namespace table
   plugin.addAction(ActionLocation.TABLE,
-    { path: [{ urlPath: '/c/local/explorer/projectsnamespaces', exact: true }] },
+    { path: [{ urlPath: '/c/local/explorer/projectsnamespaces', exact: true }, { urlPath: 'cluster.x-k8s.io.cluster', endsWith: true }] },
     {
       labelKey: 'capi.autoImport.enableAction',
       icon:     'icon-plus',
-      enabled(ns: any) {
-        return ns.metadata.labels[LABELS.AUTO_IMPORT] !== 'true';
+      enabled(target: any) {
+        return target.metadata.labels[LABELS.AUTO_IMPORT] !== 'true';
       },
       invoke(opts, resources = []) {
         resources.forEach((ns) => {
-          ns.metadata.labels[LABELS.AUTO_IMPORT] = 'true';
-          try {
-            ns.save();
-          } catch (err) {
-            const title = ns.t('resource.errors.update', { name: ns.name });
-
-            ns.$dispatch('growl/error', {
-              title, message: err, timeout: 5000
-            }, { root: true });
-          }
+          toggleAutoImport(ns);
         });
       }
     });
 
-  // add disable action to namespace table
+  // add disable auto-import action to namespace table
   plugin.addAction(ActionLocation.TABLE,
-    { path: [{ urlPath: '/c/local/explorer/projectsnamespaces', exact: true }] },
+    { path: [{ urlPath: '/c/local/explorer/projectsnamespaces', exact: true }, { urlPath: 'cluster.x-k8s.io.cluster', endsWith: true }] },
     {
       labelKey: 'capi.autoImport.disableAction',
       icon:     'icon-minus',
-      enabled(ns: any) {
-        return ns.metadata.labels[LABELS.AUTO_IMPORT] === 'true';
+      enabled(target: any) {
+        return target.metadata.labels[LABELS.AUTO_IMPORT] === 'true';
       },
       invoke(opts, resources = []) {
         resources.forEach((ns) => {
-          delete ns.metadata.labels[LABELS.AUTO_IMPORT];
-          try {
-            ns.save();
-          } catch (err) {
-            const title = ns.t('resource.errors.update', { name: ns.name });
-
-            ns.$dispatch('growl/error', {
-              title, message: err, timeout: 5000
-            }, { root: true });
-          }
+          toggleAutoImport(ns);
         });
       }
     });
