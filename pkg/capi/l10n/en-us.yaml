@@ -3,7 +3,7 @@ capi:
     title: Rancher Turtles
     description: The Rancher Turtles operator allows users to import CAPI-provisioned clusters into Rancher.
     disableFeatureFlag: The <code>embedded-cluster-api</code> feature flag must be disabled before installing the CAPI Turtles extension. Follow instructions in the documentation <a aria-label="Read how to disable the embedded CAPI feature flag" target="_blank" rel="noopener noreferrer nofollow" href="https://docs.rancher-turtles.com/docs/getting-started/rancher#setting-up-rancher-for-rancher-turtles">here</a> to do so.
-    turtlesNeeded: Either the user doesn't have permission to run the Turtles extension or the Turtles operator isn't installed. To install the Rancher Turtles extension, read the <a aria-label="Read how to install the Rancher Turtles operator" href="https://docs.rancher-turtles.com/docs/getting-started/install_turtles_operator" target="_blank" rel="noopener noreferrer nofollow">documentation.</a>
+    turtlesNeeded: Either the user doesn't have permission to run the Turtles extension or the Turtles operator isn't installed. To learn how to install the Rancher Turtles extension, read the <a aria-label="Read how to install the Rancher Turtles operator" href="https://docs.rancher-turtles.com/docs/getting-started/install_turtles_operator" target="_blank" rel="noopener noreferrer nofollow">documentation.</a>
   autoImport:
     label: CAPI Auto-Import
     checkbox:
