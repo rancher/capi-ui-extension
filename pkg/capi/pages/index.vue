@@ -6,34 +6,26 @@ import { CAPI } from '../types/capi.ts';
 export default {
   name: 'CAPITurtlesDashboard',
 
-  middleware({ redirect, route, store } ) {
-    // store.dispatch('management/find', {
-    //   type: SCHEMA,
-    //   id:   CAPI.CLUSTER_CLASS,
-    //   opt:  { force: true },
-    // }).then((schema) => {
-    //   return redirect({
-    //     name:   'c-cluster-product-resource',
-    //     params: {
-    //       ...route.params,
-    //       cluster:  '_',
-    //       resource: RANCHER_CAPI.CAPI_CLUSTER,
-    //       product:  'manager'
-    //     }
-    //   });
-    // }).catch();
-
-    if (!!store.getters['management/schemaFor'](CAPI.CLUSTER_CLASS)) {
-      return redirect({
-        name:   'c-cluster-product-resource',
-        params: {
-          ...route.params,
-          cluster:  '_',
-          resource: RANCHER_CAPI.CAPI_CLUSTER,
-          product:  'manager'
-        }
+  async middleware({ redirect, route, store } ) {
+    try {
+      const clusterClassSchema = await store.dispatch('management/find', {
+        type: SCHEMA,
+        id:   CAPI.CLUSTER_CLASS,
+        opt:  { force: true },
       });
-    }
+
+      if (clusterClassSchema) {
+        return redirect({
+          name:   'c-cluster-product-resource',
+          params: {
+            ...route.params,
+            cluster:  '_',
+            resource: RANCHER_CAPI.CAPI_CLUSTER,
+            product:  'manager'
+          }
+        });
+      }
+    } catch {}
   },
 
   components: { Banner },
@@ -92,10 +84,6 @@ export default {
   align-items: center;
   text-align: center;
   margin: 100px 0;
-
-  // & .banner.warning {
-  //   width: fit-content;
-  // }
 
   .description {
     line-height: 20px;
