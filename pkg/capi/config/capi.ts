@@ -34,7 +34,8 @@ export function init($plugin: any, store: any) {
     RANCHER_CAPI.CAPI_CLUSTER,
     TURTLES_CAPI.CLUSTER_CLASS,
     TURTLES_CAPI.PROVIDER,
-    RANCHER_CAPI.MACHINE,
+    // keep this page hidden under 'advanced' still as it may fail to load in Rancher <=2.8.0, see https://github.com/rancher/dashboard/issues/9973
+    // RANCHER_CAPI.MACHINE,
     RANCHER_CAPI.MACHINE_SET,
     RANCHER_CAPI.MACHINE_DEPLOYMENT,
   ], 'CAPITurtles');
