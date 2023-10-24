@@ -4,7 +4,7 @@ annotations:
   catalog.cattle.io/namespace: cattle-ui-plugin-system
   catalog.cattle.io/os: linux
   catalog.cattle.io/permits-os: linux, windows
-  catalog.cattle.io/rancher-version: '>= v2.7.6'
+  catalog.cattle.io/rancher-version: '>= v2.7.8'
   catalog.cattle.io/scope: management
   catalog.cattle.io/ui-component: plugins
 apiVersion: v2

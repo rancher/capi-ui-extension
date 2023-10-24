@@ -7,17 +7,17 @@ entries:
       catalog.cattle.io/namespace: cattle-ui-plugin-system
       catalog.cattle.io/os: linux
       catalog.cattle.io/permits-os: linux, windows
-      catalog.cattle.io/rancher-version: '>= v2.7.6'
+      catalog.cattle.io/rancher-version: '>= v2.7.8'
       catalog.cattle.io/scope: management
       catalog.cattle.io/ui-component: plugins
     apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-10-24T18:46:39.533868926Z"
+    created: "2023-10-24T19:40:42.378485509Z"
     description: capi plugin
-    digest: 0afdd3d17551c915768670ff6dafc5ef704c44d333d5507995a7cca27d42d6a7
+    digest: 71223c338562381e28f7e46047119150975d410e9327f30cf09b91bdbc515a4d
     name: capi
     type: application
     urls:
     - assets/capi/capi-0.1.0.tgz
     version: 0.1.0
-generated: "2023-10-24T18:46:39.53280912Z"
+generated: "2023-10-24T19:40:42.377610709Z"
