@@ -1,4 +1,5 @@
 <script lang="ts">
+import debounce from 'lodash/debounce';
 import { defineComponent } from 'vue';
 
 import { ClusterClassVariable } from '../../types/clusterClass.ts';
@@ -24,6 +25,19 @@ export default defineComponent({
     }
   },
 
+  data() {
+    return { errorMap: {} };
+  },
+
+  watch: {
+    hasValidationErrors: {
+      handler: debounce(function(neu) {
+        console.log('validation passed: ', !neu);
+        this.$emit('validation-passed', !neu);
+      }, 5),
+    }
+  },
+
   created() {
     const out = [...this.value];
 
@@ -43,7 +57,11 @@ export default defineComponent({
   computed: {
     variableDefinitions() {
       return this.clusterClass?.spec?.variables || [];
-    }
+    },
+
+    hasValidationErrors() {
+      return !!Object.keys(this.errorMap).length;
+    },
   },
 
   methods: {
@@ -63,6 +81,14 @@ export default defineComponent({
       this.$emit('input', out);
     },
 
+    updateErrors(isValid: boolean, variableDef: ClusterClassVariable) {
+      if (isValid && this.errorMap[variableDef.name]) {
+        this.$delete(this.errorMap, variableDef.name);
+      } else if (!isValid && !this.errorMap[variableDef.name]) {
+        this.$set(this.errorMap, variableDef.name, true);
+      }
+    },
+
   },
 
 });
@@ -78,6 +104,7 @@ export default defineComponent({
         :variable="variableDef"
         :value="valueFor(variableDef)"
         @input="e=>updateVariables(e, variableDef)"
+        @validation-passed="e=>updateErrors(e, variableDef)"
       />
     </template>
   </div>
