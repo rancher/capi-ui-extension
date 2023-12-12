@@ -52,6 +52,7 @@ export default [{
 },
 {
   name:     'testBoolean',
+  required: true,
   schema:
     {
       openAPIV3Schema:
@@ -71,6 +72,32 @@ export default [{
         description: 'This is a test array value',
         items:
           { type: 'string' }
+      }
+    }
+},
+{
+  name:     'enums',
+  schema:
+    {
+      openAPIV3Schema:
+      {
+        type:        'string',
+        description: 'This is a string type with enum defined',
+        enum:
+          ['option_1', 'option_2', 'option_3']
+      }
+    }
+},
+{
+  name:     'enums-multi',
+  schema:
+    {
+      openAPIV3Schema:
+      {
+        type:        'array',
+        description: 'This is an array type with enum defined',
+        enum:
+          ['option_1', 'option_2', 'option_3']
       }
     }
 }];

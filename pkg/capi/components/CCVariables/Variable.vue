@@ -4,6 +4,8 @@ import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
 import KeyValue from '@shell/components/form/KeyValue';
 import ArrayList from '@shell/components/form/ArrayList';
+import LabeledSelect from '@shell/components/form/LabeledSelect';
+import formRulesGenerator, { Validator } from '@shell/utils/validators/formRules';
 
 import { ClusterClassVariable } from '../../types/clusterClass.ts';
 
@@ -23,19 +25,22 @@ export default defineComponent({
     }
   },
 
+  watch: {
+    isValid(neu) {
+      this.$emit('validation-passed', neu);
+    }
+  },
+
   computed: {
     componentForType() {
       const { type } = this.schema;
       let out = null;
 
       // if the schema has valid options defined, use a different input:
-      // <=3 options: radio group
-      // >3 options: labeled select
+      // options are string or integer: labeledselect
       // options are array or object: //TODO nb fuck
       if (this.variableOptions) {
-        if (this.variableOptions.length <= 3) {
-          out = RadioGroup;
-        }
+        out = LabeledSelect;
       } else {
         switch (type) {
         case 'object':
@@ -90,6 +95,54 @@ export default defineComponent({
           return null;
         }
       });
+    },
+
+    isMultiSelect() {
+      return this.componentForType === LabeledSelect && this.schema.type === 'array' && typeof this.variableOptions?.[0] !== 'object';
+    },
+
+    /**
+     * format (string)
+     * exclusiveMinimum (integer/number)
+     * exclusiveMaximum (integer/number)
+     * maxItems (array)
+     * maxLength (string)
+     * maximum (integer/number)
+     * minItems (array)
+     * minLength (string)
+     * minimum (integer/number)
+     * pattern (string)
+     * uniqueItems (array)
+     * required (object)
+     */
+    validationRules() {
+      const out = [] as any;
+      const {
+        format,
+        exclusiveMinimum,
+        exclusiveMaximum,
+        maxItems,
+        maxLength,
+        maximum,
+        minItems,
+        minLength,
+        minimum,
+        pattern,
+        uniqueItems,
+        required: requiredFields
+      } = this.schema;
+
+      const required = this.variable?.required;
+
+      if (required) {
+        out.push(formRulesGenerator(this.$store.getters['i18n/t'], { key: this.variable.name }).required);
+      }
+
+      return out;
+    },
+
+    isValid() {
+      return !this.validationRules.find((rule: Validator) => !!rule(this.value));
     }
   },
 
@@ -100,12 +153,16 @@ export default defineComponent({
   <component
     :is="componentForType"
     v-if="componentForType"
+    ref="validated-component"
     :value="value"
     :label="variable.name"
     :placeholder="schema.example"
     :tooltip="schema.description"
     :required="variable.required"
     :title="variable.name"
+    :options="variableOptions"
+    :multiple="isMultiSelect"
+    :rules="validationRules"
     @input="e=>$emit('input', e)"
   />
 </template>

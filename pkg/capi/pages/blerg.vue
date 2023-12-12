@@ -22,4 +22,6 @@ export default Vue.extend({
 });
 </script>
 
-<template><CCVariables v-model="value.spec.topology.variables" :cluster-class="clusterClass" /></template>
+<template>
+  <CCVariables v-model="value.spec.topology.variables" :cluster-class="clusterClass" />
+</template>
