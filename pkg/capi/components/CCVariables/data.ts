@@ -100,4 +100,17 @@ export default [{
           ['option_1', 'option_2', 'option_3']
       }
     }
+},
+{
+  name:     'enums-object',
+  schema:
+    {
+      openAPIV3Schema:
+      {
+        type:        'object',
+        description: 'This is an object type with enum defined',
+        enum:
+          [{ option_1: '1' }, { option_2: '2' }, { option_3: '3' }]
+      }
+    }
 }];
