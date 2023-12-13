@@ -1,5 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
+import type { PropType } from 'vue';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
 import KeyValue from '@shell/components/form/KeyValue';
@@ -7,7 +8,7 @@ import ArrayList from '@shell/components/form/ArrayList';
 import LabeledSelect from '@shell/components/form/LabeledSelect';
 import formRulesGenerator, { Validator } from '@shell/utils/validators/formRules';
 
-import { ClusterClassVariable } from '../../types/clusterClass.ts';
+import type { ClusterClassVariable } from '../../types/clusterClass';
 
 // object, array, string, integer, number or boolean.
 
@@ -16,11 +17,11 @@ export default defineComponent({
 
   props: {
     variable: {
-      type:     ClusterClassVariable,
+      type:     Object as PropType<ClusterClassVariable>,
       required: true
     },
     value: {
-      type:    [String, Object, Boolean],
+      type:    [String, Object, Boolean, Array],
       default: () => null
     }
   },
@@ -36,13 +37,11 @@ export default defineComponent({
       const { type } = this.schema;
       let out = null;
 
-      // if the schema has valid options defined, use a different input:
-      // options are string or integer: labeledselect
-      // options are array or object: //TODO nb fuck
       if (this.variableOptions) {
         out = LabeledSelect;
       } else {
         switch (type) {
+        // TODO nb pre-populate if schema defines fields
         case 'object':
           out = KeyValue;
           break;
@@ -69,6 +68,15 @@ export default defineComponent({
       return out;
     },
 
+    componentWidths() {
+      return {
+        LabeledSelect: 'span-3',
+        LabeledInput:  'span-3',
+        Checkbox:      'span-3',
+        ArrayList:     'span-6'
+      };
+    },
+
     schema() {
       return this.variable?.schema?.openAPIV3Schema;
     },
@@ -82,18 +90,7 @@ export default defineComponent({
       }
 
       return opts.map((opt: any) => {
-        switch (typeof opt) {
-        case 'boolean':
-          return opt.toString();
-        case 'string':
-          return opt;
-        // todo nb how does labeled select handle numbers?
-        case 'number':
-          return opt.toString();
-        case 'object':
-          // TODO nb fuck
-          return null;
-        }
+        return typeof opt === 'object' ? JSON.stringify(opt) : opt;
       });
     },
 
@@ -146,23 +143,38 @@ export default defineComponent({
     }
   },
 
+  methods: {
+    setValue(e: any) {
+      let out = e;
+
+      const { type } = this.schema;
+
+      if (type === 'object') {
+        try {
+          out = JSON.parse(e);
+        } catch {}
+      }
+      this.$emit('input', out);
+    }
+  },
 });
 </script>
 
 <template>
-  <component
-    :is="componentForType"
-    v-if="componentForType"
-    ref="validated-component"
-    :value="value"
-    :label="variable.name"
-    :placeholder="schema.example"
-    :tooltip="schema.description"
-    :required="variable.required"
-    :title="variable.name"
-    :options="variableOptions"
-    :multiple="isMultiSelect"
-    :rules="validationRules"
-    @input="e=>$emit('input', e)"
-  />
+  <div>
+    <component
+      :is="componentForType"
+      v-if="componentForType"
+      :value="value"
+      :label="variable.name"
+      :placeholder="schema.example"
+      :tooltip="schema.description"
+      :required="variable.required"
+      :title="variable.name"
+      :options="variableOptions"
+      :multiple="isMultiSelect"
+      :rules="validationRules"
+      @input="setValue"
+    />
+  </div>
 </template>

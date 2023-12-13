@@ -23,5 +23,7 @@ export default Vue.extend({
 </script>
 
 <template>
-  <CCVariables v-model="value.spec.topology.variables" :cluster-class="clusterClass" />
+  <div>
+    <CCVariables v-model="value.spec.topology.variables" :cluster-class="clusterClass" />
+  </div>
 </template>
