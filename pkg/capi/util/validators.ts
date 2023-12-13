@@ -1,20 +1,14 @@
-// * format (string)
-// * exclusiveMinimum (integer/number)
-// * exclusiveMaximum (integer/number)
-// * maxItems (array)
-// * maxLength (string)
-// * maximum (integer/number)
-// * minItems (array)
-// * minLength (string)
-// * minimum (integer/number)
-// * pattern (string)
-// * uniqueItems (array)
-// * required (object)
-
 import { Validator, ValidationOptions } from '@shell/utils/validators/formRules';
 import { Translation } from '@shell/types/t';
-
-export default function(t: Translation, { key = 'Value' }: ValidationOptions, openAPIV3Schema: any): Validator[] {
+/**
+ *
+ * @param t this.$store.getters[i18n/t]
+ * @param param1 param1.key should be the (already localized) label of the field being validated
+ * @param openAPIV3Schema cluster class variable schema.openapiv3schema
+ *
+ * @returns an array of validator functions that work with the form-validation mixin. These can be supplied to any component wth the labeled-form-element mixin using the rules prop
+ */
+export const openAPIV3SchemaValidators = function(t: Translation, { key = 'Value' }: ValidationOptions, openAPIV3Schema: any): Validator[] {
   const {
     exclusiveMinimum,
     exclusiveMaximum,
@@ -73,4 +67,4 @@ export default function(t: Translation, { key = 'Value' }: ValidationOptions, op
   }
 
   return out;
-}
+};
