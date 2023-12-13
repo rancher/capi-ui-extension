@@ -11,7 +11,7 @@
 // * uniqueItems (array)
 // * required (object)
 
-import formRulesGenerator, { Validator, ValidationOptions, ValidatorFactory } from '@shell/utils/validators/formRules';
+import { Validator, ValidationOptions } from '@shell/utils/validators/formRules';
 import { Translation } from '@shell/types/t';
 
 // const formatPatternMap = {
@@ -41,7 +41,7 @@ import { Translation } from '@shell/types/t';
 // 	"datetime",     // a date time string like "2014-12-15T19:30:20.000Z" as defined by date-time in RFC3339
 // }
 
-export default function(t: Translation, { key = 'Value' }: ValidationOptions, openAPIV3Schema: any): { [key:string]: Validator<any> | ValidatorFactory } {
+export default function(t: Translation, { key = 'Value' }: ValidationOptions, openAPIV3Schema: any): Validator[] {
   const {
     format,
     exclusiveMinimum,
@@ -57,14 +57,13 @@ export default function(t: Translation, { key = 'Value' }: ValidationOptions, op
     required: requiredFields
   } = openAPIV3Schema;
 
-  const builtInRules = formRulesGenerator(t, { key } );
-  const out = [] as any;
+  const out = [] as any[];
 
   if (maximum) {
     if (exclusiveMaximum) {
       out.push((val: string | number) => Number(val) >= Number(maximum) ? t('validation.exclusiveMaxValue', { key, maximum }) : undefined);
     } else {
-      // out.push(builtInRules.maxValue(maximum));
+      out.push((val: string | number) => Number(val) > Number(maximum) ? t('validation.maxValue', { key, max: maximum }) : undefined);
     }
   }
 
@@ -72,21 +71,21 @@ export default function(t: Translation, { key = 'Value' }: ValidationOptions, op
     if (exclusiveMinimum) {
       out.push((val: string | number) => Number(val) <= Number(minimum) ? t('validation.exclusiveMinValue', { key, minimum }) : undefined);
     } else {
-      // out.push(builtInRules.minValue(minimum));
+      out.push((val: string | number) => Number(val) < Number(minimum) ? t('validation.minValue', { key, min: minimum }) : undefined);
     }
   }
   if (minLength !== undefined) {
-    // out.push(builtInRules.minLength(minLength));
+    out.push((val: string) => val && val.length < Number(minLength) ? t('validation.minLength', { key, min: minLength }) : undefined);
   }
   if (maxLength) {
-    // out.push(builtInRules.maxLength(maxLength));
+    out.push((val: string) => val && val.length > Number(maxLength) ? t('validation.minLength', { key, max: maxLength }) : undefined);
   }
   if (maxItems) {
-    out.push((val: any[]) => val?.length > maxItems ? t('validation.maxItems', { key, maxItems }) : undefined);
+    out.push((val: any[]) => val && val.length > maxItems ? t('validation.maxItems', { key, maxItems }) : undefined);
   }
 
   if (minItems !== undefined) {
-    out.push((val: any[]) => val?.length < minItems ? t('validation.minItems', { key, minItems }) : undefined);
+    out.push((val: any[]) => val && val.length < minItems ? t('validation.minItems', { key, minItems }) : undefined);
   }
 
   if (pattern) {
@@ -94,7 +93,7 @@ export default function(t: Translation, { key = 'Value' }: ValidationOptions, op
   }
 
   if (uniqueItems) {
-    out.push((val: any[]) => val.filter((item, index) => val.indexOf(item) !== index)?.length ? t('validation.uniqueItems', { key }) : undefined);
+    out.push((val: any[]) => val && val.filter((item, index) => val.indexOf(item) !== index).length ? t('validation.uniqueItems', { key }) : undefined);
   }
 
   if (requiredFields) {
