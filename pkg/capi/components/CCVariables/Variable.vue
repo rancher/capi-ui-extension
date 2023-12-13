@@ -81,7 +81,7 @@ export default defineComponent({
       return this.variable?.schema?.openAPIV3Schema;
     },
 
-    // the schema may define a list of valid options - format them to work correctly in labeledselect
+    // options may be arrays or objects - stringify them to display in labeledselect
     variableOptions() {
       const opts = this.schema?.enum;
 
