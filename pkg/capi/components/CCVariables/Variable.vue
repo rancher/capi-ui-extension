@@ -9,6 +9,7 @@ import LabeledSelect from '@shell/components/form/LabeledSelect';
 import formRulesGenerator, { Validator } from '@shell/utils/validators/formRules';
 
 import type { ClusterClassVariable } from '../../types/clusterClass';
+import openAPIV3SchemaValidators from '../../util/validators';
 
 // object, array, string, integer, number or boolean.
 
@@ -21,7 +22,7 @@ export default defineComponent({
       required: true
     },
     value: {
-      type:    [String, Object, Boolean, Array],
+      type:    [String, Object, Boolean, Array, Number],
       default: () => null
     }
   },
@@ -41,7 +42,6 @@ export default defineComponent({
         out = LabeledSelect;
       } else {
         switch (type) {
-        // TODO nb pre-populate if schema defines fields
         case 'object':
           out = KeyValue;
           break;
@@ -98,36 +98,8 @@ export default defineComponent({
       return this.componentForType === LabeledSelect && this.schema.type === 'array' && typeof this.variableOptions?.[0] !== 'object';
     },
 
-    /**
-     * format (string)
-     * exclusiveMinimum (integer/number)
-     * exclusiveMaximum (integer/number)
-     * maxItems (array)
-     * maxLength (string)
-     * maximum (integer/number)
-     * minItems (array)
-     * minLength (string)
-     * minimum (integer/number)
-     * pattern (string)
-     * uniqueItems (array)
-     * required (object)
-     */
     validationRules() {
-      const out = [] as any;
-      const {
-        format,
-        exclusiveMinimum,
-        exclusiveMaximum,
-        maxItems,
-        maxLength,
-        maximum,
-        minItems,
-        minLength,
-        minimum,
-        pattern,
-        uniqueItems,
-        required: requiredFields
-      } = this.schema;
+      const out = openAPIV3SchemaValidators(this.$store.getters['i18n/t'], { key: this.variable.name }, this.schema);
 
       const required = this.variable?.required;
 

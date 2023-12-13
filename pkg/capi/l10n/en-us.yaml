@@ -38,3 +38,10 @@ typeLabel:
       one { Cluster Class}
       other { Cluster Classes}
     }
+validation:
+  exclusiveMaxValue: '"{key}" must be less than {maximum}.'
+  exclusiveMinValue: '"{key}" must be greater than {minimum}.'
+  maxItems: '"{key}" may not contain more than {maxItems} items.'
+  minItems: '"{key}" must contain at least {minItems} items.'
+  pattern: '"{key}" must match the pattern <code>{pattern}</code>.'
+  uniqueItems: '"{key}" may not contain duplicate elements.'
