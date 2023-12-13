@@ -9,9 +9,7 @@ import LabeledSelect from '@shell/components/form/LabeledSelect';
 import formRulesGenerator, { Validator } from '@shell/utils/validators/formRules';
 
 import type { ClusterClassVariable } from '../../types/clusterClass';
-import openAPIV3SchemaValidators from '../../util/validators';
-
-// object, array, string, integer, number or boolean.
+import { openAPIV3SchemaValidators } from '../../util/validators';
 
 export default defineComponent({
   name: 'CCVariable',
@@ -66,15 +64,6 @@ export default defineComponent({
       }
 
       return out;
-    },
-
-    componentWidths() {
-      return {
-        LabeledSelect: 'span-3',
-        LabeledInput:  'span-3',
-        Checkbox:      'span-3',
-        ArrayList:     'span-6'
-      };
     },
 
     schema() {
