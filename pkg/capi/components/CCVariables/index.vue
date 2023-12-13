@@ -27,7 +27,7 @@ export default defineComponent({
   },
 
   data() {
-    return { errorMap: {} };
+    return { errorMap: {} as {[key:string]: boolean} };
   },
 
   watch: {

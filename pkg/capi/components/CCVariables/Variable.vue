@@ -104,7 +104,7 @@ export default defineComponent({
       const required = this.variable?.required;
 
       if (required) {
-        out.push(formRulesGenerator(this.$store.getters['i18n/t'], { key: this.variable.name }).required);
+        out.push(formRulesGenerator(this.$store.getters['i18n/t'], { key: this.variable.name }).required as Validator);
       }
 
       return out;
