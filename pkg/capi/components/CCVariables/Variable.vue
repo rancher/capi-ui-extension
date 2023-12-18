@@ -31,6 +31,12 @@ export default defineComponent({
     }
   },
 
+  created() {
+    if (!this.isValid) {
+      this.$emit('validation-passed', false);
+    }
+  },
+
   computed: {
     componentForType() {
       const { type } = this.schema;
@@ -86,10 +92,6 @@ export default defineComponent({
       });
     },
 
-    isMultiSelect() {
-      return this.componentForType === LabeledSelect && this.schema.type === 'array' && typeof this.variableOptions?.[0] !== 'object';
-    },
-
     validationRules() {
       const out = openAPIV3SchemaValidators(this.$store.getters['i18n/t'], { key: this.variable.name }, this.schema);
 
@@ -140,7 +142,6 @@ export default defineComponent({
       :required="variable.required"
       :title="variable.name"
       :options="variableOptions"
-      :multiple="isMultiSelect"
       :rules="validationRules"
       :type="schema.type === 'number' || schema.type === 'integer' ? 'number' : 'text'"
       @input="setValue"
