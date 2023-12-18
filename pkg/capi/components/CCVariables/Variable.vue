@@ -37,26 +37,29 @@ export default defineComponent({
       let out = null;
 
       if (this.variableOptions) {
-        out = LabeledSelect;
+        out = { component: LabeledSelect, name: 'LabeledSelect' };
       } else {
         switch (type) {
         case 'object':
-          out = KeyValue;
+          out = { component: KeyValue, name: 'KeyValue' };
           break;
         case 'array':
-          out = ArrayList;
+          out = { component: ArrayList, name: 'ArrayList' };
           break;
         case 'string':
-          out = LabeledInput;
+          out = { component: LabeledInput, name: 'LabeledInput' };
           break;
         case 'integer':
-          out = LabeledInput;
+          out = { component: LabeledInput, name: 'LabeledInput' };
+
           break;
         case 'number':
-          out = LabeledInput;
+          out = { component: LabeledInput, name: 'LabeledInput' };
+
           break;
         case 'boolean':
-          out = Checkbox;
+          out = { component: Checkbox, name: 'Checkbox' };
+
           break;
         default:
           break;
@@ -101,6 +104,10 @@ export default defineComponent({
 
     isValid() {
       return !this.validationRules.find((rule: Validator) => !!rule(this.value));
+    },
+
+    widerComponent() {
+      return this.componentForType?.name === 'ArrayList' || this.componentForType?.name === 'KeyValue';
     }
   },
 
@@ -122,9 +129,9 @@ export default defineComponent({
 </script>
 
 <template>
-  <div>
+  <div :class="{'wider': widerComponent, 'align-center': componentForType?.name==='Checkbox'}">
     <component
-      :is="componentForType"
+      :is="componentForType.component"
       v-if="componentForType"
       :value="value"
       :label="variable.name"
@@ -135,7 +142,13 @@ export default defineComponent({
       :options="variableOptions"
       :multiple="isMultiSelect"
       :rules="validationRules"
+      :type="schema.type === 'number' || schema.type === 'integer' ? 'number' : 'text'"
       @input="setValue"
     />
   </div>
 </template>
+<style lang="scss" scoped>
+.align-center {
+  align-self: 'center'
+}
+</style>

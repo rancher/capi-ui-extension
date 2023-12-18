@@ -44,7 +44,7 @@ export const openAPIV3SchemaValidators = function(t: Translation, { key = 'Value
     out.push((val: string) => val && val.length < Number(minLength) ? t('validation.minLength', { key, min: minLength }) : undefined);
   }
   if (maxLength) {
-    out.push((val: string) => val && val.length > Number(maxLength) ? t('validation.minLength', { key, max: maxLength }) : undefined);
+    out.push((val: string) => val && val.length > Number(maxLength) ? t('validation.maxLength', { key, max: maxLength }) : undefined);
   }
   if (maxItems) {
     out.push((val: any[]) => val && val.length > maxItems ? t('validation.maxItems', { key, maxItems }) : undefined);
