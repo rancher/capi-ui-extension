@@ -89,6 +89,22 @@ export default defineComponent({
       }
     },
 
+    newComponentType(variableDef: ClusterClassVariable, idx: number) {
+      const ref = `${ variableDef.name }-input`;
+      const nextDef = this.variableDefinitions[idx + 1];
+
+      if (!nextDef) {
+        return false;
+      }
+      const nextRef = `${ nextDef.name }-input`;
+
+      const nextComponent = this.$refs?.[nextRef]?.[0]?.componentForType;
+      const currentComponent = this.$refs?.[ref]?.[0]?.componentForType;
+
+      console.log(this.$refs?.[ref]?.[0]);
+
+      return nextComponent && currentComponent && (nextComponent?.name !== currentComponent?.name);
+    },
   },
 
 });
@@ -97,14 +113,17 @@ export default defineComponent({
 <template>
   <div class="variables">
     <template v-if="variableDefinitions && variableDefinitions.length">
-      <Variable
-        v-for="variableDef in variableDefinitions"
-        :key="variableDef.name"
-        :variable="variableDef"
-        :value="valueFor(variableDef)"
-        @input="e=>updateVariables(e, variableDef)"
-        @validation-passed="e=>updateErrors(e, variableDef)"
-      />
+      <template v-for="(variableDef, i) in variableDefinitions">
+        <Variable
+          :key="variableDef.name"
+          :ref="`${variableDef.name}-input`"
+          :variable="variableDef"
+          :value="valueFor(variableDef)"
+          @input="e=>updateVariables(e, variableDef)"
+          @validation-passed="e=>updateErrors(e, variableDef)"
+        />
+        <div v-if="newComponentType(variableDef, i)" :key="`${variableDef.name}-break`" class="row-break" />
+      </template>
     </template>
   </div>
 </template>
@@ -116,10 +135,18 @@ export default defineComponent({
   flex-wrap: wrap;
 
   &>*{
-    flex: 1 0 20%;
+    flex: 0 0 23.25%;
     margin: 0 1.75% 10px 0;
     max-width: 23.25%;
-    align-self: center;
+    &::v-deep.wider{
+      flex: 0 0 48.25%;
+      max-width: 48.25%;
+    }
+    &.row-break {
+      flex: 1 0 100%;
+      max-width: 100%;
+      margin: 10px 0px 0px 0px;
+    }
   }
 }
 </style>
