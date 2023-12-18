@@ -29,28 +29,21 @@ export default defineComponent({
   },
 
   data() {
-    return { clusterClass: null, variables: [] };
+    return {
+      clusterClass: null, variables: [], variablesValid: true
+    };
   },
-
-  // computed: {
-  //   variables: {
-  //     get() {
-  //       return this.value?.spec?.topology?.variables || [];
-  //     },
-  //     set(neu) {
-  //       this.$set(this.value, 'spec.topology.variables', neu);
-  //     }
-  //   }
-  // },
 
 });
 </script>
 
 <template>
   <div>
+    <div>Is valid: {{ variablesValid }}</div>
+
     <Tabbed :side-tabs="true">
       <Tab name="variables">
-        <CCVariables v-if="clusterClass" v-model="variables" :cluster-class="clusterClass" />
+        <CCVariables v-if="clusterClass" v-model="variables" :cluster-class="clusterClass" @validation-passed="e=>variablesValid=e" />
       </tab>
     </Tabbed>
   </div>

@@ -27,11 +27,11 @@ export default defineComponent({
   },
 
   data() {
-    return { errorMap: {} as {[key:string]: boolean} };
+    return { errorCount: 0 };
   },
 
   watch: {
-    hasValidationErrors: {
+    errorCount: {
       handler: debounce(function(neu) {
         this.$emit('validation-passed', !neu);
       }, 5),
@@ -57,11 +57,7 @@ export default defineComponent({
   computed: {
     variableDefinitions() {
       return this.clusterClass?.spec?.variables || [];
-    },
-
-    hasValidationErrors() {
-      return !!Object.keys(this.errorMap).length;
-    },
+    }
   },
 
   methods: {
@@ -81,11 +77,11 @@ export default defineComponent({
       this.$emit('input', out);
     },
 
-    updateErrors(isValid: boolean, variableDef: ClusterClassVariable) {
-      if (isValid && this.errorMap[variableDef.name]) {
-        this.$delete(this.errorMap, variableDef.name);
-      } else if (!isValid && !this.errorMap[variableDef.name]) {
-        this.$set(this.errorMap, variableDef.name, true);
+    updateErrors(isValid: boolean) {
+      if (!isValid) {
+        this.errorCount++;
+      } else {
+        this.errorCount--;
       }
     },
 
@@ -100,8 +96,6 @@ export default defineComponent({
 
       const nextComponent = this.$refs?.[nextRef]?.[0]?.componentForType;
       const currentComponent = this.$refs?.[ref]?.[0]?.componentForType;
-
-      console.log(this.$refs?.[ref]?.[0]);
 
       return nextComponent && currentComponent && (nextComponent?.name !== currentComponent?.name);
     },
@@ -120,7 +114,7 @@ export default defineComponent({
           :variable="variableDef"
           :value="valueFor(variableDef)"
           @input="e=>updateVariables(e, variableDef)"
-          @validation-passed="e=>updateErrors(e, variableDef)"
+          @validation-passed="updateErrors"
         />
         <div v-if="newComponentType(variableDef, i)" :key="`${variableDef.name}-break`" class="row-break" />
       </template>
