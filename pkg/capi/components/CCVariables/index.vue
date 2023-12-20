@@ -2,6 +2,7 @@
 import debounce from 'lodash/debounce';
 import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
+import { randomStr } from '@shell/utils/string';
 import { ClusterClassVariable } from '../../types/clusterClass';
 import type { CapiClusterVariable } from '../../types/cluster.x-k8s.io.cluster';
 import Variable from './Variable.vue';
@@ -27,7 +28,8 @@ export default defineComponent({
   },
 
   data() {
-    return { errorCount: 0 };
+    // this key is used on the spacer element so it can be forced to re-calculate its visibility when the cluster class changes
+    return { errorCount: 0, rerenderKey: randomStr() };
   },
 
   watch: {
@@ -38,6 +40,9 @@ export default defineComponent({
     },
     variableDefinitions(neu, old) {
       this.updateVariableDefaults(neu, old);
+      this.$nextTick(() => {
+        this.rerenderKey = randomStr();
+      });
     },
   },
 
@@ -48,7 +53,8 @@ export default defineComponent({
   computed: {
     variableDefinitions() {
       return this.clusterClass?.spec?.variables || [];
-    }
+    },
+
   },
 
   methods: {
@@ -117,28 +123,23 @@ export default defineComponent({
       }
     },
 
-    newComponentType(variableDef: ClusterClassVariable, idx: number) {
-      console.log('calculating new component type');
-      const ref = `${ variableDef.name }-input`;
-      const nextDef = this.variableDefinitions[idx + 1];
+    newComponentType(variableDef: ClusterClassVariable, i: number) {
+      const inputEl = this.$refs[`${ variableDef.name }-input`]?.[0]?.$el;
+      const nextInputEl = this.$refs[`${ this.variableDefinitions[i + 1]?.name }-input`]?.[0]?.$el;
 
-      if (!nextDef) {
+      if (!nextInputEl) {
         return false;
       }
-      const nextRef = `${ nextDef.name }-input`;
 
-      const nextComponent = this.$refs?.[nextRef]?.[0]?.componentForType;
-      const currentComponent = this.$refs?.[ref]?.[0]?.componentForType;
-
-      return nextComponent && currentComponent && (nextComponent?.name !== currentComponent?.name);
-    },
+      return inputEl?._prevClass !== nextInputEl._prevClass;
+    }
   },
 
 });
 </script>
 
 <template>
-  <div :key="`${clusterClass.id}`" class="variables">
+  <div class="variables">
     <template v-if="variableDefinitions && variableDefinitions.length">
       <template v-for="(variableDef, i) in variableDefinitions">
         <Variable
@@ -149,31 +150,34 @@ export default defineComponent({
           @input="e=>updateVariables(e, variableDef)"
           @validation-passed="updateErrors"
         />
-        <div v-if="newComponentType(variableDef, i)" :key="`${variableDef.name}-${clusterClass.id}-break`" class="row-break" />
+        <div v-if="newComponentType(variableDef, i)" :key="`${i}-${rerenderKey}`" class="force-newline" />
       </template>
     </template>
   </div>
 </template>
 
 <style lang="scss" scoped>
+$standard-input: 23.25%;
+$wider-input: 48.25%;
+
 .variables {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
 
   &>*{
-    flex: 0 0 23.25%;
+    flex: 0 1 $standard-input;
     margin: 0 1.75% 10px 0;
-    max-width: 23.25%;
+    max-width: $standard-input;
     &::v-deep.wider{
-      flex: 0 0 48.25%;
-      max-width: 48.25%;
+      flex: 0 1 $wider-input;
+      max-width: $wider-input;
     }
-    &.row-break {
-      flex: 1 0 100%;
-      max-width: 100%;
-      margin: 10px 0px 0px 0px;
-    }
+
+  }
+  &>.force-newline {
+    flex: 1 0 100%;
+    max-width: initial;
   }
 }
 </style>
