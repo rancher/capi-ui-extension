@@ -6,6 +6,7 @@ import { _CLONE, _CREATE, _EDIT } from '@shell/config/query-params';
 import { LABELS } from './types/capi';
 import capiRouting from './routes/capi-routing';
 import toggleAutoImport from './util/auto-import';
+import capiStore from './store/capi-store';
 
 // Init the package
 export default function(plugin: IPlugin): void {
@@ -19,6 +20,9 @@ export default function(plugin: IPlugin): void {
 
   // Add Vue Routes
   plugin.addRoutes(capiRouting);
+
+  //Add vue store
+  plugin.addDashboardStore(capiStore.config.namespace, capiStore.specifics, capiStore.config);
 
   // add tab to namespace edit
   plugin.addTab(

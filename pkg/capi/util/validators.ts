@@ -1,5 +1,6 @@
 import { Validator, ValidationOptions } from '@shell/utils/validators/formRules';
 import { Translation } from '@shell/types/t';
+//import { NON_INFRASTRUCTURE_PROVIDERS } from '@pkg/capi/types/capi';
 
 // const stringFormats = {
 //   // this is a mongodb id - requires library to validate?
@@ -114,6 +115,16 @@ export const openAPIV3SchemaValidators = function(t: Translation, { key = 'Value
   if (requiredFields) {
     out.push((val: any) => requiredFields.find((key: string) => val[key] === undefined) ? t('validation.requiredFields', { key, requiredFields: requiredFields.toString() }) : undefined);
   }
+
+  return out;
+};
+
+export const versionValidator = function(t: Translation, type: String): Validator[] {
+  const out = [] as any[];
+
+  // if (maxItems) {
+  //   out.push((val: any[]) => val && val.length > maxItems ? t('validation.maxItems', { key, maxItems }) : undefined);
+  // }
 
   return out;
 };

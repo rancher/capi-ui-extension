@@ -14,11 +14,19 @@ export default defineComponent({
     CCVariables, Tabbed, Tab, LabeledSelect
   },
   props: {
+
     value: {
       type:    Object,
-      default: () => {
-        return {};
-      }
+      default: null,
+    },
+
+    /**
+     * Inherited global identifier prefix for tests
+     * Define a term based on the parent component to avoid conflicts on multiple components
+     */
+    componentTestid: {
+      type:    String,
+      default: 'capi-provider-create'
     }
   },
   async fetch() {

@@ -45,3 +45,8 @@ export function init($plugin: any, store: any) {
   // Ensure CAPI group appears before the Advanced group
   weightGroup('CAPITurtles', 10, true);
 }
+
+export const API = {
+  PROVIDERS: 'operator.cluster.x-k8s.io.infrastructureprovider',
+  CLUSTER_CLASSES: 'cluster.x-k8s.io.clusterclass'
+};
