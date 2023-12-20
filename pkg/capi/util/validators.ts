@@ -117,3 +117,5 @@ export const openAPIV3SchemaValidators = function(t: Translation, { key = 'Value
 
   return out;
 };
+
+export const isDefined = (val: any) => val || val === false;

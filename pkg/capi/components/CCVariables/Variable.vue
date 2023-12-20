@@ -9,7 +9,7 @@ import LabeledSelect from '@shell/components/form/LabeledSelect';
 import formRulesGenerator, { Validator } from '@shell/utils/validators/formRules';
 
 import type { ClusterClassVariable } from '../../types/clusterClass';
-import { openAPIV3SchemaValidators } from '../../util/validators';
+import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
 
 export default defineComponent({
   name: 'CCVariable',
@@ -98,7 +98,9 @@ export default defineComponent({
       const required = this.variable?.required;
 
       if (required) {
-        out.push(formRulesGenerator(this.$store.getters['i18n/t'], { key: this.variable.name }).required as Validator);
+        // out.push(formRulesGenerator(this.$store.getters['i18n/t'], { key: this.variable.name }).required as Validator);
+
+        out.push(val => !isDefined(val) ? this.$store.getters['i18n/t']('validation.required', { key: this.variable.name }) : null);
       }
 
       return out;
