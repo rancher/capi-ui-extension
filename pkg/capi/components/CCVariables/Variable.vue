@@ -43,28 +43,28 @@ export default defineComponent({
       let out = null;
 
       if (this.variableOptions) {
-        out = { component: LabeledSelect, name: 'LabeledSelect' };
+        out = { component: LabeledSelect, name: 'text-var' };
       } else {
         switch (type) {
         case 'object':
-          out = { component: KeyValue, name: 'KeyValue' };
+          out = { component: KeyValue, name: 'keyvalue-var' };
           break;
         case 'array':
-          out = { component: ArrayList, name: 'ArrayList' };
+          out = { component: ArrayList, name: 'arraylist-var' };
           break;
         case 'string':
-          out = { component: LabeledInput, name: 'LabeledInput' };
+          out = { component: LabeledInput, name: 'text-var' };
           break;
         case 'integer':
-          out = { component: LabeledInput, name: 'LabeledInput' };
+          out = { component: LabeledInput, name: 'text-var' };
 
           break;
         case 'number':
-          out = { component: LabeledInput, name: 'LabeledInput' };
+          out = { component: LabeledInput, name: 'text-var' };
 
           break;
         case 'boolean':
-          out = { component: Checkbox, name: 'Checkbox' };
+          out = { component: Checkbox, name: 'checkbox-var' };
 
           break;
         default:
@@ -109,7 +109,7 @@ export default defineComponent({
     },
 
     widerComponent() {
-      return this.componentForType?.name === 'ArrayList' || this.componentForType?.name === 'KeyValue';
+      return this.componentForType?.name === 'arraylist-var' || this.componentForType?.name === 'keyvalue-var';
     }
   },
 
@@ -131,7 +131,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div :class="{'wider': widerComponent, 'align-center': componentForType?.name==='Checkbox'}">
+  <div :class="{'wider': widerComponent, 'align-center': componentForType?.name==='checkbox-var', [`${componentForType.name}`]: true}">
     <component
       :is="componentForType.component"
       v-if="componentForType"
@@ -146,6 +146,7 @@ export default defineComponent({
       :type="schema.type === 'number' || schema.type === 'integer' ? 'number' : 'text'"
       @input="setValue"
     />
+    <div class="flexbox-newline" />
   </div>
 </template>
 <style lang="scss" scoped>
