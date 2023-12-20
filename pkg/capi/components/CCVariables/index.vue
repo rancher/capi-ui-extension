@@ -35,23 +35,14 @@ export default defineComponent({
       handler: debounce(function(neu) {
         this.$emit('validation-passed', !neu);
       }, 5),
-    }
+    },
+    variableDefinitions(neu, old) {
+      this.updateVariableDefaults(neu, old);
+    },
   },
 
   created() {
-    const out = [...this.value];
-
-    this.variableDefinitions.forEach((def: ClusterClassVariable) => {
-      const defaultValue = def.schema.openAPIV3Schema.default;
-
-      if (!out.find((variable: any) => {
-        return variable.name === def.name;
-      }) && defaultValue) {
-        out.push({ name: def.name, value: defaultValue });
-      }
-    });
-
-    this.$emit('input', out);
+    this.updateVariableDefaults(this.variableDefinitions, []);
   },
 
   computed: {
@@ -77,6 +68,47 @@ export default defineComponent({
       this.$emit('input', out);
     },
 
+    /**
+   * When the cluster class changes, update the variables array:
+   *  remove any variables not defined in the new cluster class
+   *  if a variable is defined in both cluster classes, clear out the old default
+   *  set default values from the new cluster class definitions
+   *  if a variable is defined in both old and new cluster classes, and the user has set its value to something other than the old default, preserve that
+   */
+    updateVariableDefaults(neu: ClusterClassVariable[], old: ClusterClassVariable[]) {
+      const out = [...this.value].reduce((acc: CapiClusterVariable[], existingVar: CapiClusterVariable) => {
+        const neuDef = (neu || []).find(n => n.name === existingVar.name);
+
+        if (!neuDef) {
+          return acc;
+        }
+        const oldDefault = (old || []).find(d => d.name === existingVar.name)?.schema?.openAPIV3Schema?.default;
+
+        if (oldDefault && existingVar.value === oldDefault) {
+          delete existingVar.value;
+        }
+        const newDefault = neuDef.schema?.openAPIV3Schema?.default;
+
+        if (newDefault && !existingVar.value) {
+          existingVar.value = newDefault;
+        }
+        acc.push(existingVar);
+
+        return acc;
+      }, []);
+
+      neu.forEach((def) => {
+        const newDefault = def.schema?.openAPIV3Schema?.default;
+
+        if (newDefault && !out.find(v => v.name === def.name)) {
+          out.push({ name: def.name, value: newDefault });
+        }
+      });
+
+      this.errorCount = 0;
+      this.$emit('input', out);
+    },
+
     updateErrors(isValid: boolean) {
       if (!isValid) {
         this.errorCount++;
@@ -86,6 +118,7 @@ export default defineComponent({
     },
 
     newComponentType(variableDef: ClusterClassVariable, idx: number) {
+      console.log('calculating new component type');
       const ref = `${ variableDef.name }-input`;
       const nextDef = this.variableDefinitions[idx + 1];
 
@@ -105,18 +138,18 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="variables">
+  <div :key="`${clusterClass.id}`" class="variables">
     <template v-if="variableDefinitions && variableDefinitions.length">
       <template v-for="(variableDef, i) in variableDefinitions">
         <Variable
-          :key="variableDef.name"
+          :key="`${variableDef.name}`"
           :ref="`${variableDef.name}-input`"
           :variable="variableDef"
           :value="valueFor(variableDef)"
           @input="e=>updateVariables(e, variableDef)"
           @validation-passed="updateErrors"
         />
-        <div v-if="newComponentType(variableDef, i)" :key="`${variableDef.name}-break`" class="row-break" />
+        <div v-if="newComponentType(variableDef, i)" :key="`${variableDef.name}-${clusterClass.id}-break`" class="row-break" />
       </template>
     </template>
   </div>
