@@ -5,6 +5,7 @@ import type { PropType } from 'vue';
 import { randomStr } from '@shell/utils/string';
 import { ClusterClassVariable } from '../../types/clusterClass';
 import type { CapiClusterVariable } from '../../types/cluster.x-k8s.io.cluster';
+import { isDefined } from '../../util/validators';
 import Variable from './Variable.vue';
 
 export default defineComponent({
@@ -90,12 +91,15 @@ export default defineComponent({
         }
         const oldDefault = (old || []).find(d => d.name === existingVar.name)?.schema?.openAPIV3Schema?.default;
 
-        if (oldDefault && existingVar.value === oldDefault) {
+        if (isDefined(oldDefault) && existingVar.value === oldDefault) {
           delete existingVar.value;
         }
-        const newDefault = neuDef.schema?.openAPIV3Schema?.default;
+        let newDefault = neuDef.schema?.openAPIV3Schema?.default;
 
-        if (newDefault && !existingVar.value) {
+        if (neuDef.schema?.openAPIV3Schema?.type === 'boolean' && !newDefault) {
+          newDefault = false;
+        }
+        if (isDefined(newDefault) && !existingVar.value) {
           existingVar.value = newDefault;
         }
         acc.push(existingVar);
@@ -104,9 +108,12 @@ export default defineComponent({
       }, []);
 
       neu.forEach((def) => {
-        const newDefault = def.schema?.openAPIV3Schema?.default;
+        let newDefault = def.schema?.openAPIV3Schema?.default;
 
-        if (newDefault && !out.find(v => v.name === def.name)) {
+        if (def.schema?.openAPIV3Schema?.type === 'boolean' && !newDefault) {
+          newDefault = false;
+        }
+        if (isDefined(newDefault) && !out.find(v => v.name === def.name)) {
           out.push({ name: def.name, value: newDefault });
         }
       });
