@@ -20,11 +20,25 @@ export default defineComponent({
     },
 
     // <cluster.x-k8s.io>.spec.topology.variables
+    // OR <cluster.x-k8s.io>.spec.topology.workers.machineDeployments[].variables.overrides
+    // OR <cluster.x-k8s.io>.spec.topology.workers.machinePools[].variables.overrides
     value: {
       type:    Array as PropType<Array<CapiClusterVariable>>,
       default: () => {
         return [];
       }
+    },
+
+    // if this and machinePoolClass are empty, ALL variables will be shown
+    // only 1 of machinePoolClass and machineDeploymentClass should be set
+    machineDeploymentClass: {
+      type:    String,
+      default: null
+    },
+
+    machinePoolClass: {
+      type:    String,
+      default: null
     }
   },
 
@@ -53,9 +67,53 @@ export default defineComponent({
 
   computed: {
     variableDefinitions() {
-      return this.clusterClass?.spec?.variables || [];
+      const allVariableDefinitions = this.clusterClass?.spec?.variables || [];
+
+      if (!this.machineDeploymentClass && !this.machinePoolClass) {
+        return allVariableDefinitions;
+      }
+      const variableNames = this.machineScopedJsonPatches.reduce((names, patch) => {
+        const valueFromVariable = patch?.valueFrom?.variable;
+
+        if (!valueFromVariable) {
+          return names;
+        }
+
+        const parsedName = valueFromVariable.split(/\.|\[/)[0];
+
+        names.push(parsedName);
+
+        // the value here could be a field or index of the variable, defined <variable definition.name>.<some field> or <variable definition name>[i]
+        return names;
+      }, []);
+
+      return allVariableDefinitions.filter(v => variableNames.includes(v.name));
     },
 
+    machineScopedJsonPatches() {
+      if (!this.machineDeploymentClass && !this.machinePoolClass) {
+        return [];
+      }
+      const out = [] as any[];
+      const matchName = this.machineDeploymentClass || this.machinePoolClass;
+      const matchKey = this.machineDeploymentClass ? 'machineDeploymentClass' : 'machinePoolClass';
+
+      const patches = this.clusterClass?.spec?.patches || [];
+
+      patches.forEach((p) => {
+        const definitions = p?.definitions || [];
+
+        definitions.forEach((definition) => {
+          const matchMachines = definition?.selector?.matchResources?.[matchKey]?.names || [];
+
+          if (matchMachines.includes(matchName)) {
+            out.push(...definition.jsonPatches);
+          }
+        });
+      });
+
+      return out;
+    },
   },
 
   methods: {
