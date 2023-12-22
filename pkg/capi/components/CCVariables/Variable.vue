@@ -107,10 +107,22 @@ export default defineComponent({
     },
 
     isValid() {
-      return !this.validationRules.find((rule: Validator) => !!rule(this.value));
+      return !this.validationErrors.length;
     },
 
-    widerComponent() {
+    validationErrors() {
+      return this.validationRules.reduce((errs: string[], rule: Validator) => {
+        const message = rule(this.value);
+
+        if (message) {
+          errs.push(message);
+        }
+
+        return errs;
+      }, []);
+    },
+
+    listComponent() {
       return this.componentForType?.name === 'arraylist-var' || this.componentForType?.name === 'keyvalue-var';
     }
   },
@@ -133,7 +145,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div :class="{'wider': widerComponent, 'align-center': componentForType?.name==='checkbox-var', [`${componentForType.name}`]: true}">
+  <div :class="{'wider': listComponent, 'align-center': componentForType?.name==='checkbox-var', [`${componentForType.name}`]: true}">
     <component
       :is="componentForType.component"
       v-if="componentForType"
@@ -144,15 +156,33 @@ export default defineComponent({
       :required="variable.required"
       :title="variable.name"
       :options="variableOptions"
-      :rules="validationRules"
+      :rules="!listComponent ? validationRules : []"
       :type="schema.type === 'number' || schema.type === 'integer' ? 'number' : 'text'"
       @input="setValue"
-    />
+    >
+      <template #title>
+        <div class="input-label">
+          <span>{{ variable.name }}
+            <i v-if="schema.description" v-clean-tooltip="schema.description" class="icon icon-sm icon-info" />
+            <i v-if="!isValid" v-clean-tooltip="validationErrors.join(' ')" class="icon icon-warning" />
+          </span>
+        </div>
+      </template>
+    </component>
     <div class="flexbox-newline" />
   </div>
 </template>
 <style lang="scss" scoped>
 .align-center {
   align-self: 'center'
+}
+.input-label{
+  color: var(--input-label);
+  margin-bottom: 5px;
+  display: block;
+  width:100%;
+  .icon-warning{
+    color: var(--error)
+  }
 }
 </style>
