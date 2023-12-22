@@ -53,6 +53,7 @@ export default defineComponent({
         this.$emit('validation-passed', !neu);
       }, 5),
     },
+
     variableDefinitions(neu, old) {
       this.updateVariableDefaults(neu, old);
       this.$nextTick(() => {
@@ -79,15 +80,17 @@ export default defineComponent({
           return names;
         }
 
+        // the value here could be a field or index of the variable, defined <variable definition.name>.<some field> or <variable definition name>[i]
         const parsedName = valueFromVariable.split(/\.|\[/)[0];
 
-        names.push(parsedName);
+        if (parsedName !== 'builtin') {
+          names.push(parsedName);
+        }
 
-        // the value here could be a field or index of the variable, defined <variable definition.name>.<some field> or <variable definition name>[i]
         return names;
       }, []);
 
-      return allVariableDefinitions.filter(v => variableNames.includes(v.name));
+      return allVariableDefinitions.filter((v: ClusterClassVariable) => variableNames.includes(v.name));
     },
 
     machineScopedJsonPatches() {
@@ -103,7 +106,7 @@ export default defineComponent({
       patches.forEach((p) => {
         const definitions = p?.definitions || [];
 
-        definitions.forEach((definition) => {
+        definitions.forEach((definition: any) => {
           const matchMachines = definition?.selector?.matchResources?.[matchKey]?.names || [];
 
           if (matchMachines.includes(matchName)) {
