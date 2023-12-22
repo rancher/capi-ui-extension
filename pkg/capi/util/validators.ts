@@ -1,5 +1,6 @@
 import { Validator, ValidationOptions } from '@shell/utils/validators/formRules';
 import { Translation } from '@shell/types/t';
+import isEmpty from 'lodash/isEmpty';
 
 // const stringFormats = {
 //   // this is a mongodb id - requires library to validate?
@@ -118,4 +119,4 @@ export const openAPIV3SchemaValidators = function(t: Translation, { key = 'Value
   return out;
 };
 
-export const isDefined = (val: any) => val || val === false;
+export const isDefined = (val: any) => (val || val === false) && !isEmpty(val);
