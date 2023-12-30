@@ -38,36 +38,36 @@ export default function(plugin: IPlugin): void {
   );
 
   // add enable auto-import action to namespace table
-  plugin.addAction(ActionLocation.TABLE,
-    { path: [{ urlPath: '/c/local/explorer/projectsnamespaces', exact: true }, { urlPath: 'cluster.x-k8s.io.cluster', endsWith: true }] },
-    {
-      labelKey: 'capi.autoImport.enableAction',
-      icon:     'icon-plus',
-      enabled(target: any) {
-        return target.metadata.labels[LABELS.AUTO_IMPORT] !== 'true';
-      },
-      invoke(opts, resources = []) {
-        resources.forEach((ns) => {
-          toggleAutoImport(ns);
-        });
-      }
-    });
+  // plugin.addAction(ActionLocation.TABLE,
+  //   { path: [{ urlPath: '/c/local/explorer/projectsnamespaces', exact: true }, { urlPath: 'cluster.x-k8s.io.cluster', endsWith: true }] },
+  //   {
+  //     labelKey: 'capi.autoImport.enableAction',
+  //     icon:     'icon-plus',
+  //     enabled(target: any) {
+  //       return target.metadata.labels[LABELS.AUTO_IMPORT] !== 'true';
+  //     },
+  //     invoke(opts, resources = []) {
+  //       resources.forEach((ns) => {
+  //         toggleAutoImport(ns);
+  //       });
+  //     }
+  //   });
 
   // add disable auto-import action to namespace table
-  plugin.addAction(ActionLocation.TABLE,
-    { path: [{ urlPath: '/c/local/explorer/projectsnamespaces', exact: true }, { urlPath: 'cluster.x-k8s.io.cluster', endsWith: true }] },
-    {
-      labelKey: 'capi.autoImport.disableAction',
-      icon:     'icon-minus',
-      enabled(target: any) {
-        return target.metadata.labels[LABELS.AUTO_IMPORT] === 'true';
-      },
-      invoke(opts, resources = []) {
-        resources.forEach((ns) => {
-          toggleAutoImport(ns);
-        });
-      }
-    });
+  // plugin.addAction(ActionLocation.TABLE,
+  //   { path: [{ urlPath: '/c/local/explorer/projectsnamespaces', exact: true }, { urlPath: 'cluster.x-k8s.io.cluster', endsWith: true }] },
+  //   {
+  //     labelKey: 'capi.autoImport.disableAction',
+  //     icon:     'icon-minus',
+  //     enabled(target: any) {
+  //       return target.metadata.labels[LABELS.AUTO_IMPORT] === 'true';
+  //     },
+  //     invoke(opts, resources = []) {
+  //       resources.forEach((ns) => {
+  //         toggleAutoImport(ns);
+  //       });
+  //     }
+  //   });
 
   // add column to namespace table
   plugin.addTableColumn(

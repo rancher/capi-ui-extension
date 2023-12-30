@@ -1,6 +1,7 @@
 import { Validator, ValidationOptions } from '@shell/utils/validators/formRules';
 import { Translation } from '@shell/types/t';
 import isEmpty from 'lodash/isEmpty';
+import { CP_VERSIONS } from '@pkg/capi/types/capi';
 
 // const stringFormats = {
 //   // this is a mongodb id - requires library to validate?
@@ -120,3 +121,21 @@ export const openAPIV3SchemaValidators = function(t: Translation, { key = 'Value
 };
 
 export const isDefined = (val: any) => (val || val === false) && !isEmpty(val);
+export const versionTest = function(t: Translation, type: String): RegExp {
+  let ending = '';
+
+  if (CP_VERSIONS[type]) {
+    ending = `\\+(${ CP_VERSIONS[type].join('|') })`;
+  }
+
+  return new RegExp(`^v(\\d+.){2}\\d+${ ending }$`);
+};
+
+export const versionValidator = function(t: Translation, type: String): Validator[] {
+  const out = [] as any[];
+  const test = versionTest(t, type);
+
+  out.push((val: String) => val && !val.match(test) ? t('validation.version') : undefined);
+
+  return out;
+};
