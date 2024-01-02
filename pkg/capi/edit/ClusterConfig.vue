@@ -1,6 +1,6 @@
 <script lang='ts'>
 import {
-  CREDENTIALS_UPDATE_REQUIRED, CREDENTIALS_NOT_REQUIRED, CAPIClusterTopology, CAPIClusterNetwork, ClusterClass, CAPI
+  CREDENTIALS_UPDATE_REQUIRED, CREDENTIALS_NOT_REQUIRED, CAPIClusterTopology, CAPIClusterNetwork, CAPIClusterCPEndpoint, ClusterClass, CAPI, Worker
 } from '@pkg/capi/types/capi';
 import ClusterClassVariables from '@pkg/capi/components/CCVariables/index';
 import CreateEditView from '@shell/mixins/create-edit-view';
@@ -17,14 +17,14 @@ import { NORMAN } from '@shell/config/types';
 import { DESCRIPTION } from '@shell/config/labels-annotations';
 import { versionTest, versionValidator } from '@pkg/capi/util/validators';
 import { clear } from '@shell/utils/array';
-import { API } from '../config/capi';
 
 import WorkerItem from './WorkerItem';
 import NetworkSection from './NetworkSection';
+import ControlPlaneEndpointSection from './ControlPlaneEndpointSection';
 
 const defaultTopologyConfig: CAPIClusterTopology = {
   version: '',
-  class:             '',
+  class:   '',
   workers:           { machineDeployments: [], machinePools: [] }
 };
 const defaultClusterNetwork: CAPIClusterNetwork = {
@@ -32,6 +32,11 @@ const defaultClusterNetwork: CAPIClusterNetwork = {
   pods:          { cidrBlocks: [] },
   serviceDomain: '',
   services:      { cidrBlocks: [] }
+};
+
+const defaultCPEndpointConfig: CAPIClusterCPEndpoint = {
+  host: '',
+  port: null
 };
 
 export default {
@@ -45,7 +50,8 @@ export default {
     WorkerItem,
     ClusterClassVariables,
     LabelValue,
-    NetworkSection
+    NetworkSection,
+    ControlPlaneEndpointSection
   },
   mixins: [CreateEditView, FormValidation],
   props:      {
@@ -119,14 +125,6 @@ export default {
     }
   },
   computed: {
-    // clusterClass: {
-    //   get() {
-    //     return this.value.spec.topology.class;
-    //   },
-    //   set(val) {
-    //     this.set(this.value.spec.topology, 'class', val);
-    //   }
-    // },
     version() {
       return this.value.spec.topology.version;
     },
@@ -148,10 +146,11 @@ export default {
     stepTwoRequires() {
       const versionTestString = versionTest(this.$store.getters['i18n/t'], this.controlPlane);
       const versionValid = this.version && !!(this.version.match(versionTestString));
+      const controlPlaneEndpointValid = !!this.value.spec.controlPlaneEndpoint.host && !!this.value.spec.controlPlaneEndpoint.port;
       const machineDeploymentsValid = this.value.spec.topology.workers.machineDeployments.length > 0 && !!this.value.spec.topology.workers.machineDeployments[0]?.name && !!this.value.spec.topology.workers.machineDeployments[0]?.class;
       const machinePoolsValid = this.value.spec.topology.workers.machinePools.length > 0 && !!this.value.spec.topology.workers.machinePools[0]?.name && !!this.value.spec.topology.workers.machinePools[0]?.class;
 
-      return versionValid && (machineDeploymentsValid || machinePoolsValid);
+      return versionValid && controlPlaneEndpointValid && (machineDeploymentsValid || machinePoolsValid);
     },
     clusterClassOptions() {
       const out: ClusterClass[] = [];
@@ -167,6 +166,9 @@ export default {
 
     clusterNetwork() {
       return this.value.spec.clusterNetwork;
+    },
+    controlPlaneEndpoint() {
+      return this.value.spec.controlPlaneEndpoint;
     },
     clusterClassObj() {
       return this.clusterClasses.find(x => x.metadata.name === this.clusterClass);
@@ -194,7 +196,6 @@ export default {
       if ( this.errors ) {
         clear(this.errors);
       }
-      console.log(this.value);
       await this.value.save();
 
       return this.done();
@@ -210,6 +211,10 @@ export default {
 
       if ( !this.value.spec.clusterNetwork ) {
         set(this.value.spec, 'clusterNetwork', defaultClusterNetwork);
+      }
+
+      if ( !this.value.spec.controlPlaneEndpoint ) {
+        set(this.value.spec, 'controlPlaneEndpoint', defaultCPEndpointConfig);
       }
     },
 
@@ -232,7 +237,7 @@ export default {
         this.$refs.cruresource.emitOrRoute();
       }
     },
-    validateVariables(neu) {
+    validateVariables(neu: Boolean) {
       this.variablesReady = neu;
       this.stepOneReady();
     },
@@ -248,16 +253,24 @@ export default {
         params: {},
       });
     },
-    clusterClassChanged(val) {
+    clusterClassChanged(val: String) {
       this.set(this.value.spec.topology, 'class', val);
       this.stepOneReady();
     },
-    machineDeploymentsChanged(val) {
+    machineDeploymentsChanged(val: Worker) {
       this.set(this.value.spec.topology.workers, 'machineDeployments', val);
       this.stepTwoReady();
     },
-    machinePoolsChanged(val) {
-      this.set(this.spec.topology.workers, 'machinePools', val);
+    machinePoolsChanged(val: Worker) {
+      this.set(this.value.spec.topology.workers, 'machinePools', val);
+      this.stepTwoReady();
+    },
+    cpEndpointHostChanged(val: String) {
+      this.set(this.value.spec.controlPlaneEndpoint, 'host', val);
+      this.stepTwoReady();
+    },
+    cpEndpointPortChanged(val: Number) {
+      this.set(this.value.spec.controlPlaneEndpoint, 'port', val);
       this.stepTwoReady();
     },
   }
@@ -381,6 +394,19 @@ export default {
           @service-domain-changed="(val) => $set(value.spec.clusterNetwork, 'serviceDomain', val)"
           @pods-cidr-blocks-changed="(val) => $set(value.spec.clusterNetwork.pods, 'cidrBlocks', val)"
           @services-cidr-blocks-changed="(val) => $set(value.spec.clusterNetwork.services, 'cidrBlocks', val)"
+        />
+      </div>
+
+      <div class="spacer" />
+      <div class="mt-20">
+        <h2>
+          <t k="capi.cluster.controlPlaneEndpoint.title" />
+        </h2>
+        <ControlPlaneEndpointSection
+          v-model="controlPlaneEndpoint"
+          :mode="mode"
+          @control-plane-endpoint-host-changed="cpEndpointHostChanged"
+          @control-plane-endpoint-port-changed-changed="cpEndpointPortChanged"
         />
       </div>
 

@@ -44,7 +44,7 @@ export default {
         class="col span-3"
       >
         <LabeledInput
-          v-model="apiServerPort"
+          :value="apiServerPort"
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.networking.apiServerPort')"
@@ -55,7 +55,7 @@ export default {
         class="col span-3"
       >
         <LabeledInput
-          v-model="serviceDomain"
+          :value="serviceDomain"
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.networking.serviceDomain')"
@@ -66,7 +66,7 @@ export default {
     <div class="row mb-20">
       <div class="col span-3">
         <ArrayList
-          v-model="podsCidrBlocks"
+          :value="podsCidrBlocks"
           :protip="false"
           :mode="mode"
           :title="t('capi.cluster.networking.pods')"
@@ -75,7 +75,7 @@ export default {
       </div>
       <div class="col span-3">
         <ArrayList
-          v-model="servicesCidrBlocks"
+          :value="servicesCidrBlocks"
           :protip="false"
           :mode="mode"
           :title="t('capi.cluster.networking.services')"

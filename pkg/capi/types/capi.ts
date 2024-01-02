@@ -22,7 +22,7 @@ export const CP_VERSIONS = {
 
 export const CREDENTIALS_UPDATE_REQUIRED = ['aks'];
 export const CREDENTIALS_NOT_REQUIRED = ['docker'];
-interface Worker {
+export interface Worker {
   name: String,
   class: String
 }
@@ -34,6 +34,10 @@ export interface CAPIClusterTopology {
       machineDeployments: Worker[],
       machinePools: Worker[]
     }
+}
+export interface CAPIClusterCPEndpoint {
+  host: String,
+  port: Number
 }
 
 export interface CAPIClusterNetwork {

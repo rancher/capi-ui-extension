@@ -46,6 +46,10 @@ capi:
       serviceDomain: Service Domain
       pods: Pod CIDR Blocks
       services: Service VIP CIDR Blocks
+    controlPlaneEndpoint:
+      title: Control Plane Endpoint
+      host: Host
+      port: Port
     workers:
       title: Workers
       class: Class
