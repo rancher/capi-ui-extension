@@ -9,12 +9,6 @@ export const CAPI = {
   PROVIDER:      'operator.cluster.x-k8s.io.infrastructureprovider',
 };
 
-// Includes bootrstap providers, control plane providers, and add-on providers:
-// BOOTSTRAP_PROVIDERS = ['kubeadm', 'talos', 'microk8s', 'ocne', 'kubekey-k3s', 'rke2'];
-// CP_PROVIDERS = ['kubeadm', 'talos', 'microk8s', 'nested', 'ocne', 'kubekey-k3s', 'kamaji', 'rke2'];
-// ADD_ON_PROVIDERS = ['helm'];
-export const NON_INFRASTRUCTURE_PROVIDERS = ['kubeadm', 'talos', 'microk8s', 'nested', 'ocne', 'kubekey-k3s', 'kamaji', 'rke2', 'helm'];
-
 export const CP_VERSIONS = {
   'kubekey-k3s': ['k3s1', 'k3s2'],
   rke2:          ['rke2r1', 'rke2r2']

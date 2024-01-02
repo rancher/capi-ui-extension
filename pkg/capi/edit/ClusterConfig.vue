@@ -36,7 +36,7 @@ const defaultClusterNetwork: CAPIClusterNetwork = {
 
 const defaultCPEndpointConfig: CAPIClusterCPEndpoint = {
   host: '',
-  port: null
+  port: 49152
 };
 
 export default {

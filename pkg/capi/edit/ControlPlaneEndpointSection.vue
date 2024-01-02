@@ -3,9 +3,7 @@ import { _EDIT } from '@shell/config/query-params';
 import { LabeledInput } from '@components/Form/LabeledInput';
 
 export default {
-  components: {
-    LabeledInput
-  },
+  components: { LabeledInput },
   props:      {
     value: {
       type:     Object,

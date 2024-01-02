@@ -8,7 +8,7 @@ import { set } from '@shell/utils/object';
 
 import { DEFAULT_WORKSPACE } from '@shell/config/types';
 
-import { NON_INFRASTRUCTURE_PROVIDERS, CAPI, InfrastructureProvider } from '@pkg/capi/types/capi';
+import { CAPI, InfrastructureProvider } from '@pkg/capi/types/capi';
 
 import ClusterConfig from './ClusterConfig';
 
@@ -34,9 +34,7 @@ export default {
     }
   },
   async fetch() {
-    const allProviders = await this.$store.dispatch('management/findAll', { type: CAPI.PROVIDER });
-
-    this.capiProviders = allProviders.filter(p => !NON_INFRASTRUCTURE_PROVIDERS.includes(p.metadata.name)) || [];
+    this.capiProviders = await this.getProviders();
 
     if ( !this.value.spec ) {
       set(this.value, 'spec', {});
@@ -97,6 +95,15 @@ export default {
     },
   },
   methods: {
+    async getProviders() {
+      const allProviders = await this.$store.dispatch('management/findAll', { type: CAPI.PROVIDER });
+      const clusterClasses = await this.$store.dispatch('management/findAll', { type: CAPI.CLUSTER_CLASS });
+      const providersFromCC = new Set(clusterClasses.map(cc => cc.spec.infrastructure.ref.name));
+
+      const filtered = allProviders.filter(p => providersFromCC.has(p.metadata.name)) || [];
+
+      return filtered;
+    },
     cancel() {
       this.$router.push({
         name:   'c-cluster-manager-capi',
