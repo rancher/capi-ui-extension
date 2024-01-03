@@ -19,9 +19,6 @@ export default defineComponent({
       default: () => {}
     },
 
-    // <cluster.x-k8s.io>.spec.topology.variables
-    // OR <cluster.x-k8s.io>.spec.topology.workers.machineDeployments[].variables.overrides
-    // OR <cluster.x-k8s.io>.spec.topology.workers.machinePools[].variables.overrides
     value: {
       type:    Array as PropType<Array<CapiClusterVariable>>,
       default: () => {
