@@ -1,54 +1,9 @@
 import { Validator, ValidationOptions } from '@shell/utils/validators/formRules';
 import { Translation } from '@shell/types/t';
 import isEmpty from 'lodash/isEmpty';
-
-// const stringFormats = {
-//   // this is a mongodb id - requires library to validate?
-//   // "bsonobjectid", // bson object ID
-
-// // "uri",          // an URI as parsed by Golang net/url.ParseRequestURI
-// // "email",        // an email address as parsed by Golang net/mail.ParseAddress
-// // use wildcardHostname
-// "hostname",     // a valid representation for an Internet host name, as defined by RFC 1034, section 3.1 [RFC1034].
-
-// // use utils/string/isIpv4
-// "ipv4",         // an IPv4 IP as parsed by Golang net.ParseIP
-
-// // "ipv6",         // an IPv6 IP as parsed by Golang net.ParseIP
-
-// //use isValidCIDR
-// "cidr",         // a CIDR as parsed by Golang net.ParseCIDR
-
-// //use isValidMac
-// "mac",          // a MAC address as parsed by Golang net.ParseMAC
-
-// // use toLowerCase() instead of mode modifier
-// "uuid",         // an UUID that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-// "uuid3",        // an UUID3 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-// "uuid4",        // an UUID4 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-// "uuid5",        // an UUID6 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-
-// //use https://www.oreilly.com/library/view/regular-expressions-cookbook/9781449327453/ch04s13.html
-// "isbn",         // an ISBN10 or ISBN13 number string like "0321751043" or "978-0321751041"
-// "isbn10",       // an ISBN10 number string like "0321751043"
-// "isbn13",       // an ISBN13 number string like "978-0321751041"
-
-// "creditcard",   // a credit card number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\d{3})\\d{11})$ with any non digit characters mixed in
-// "ssn",          // a U.S. social security number following the regex ^\\d{3}[- ]?\\d{2}[- ]?\\d{4}$
-// "hexcolor",     // an hexadecimal color code like "#FFFFFF", following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
-
-// // /^rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)$/
-// "rgbcolor",     // an RGB color code like rgb like "rgb(255,255,2559"
-
-// //use base64Decode?
-// "byte",         // base64 encoded binary data
-
-// "password",     // any kind of string
-
-// "date",         // a date string like "2006-01-02" as defined by full-date in RFC3339
-// "duration",     // a duration string like "22 ns" as parsed by Golang time.ParseDuration or compatible with Scala duration format
-// "datetime",     // a date time string like "2014-12-15T19:30:20.000Z" as defined by date-time in RFC3339}
-// }
+import { isIpv4 } from '@shell/utils/string';
+import { isValidCIDR, isValidMac } from '@shell/utils/validators/cidr';
+import formRulesGenerator from '@shell/utils/validators/formRules/index.ts';
 
 /**
  *
@@ -70,7 +25,8 @@ export const openAPIV3SchemaValidators = function(t: Translation, { key = 'Value
     minimum,
     pattern,
     uniqueItems,
-    required: requiredFields
+    required: requiredFields,
+    format
   } = openAPIV3Schema;
 
   const out = [] as any[];
@@ -105,7 +61,11 @@ export const openAPIV3SchemaValidators = function(t: Translation, { key = 'Value
   }
 
   if (pattern) {
-    out.push((val: string) => val && !val.match(new RegExp(pattern)) ? t('validation.pattern', { key, pattern }) : undefined);
+    out.push(regexValidator(t('validation.pattern', { key, pattern }), new RegExp(pattern)));
+  }
+
+  if (format && stringFormatValidators(t, { key }, format)) {
+    out.push(stringFormatValidators(t, { key }, format));
   }
 
   if (uniqueItems) {
@@ -119,4 +79,45 @@ export const openAPIV3SchemaValidators = function(t: Translation, { key = 'Value
   return out;
 };
 
-export const isDefined = (val: any) => (val || val === false) && !isEmpty(val);
+const regexValidator = function(errorMessage: string, regexp: RegExp ): Validator {
+  return (val: string) => val && !val.match(regexp) ? errorMessage : undefined;
+};
+
+// strings can be evaluated against regular expressions by defining 'pattern' or validated against a common set of regexp using 'format'
+/**
+ *
+ * @param t this.$store.getters[i18n/t]
+ * @param param1 param1.key should be the (already localized) label of the field being validated
+ * @param format one of a set list of string formats defined here https://github.com/kubernetes/apiextensions-apiserver/blob/master/pkg/apiserver/validation/formats.go
+ *
+ * @returns a form validator for the string format, OR undefined if the format specified is invalid or a format we're not validating for practical reasons
+ */
+const stringFormatValidators = function(t: Translation, { key = 'Value' }: ValidationOptions, format: string): Validator | undefined {
+  const formRules = formRulesGenerator(t, { key } );
+  const errorMessage = t('validation.stringFormat', { key, format });
+
+  // there are actually 24 formats in total validated on the backend with some odd options eg ISBN, creditcard
+  // this subset of formats are the most universal, which we can be confident we are validating correctly
+  switch (format) {
+  case 'hostname':
+    return (val: string) => formRules.wildcardHostname(val);
+  case 'ipv4':
+    return (val: string) => val && !isIpv4(val) ? errorMessage : undefined;
+  case 'cidr':
+    return (val: string) => val && !isValidCIDR(val) ? errorMessage : undefined;
+  case 'mac':
+    return (val: string) => val && !isValidMac(val) ? errorMessage : undefined;
+  case 'uuid':
+    return regexValidator(errorMessage, /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i);
+  case 'uuid3':
+    return regexValidator(errorMessage, /^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i);
+  case 'uuid4':
+    return regexValidator(errorMessage, /^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$/i);
+  case 'uuid5':
+    return regexValidator(errorMessage, /^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$/i);
+  default:
+    return undefined;
+  }
+};
+
+export const isDefined = (val: any) => (val || val === false) || !isEmpty(val);
