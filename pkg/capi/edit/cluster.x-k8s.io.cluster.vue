@@ -1,12 +1,12 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import Tabbed from '@shell/components/Tabbed';
-import Tab from '@shell/components/Tabbed/Tab';
-import LabeledSelect from '@shell/components/form/LabeledSelect';
+import Tabbed from '@shell/components/Tabbed.vue';
+import Tab from '@shell/components/Tabbed/Tab.vue';
+import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 
 import { CAPI } from '../types/capi';
-import CCVariables from '../components/CCVariables';
+import CCVariables from '../components/CCVariables/index.vue';
 const TEST_CC_ID = 'default/quickstart-more-variables';
 
 export default defineComponent({
