@@ -6,10 +6,12 @@ import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
 import KeyValue from '@shell/components/form/KeyValue.vue';
 import ArrayList from '@shell/components/form/ArrayList.vue';
 import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
+import { Validator } from '@shell/utils/validators/formRules';
 
+import { mapGetters } from 'vuex';
+import { Translation } from '@rancher/shell/types/t';
 import type { ClusterClassVariable } from '../../types/clusterClass';
 import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
-
 export default defineComponent({
   name: 'CCVariable',
 
@@ -43,6 +45,7 @@ export default defineComponent({
   },
 
   computed: {
+    ...mapGetters({ t: 'i18n/t' }),
     componentForType() {
       const { type } = this.schema;
       let out = null;
@@ -98,12 +101,13 @@ export default defineComponent({
     },
 
     validationRules() {
-      const out = openAPIV3SchemaValidators(this.$store.getters['i18n/t'], { key: this.variable.name }, this.schema);
+      const t = this.t as Translation;
+      const out = openAPIV3SchemaValidators(t, { key: this.variable.name }, this.schema);
 
       const required = this.variable?.required;
 
       if (required && this.validateRequired) {
-        out.push(val => !isDefined(val) ? this.$store.getters['i18n/t']('validation.required', { key: this.variable.name }) : null);
+        out.push(val => !isDefined(val) ? t('validation.required', { key: this.variable.name }) : undefined);
       }
 
       return out;
