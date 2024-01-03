@@ -136,9 +136,8 @@ export default defineComponent({
     /**
    * When the cluster class changes, update the variables array:
    *  remove any variables not defined in the new cluster class
-   *  if a variable is defined in both cluster classes, clear out the old default
+   *  if a variable is defined in both cluster classes, clear out the old value
    *  set default values from the new cluster class definitions
-   *  if a variable is defined in both old and new cluster classes, and the user has set its value to something other than the old default, preserve that
    */
     updateVariableDefaults(neu: ClusterClassVariable[], old: ClusterClassVariable[]) {
       const out = [...this.value].reduce((acc: CapiClusterVariable[], existingVar: CapiClusterVariable) => {
@@ -189,8 +188,9 @@ export default defineComponent({
     },
 
     newComponentType(variableDef: ClusterClassVariable, i: number) {
-      const inputEl = this.$refs[`${ variableDef.name }-input`]?.[0]?.$el;
-      const nextInputEl = this.$refs[`${ this.variableDefinitions[i + 1]?.name }-input`]?.[0]?.$el;
+      const refs = this.$refs as {[key:string]: any[]};
+      const inputEl = refs[`${ variableDef.name }-input`]?.[0]?.$el;
+      const nextInputEl = refs[`${ this.variableDefinitions[i + 1]?.name }-input`]?.[0]?.$el;
 
       if (!nextInputEl) {
         return false;
