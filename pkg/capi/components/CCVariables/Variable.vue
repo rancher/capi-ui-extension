@@ -148,7 +148,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div :class="{'wider': listComponent, 'align-center': componentForType?.name==='checkbox-var', [`${componentForType.name}`]: true}">
+  <div v-if="componentForType" :class="{'wider': listComponent, 'align-center': componentForType?.name==='checkbox-var', [`${componentForType.name}`]: true}">
     <component
       :is="componentForType.component"
       v-if="componentForType"
