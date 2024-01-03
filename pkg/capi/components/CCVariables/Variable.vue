@@ -3,9 +3,9 @@ import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
-import KeyValue from '@shell/components/form/KeyValue';
-import ArrayList from '@shell/components/form/ArrayList';
-import LabeledSelect from '@shell/components/form/LabeledSelect';
+import KeyValue from '@shell/components/form/KeyValue.vue';
+import ArrayList from '@shell/components/form/ArrayList.vue';
+import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
 
 import type { ClusterClassVariable } from '../../types/clusterClass';
 import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
