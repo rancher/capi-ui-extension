@@ -6,7 +6,6 @@ import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
 import KeyValue from '@shell/components/form/KeyValue';
 import ArrayList from '@shell/components/form/ArrayList';
 import LabeledSelect from '@shell/components/form/LabeledSelect';
-import formRulesGenerator, { Validator } from '@shell/utils/validators/formRules';
 
 import type { ClusterClassVariable } from '../../types/clusterClass';
 import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
@@ -19,9 +18,15 @@ export default defineComponent({
       type:     Object as PropType<ClusterClassVariable>,
       required: true
     },
+
     value: {
       type:    [String, Object, Boolean, Array, Number],
       default: () => null
+    },
+
+    validateRequired: {
+      type:    Boolean,
+      default: true
     }
   },
 
@@ -97,9 +102,7 @@ export default defineComponent({
 
       const required = this.variable?.required;
 
-      if (required) {
-        // out.push(formRulesGenerator(this.$store.getters['i18n/t'], { key: this.variable.name }).required as Validator);
-
+      if (required && this.validateRequired) {
         out.push(val => !isDefined(val) ? this.$store.getters['i18n/t']('validation.required', { key: this.variable.name }) : null);
       }
 
@@ -153,7 +156,7 @@ export default defineComponent({
       :label="variable.name"
       :placeholder="schema.example"
       :tooltip="schema.description"
-      :required="variable.required"
+      :required="variable.required && validateRequired"
       :title="variable.name"
       :options="variableOptions"
       :rules="!listComponent ? validationRules : []"

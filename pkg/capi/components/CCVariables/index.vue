@@ -215,6 +215,7 @@ export default defineComponent({
           :ref="`${variableDef.name}-input`"
           :variable="variableDef"
           :value="valueFor(variableDef)"
+          :validate-required="!machineDeploymentClass && !machinePoolClass"
           @input="e=>updateVariables(e, variableDef)"
           @validation-passed="updateErrors"
         />
