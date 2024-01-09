@@ -66,34 +66,37 @@ export default {
     provider: {
       type:     String,
       required: true,
+    },
+    clusterClassObj: {
+      type:     ClusterClass,
+      required: true,
     }
   },
   async fetch() {
-    await this.getClusterClasses();
     await this.initSpecs();
   },
   data() {
-    const stepBasics = {
-      name:           'stepBasics',
+    const stepConfiguration = {
+      name:           'stepConfiguration',
       title:          this.t('capi.cluster.steps.basics.title'),
       label:          this.t('capi.cluster.steps.basics.label'),
       subtext:        '',
       descriptionKey: 'capi.cluster.steps.basics.description',
-      ready:          false,
+      ready:          true, // false,
       weight:         30
     };
 
-    const stepConfiguration = {
-      name:           'stepConfiguration',
+    const stepVariables = {
+      name:           'stepVariables',
       title:          this.t('capi.cluster.steps.configuration.title'),
       label:          this.t('capi.cluster.steps.configuration.label'),
       subtext:        '',
       descriptionKey: 'capi.cluster.steps.configuration.description',
-      ready:          false,
+      ready:          true, // false,
       weight:         30
     };
 
-    const addSteps = [stepBasics, stepConfiguration].sort((a, b) => (b.weight || 0) - (a.weight || 0));
+    const addSteps = [stepConfiguration, stepVariables].sort((a, b) => (b.weight || 0) - (a.weight || 0));
 
     return {
       fvFormRuleSets:          [{ path: 'spec.topology.version', rules: [versionValidator] }],
@@ -103,14 +106,11 @@ export default {
       versionInfo:             {},
       allNamespaces:           [],
       shouldCreateCredential:  CREDENTIALS_UPDATE_REQUIRED.includes(this.provider),
-      providers:               [],
-      clusterClasses:          [],
       defaultWorkerAddValue:   {
         name:  '',
         class: ''
       },
-      variablesReady: false,
-      clusterClass:   ''
+      variablesReady: false
     };
   },
 
@@ -141,27 +141,18 @@ export default {
       }];
     },
     stepOneRequires() {
-      return !!this.value.metadata.name && !!this.clusterClass && !!this.variablesReady;
+      return true;
+      // return !!this.value.metadata.name && !!this.clusterClass && !!this.variablesReady;
     },
     stepTwoRequires() {
-      const versionTestString = versionTest(this.$store.getters['i18n/t'], this.controlPlane);
-      const versionValid = this.version && !!(this.version.match(versionTestString));
-      const controlPlaneEndpointValid = !!this.value.spec.controlPlaneEndpoint.host && !!this.value.spec.controlPlaneEndpoint.port;
-      const machineDeploymentsValid = this.value.spec.topology.workers.machineDeployments.length > 0 && !!this.value.spec.topology.workers.machineDeployments[0]?.name && !!this.value.spec.topology.workers.machineDeployments[0]?.class;
-      const machinePoolsValid = this.value.spec.topology.workers.machinePools.length > 0 && !!this.value.spec.topology.workers.machinePools[0]?.name && !!this.value.spec.topology.workers.machinePools[0]?.class;
+      return true;
+      // const versionTestString = versionTest(this.$store.getters['i18n/t'], this.controlPlane);
+      // const versionValid = this.version && !!(this.version.match(versionTestString));
+      // const controlPlaneEndpointValid = !!this.value.spec.controlPlaneEndpoint.host && !!this.value.spec.controlPlaneEndpoint.port;
+      // const machineDeploymentsValid = this.value.spec.topology.workers.machineDeployments.length > 0 && !!this.value.spec.topology.workers.machineDeployments[0]?.name && !!this.value.spec.topology.workers.machineDeployments[0]?.class;
+      // const machinePoolsValid = this.value.spec.topology.workers.machinePools.length > 0 && !!this.value.spec.topology.workers.machinePools[0]?.name && !!this.value.spec.topology.workers.machinePools[0]?.class;
 
-      return versionValid && controlPlaneEndpointValid && (machineDeploymentsValid || machinePoolsValid);
-    },
-    clusterClassOptions() {
-      const out: ClusterClass[] = [];
-
-      this.clusterClasses.forEach((obj: ClusterClass) => {
-        if (obj?.metadata?.name) {
-          out.push(obj.metadata.name);
-        }
-      });
-
-      return out;
+      // return versionValid && controlPlaneEndpointValid && (machineDeploymentsValid || machinePoolsValid);
     },
 
     clusterNetwork() {
@@ -170,12 +161,7 @@ export default {
     controlPlaneEndpoint() {
       return this.value.spec.controlPlaneEndpoint;
     },
-    clusterClassObj() {
-      return this.clusterClasses.find(x => x.metadata.name === this.clusterClass);
-    },
-    clusterClassDescription() {
-      return this.clusterClassObj?.metadata?.annotations?.[DESCRIPTION] || this.clusterClassObj?.metadata?.annotations?.description || '';
-    },
+
     machineDeploymentOptions() {
       return this.clusterClassObj?.spec?.workers?.machineDeployments?.map( w => w.class);
     },
@@ -218,12 +204,6 @@ export default {
       }
     },
 
-    async getClusterClasses() {
-      const allClusterClasses: ClusterClass[] = await this.$store.dispatch('management/findAll', { type: CAPI.CLUSTER_CLASS });
-
-      this.clusterClasses = allClusterClasses.filter(cc => cc.spec.infrastructure.ref.name === this.provider);
-    },
-
     stepOneReady() {
       this.$set(this.addSteps[0], 'ready', this.stepOneRequires);
     },
@@ -252,10 +232,6 @@ export default {
         name:   'c-cluster-manager-capi',
         params: {},
       });
-    },
-    clusterClassChanged(val: String) {
-      this.set(this.value.spec.topology, 'class', val);
-      this.stepOneReady();
     },
     machineDeploymentsChanged(val: Worker) {
       this.set(this.value.spec.topology.workers, 'machineDeployments', val);
@@ -298,7 +274,7 @@ export default {
     @cancel="cancel"
     @error="fvUnreportedValidationErrors"
   >
-    <template #stepBasics>
+    <template #stepConfiguration>
       <NameNsDescription
         v-if="!isView"
         v-model="value"
@@ -312,11 +288,10 @@ export default {
         :rules="{name:fvGetAndReportPathRules('metadata.name')}"
         @change="stepOneReady"
       />
-      <h2>
-        <t k="capi.cluster.providerConfig.title" />
-      </h2>
-
       <div v-if="canUpdateCredential">
+        <h2>
+          <t k="capi.cluster.providerConfig.title" />
+        </h2>
         <RadioGroup
           v-model="shouldCreateCredential"
           name="shouldCreateCredential"
@@ -330,55 +305,36 @@ export default {
       <div
         v-else
         class="mt-20"
-      >
-      </div>
-
-      <div class="row mb-20">
-        <div class="col span-3">
-          <LabeledSelect
-            v-model="clusterClass"
-            :mode="mode"
-            :options="clusterClassOptions"
-            label-key="capi.cluster.clusterClass.label"
-            required
-            @input="clusterClassChanged"
-          />
-        </div>
-        <div v-if="!!clusterClassDescription">
-          <LabelValue
-            :name="t('capi.cluster.clusterClass.description')"
-            :value="clusterClassDescription"
-          />
-        </div>
-      </div>
+      />
       <div class="spacer" />
-      <div v-if="!!clusterClassObj">
-        <h2>
-          <t k="capi.cluster.variables.title" />
-        </h2>
-        <ClusterClassVariables
-          v-model="value.spec.topology.variables"
-          :cluster-class="clusterClassObj"
-          @validation-passed="validateVariables"
-        />
-      </div>
-    </template>
-    <template #stepConfiguration>
-      <div class="mt-20">
-        <h2>
-          <t k="capi.cluster.version.title" />
-        </h2>
-        <div class="row mb-20">
-          <div class="col span-3">
-            <LabeledInput
-              v-model="value.spec.topology.version"
-              :mode="mode"
-              label-key="cluster.kubernetesVersion.label"
-              required
-              :rules="versionRule"
-              @input="stepTwoReady"
-            />
+      <div class="row mb-60">
+        <div class="col span-5">
+          <h2>
+            <t k="capi.cluster.version.title" />
+          </h2>
+          <div class="row mb-20">
+            <div class="col span-3">
+              <LabeledInput
+                v-model="value.spec.topology.version"
+                :mode="mode"
+                label-key="cluster.kubernetesVersion.label"
+                required
+                :rules="versionRule"
+                @input="stepTwoReady"
+              />
+            </div>
           </div>
+        </div>
+        <div class="col span-3">
+          <h2>
+            <t k="capi.cluster.controlPlaneEndpoint.title" />
+          </h2>
+          <ControlPlaneEndpointSection
+            v-model="controlPlaneEndpoint"
+            :mode="mode"
+            @control-plane-endpoint-host-changed="cpEndpointHostChanged"
+            @control-plane-endpoint-port-changed-changed="cpEndpointPortChanged"
+          />
         </div>
       </div>
 
@@ -398,17 +354,6 @@ export default {
       </div>
 
       <div class="spacer" />
-      <div class="mt-20">
-        <h2>
-          <t k="capi.cluster.controlPlaneEndpoint.title" />
-        </h2>
-        <ControlPlaneEndpointSection
-          v-model="controlPlaneEndpoint"
-          :mode="mode"
-          @control-plane-endpoint-host-changed="cpEndpointHostChanged"
-          @control-plane-endpoint-port-changed-changed="cpEndpointPortChanged"
-        />
-      </div>
 
       <div class="spacer" />
       <div class="mt-20">
@@ -446,6 +391,16 @@ export default {
           </div>
         </div>
       </div>
+    </template>
+    <template #stepVariables>
+      <h2>
+        <t k="capi.cluster.variables.title" />
+      </h2>
+      <ClusterClassVariables
+        v-model="value.spec.topology.variables"
+        :cluster-class="clusterClassObj"
+        @validation-passed="validateVariables"
+      />
     </template>
   </CruResource>
 </template>

@@ -58,6 +58,13 @@ capi:
         title: Machine Deployments
       machinePools:
         title: Machine Pools
+  clusterClassCard:
+    title: 'Cluster Class Name: {name}'
+    controlPlaneName: Control Plane Name
+    controlPlaneKind: Control Plane Kind
+    controlPlaneNamespace: Control Plane Namespace
+    machineDeploymentsCount: '{count} Machine Deployments'
+    machinePoolsCount: '{count} Machine Pools'
 
 nav:
   group:

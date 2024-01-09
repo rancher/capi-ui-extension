@@ -34,7 +34,7 @@ export default {
     }
   },
   async fetch() {
-    this.capiProviders = await this.getProviders();
+    this.providers = await this.getProviders();
 
     if ( !this.value.spec ) {
       set(this.value, 'spec', {});
@@ -50,17 +50,17 @@ export default {
   data() {
     const subType = this.$route.query[SUB_TYPE] || null;
 
-    return { subType, capiProviders: [] };
+    return { subType, providers: [] };
   },
   computed: {
-    capiSubTypes() {
+    subTypes() {
       const out = [];
       const getters = this.$store.getters;
 
-      this.capiProviders.forEach((obj: InfrastructureProvider) => {
+      this.providers.forEach((obj: InfrastructureProvider) => {
         addType(obj?.metadata?.name);
       });
-
+      console.log(out);
       return out;
 
       function addType(id: String, disabled = false, iconClass = undefined) {
@@ -134,7 +134,7 @@ export default {
       :selected-subtype="subType"
       :resource="value"
       :errors="errors"
-      :subtypes="capiSubTypes"
+      :subtypes="subTypes"
       :cancel-event="true"
       :prevent-enter-submit="true"
       class="create-cluster"
@@ -143,13 +143,13 @@ export default {
       @select-type="selectType"
       @error="e=>errors = e"
     >
-      <template #capisubtypes>
+      <template #subtypes>
         <div
           class="mb-20"
           style="width: 100%;"
         >
           <SelectIconGrid
-            :rows="capiSubTypes"
+            :rows="subTypes"
             key-field="id"
             name-field="label"
             side-label-field="tag"
