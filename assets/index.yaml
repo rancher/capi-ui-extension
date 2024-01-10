@@ -12,12 +12,12 @@ entries:
       catalog.cattle.io/ui-component: plugins
     apiVersion: v2
     appVersion: 0.1.0
-    created: "2024-01-03T19:56:48.498278363Z"
+    created: "2024-01-10T19:01:45.165149263Z"
     description: capi plugin
-    digest: e480b623286c6b47a6ebf90312a98b9bc95e60adc6c58d86ea5a19ff4be99a06
+    digest: bf5093ed49491c0ab3d4124cffd70d46ad609b863ac30fee5db7de48ff740fd2
     name: capi
     type: application
     urls:
     - assets/capi/capi-0.1.0.tgz
     version: 0.1.0
-generated: "2024-01-03T19:56:48.497710796Z"
+generated: "2024-01-10T19:01:45.164224497Z"

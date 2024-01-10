@@ -1,11 +1,1 @@
-plugin/capi-0.1.0.umd.min.2.js
-plugin/capi-0.1.0.umd.min.2.js.map
-plugin/capi-0.1.0.umd.min.3.js
-plugin/capi-0.1.0.umd.min.3.js.map
-plugin/capi-0.1.0.umd.min.4.js
-plugin/capi-0.1.0.umd.min.4.js.map
-plugin/capi-0.1.0.umd.min.formatters.js
-plugin/capi-0.1.0.umd.min.formatters.js.map
-plugin/capi-0.1.0.umd.min.js
-plugin/capi-0.1.0.umd.min.js.map
 plugin/package.json
