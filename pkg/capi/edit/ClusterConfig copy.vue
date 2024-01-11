@@ -17,7 +17,6 @@ import { NORMAN } from '@shell/config/types';
 import { DESCRIPTION } from '@shell/config/labels-annotations';
 import { versionTest, versionValidator } from '@pkg/capi/util/validators';
 import { clear } from '@shell/utils/array';
-import CardGrid from './../components/CardGrid';
 
 import WorkerItem from './WorkerItem';
 import NetworkSection from './NetworkSection';
@@ -49,11 +48,10 @@ export default {
     LabeledSelect,
     LabeledInput,
     WorkerItem,
+    ClusterClassVariables,
     LabelValue,
     NetworkSection,
-    ControlPlaneEndpointSection,
-    ClusterClassVariables,
-    CardGrid
+    ControlPlaneEndpointSection
   },
   mixins: [CreateEditView, FormValidation],
   props:      {
@@ -68,24 +66,28 @@ export default {
     provider: {
       type:     String,
       required: true,
+    },
+    clusterClassObj: {
+      type:     ClusterClass,
+      required: true,
     }
   },
   async fetch() {
-    this.clusterClasses = await this.getClusterClasses() || [];
     await this.initSpecs();
   },
   data() {
-    const stepClusterClass = {
-      name:           'stepClusterClass',
-      title:          this.t('capi.cluster.steps.clusterClass.title'),
-      label:          this.t('capi.cluster.steps.clusterClass.label'),
+    const stepConfiguration = {
+      name:           'stepConfiguration',
+      title:          this.t('capi.cluster.steps.basics.title'),
+      label:          this.t('capi.cluster.steps.basics.label'),
       subtext:        '',
-      descriptionKey: 'capi.cluster.steps.clusterClass.description',
+      descriptionKey: 'capi.cluster.steps.basics.description',
       ready:          true, // false,
       weight:         30
     };
-    const stepConfiguration = {
-      name:           'stepConfiguration',
+
+    const stepVariables = {
+      name:           'stepVariables',
       title:          this.t('capi.cluster.steps.configuration.title'),
       label:          this.t('capi.cluster.steps.configuration.label'),
       subtext:        '',
@@ -94,17 +96,7 @@ export default {
       weight:         30
     };
 
-    const stepVariables = {
-      name:           'stepVariables',
-      title:          this.t('capi.cluster.steps.variables.title'),
-      label:          this.t('capi.cluster.steps.variables.label'),
-      subtext:        '',
-      descriptionKey: 'capi.cluster.steps.variables.description',
-      ready:          true, // false,
-      weight:         30
-    };
-
-    const addSteps = [stepClusterClass, stepConfiguration, stepVariables].sort((a, b) => (b.weight || 0) - (a.weight || 0));
+    const addSteps = [stepConfiguration, stepVariables].sort((a, b) => (b.weight || 0) - (a.weight || 0));
 
     return {
       fvFormRuleSets:          [{ path: 'spec.topology.version', rules: [versionValidator] }],
@@ -118,8 +110,7 @@ export default {
         name:  '',
         class: ''
       },
-      variablesReady: false,
-      clusterClassObj: null
+      variablesReady: false
     };
   },
 
@@ -182,45 +173,11 @@ export default {
     },
     versionRule() {
       return versionValidator(this.$store.getters['i18n/t'], this.controlPlane);
-    },
-    options() {
-      const out: string[] = [];
-      const getters = this.$store.getters;
-
-      this.clusterClasses.forEach((obj: ClusterClass) => {
-        addType(obj);
-      });
-
-      return out;
-
-      function addType(obj: Object, disabled = false) {
-        const id = obj?.metadata?.name;
-        const label = getters['i18n/withFallback'](`cluster.clusterClass."${ id }"`, null, id);
-        const description = getters['i18n/withFallback'](`cluster.providerDescription."${ id }"`, null, '');
-        const tag = '';
-
-        const subtype = {
-          id,
-          obj,
-          label,
-          description,
-          disabled,
-          tag,
-          selected: true
-        };
-
-        out.push(subtype);
-      }
-    },
+    }
   },
   methods: {
     set,
     generateYaml() {},
-    async getClusterClasses() {
-      const allClusterClasses: ClusterClass[] = await this.$store.dispatch('management/findAll', { type: CAPI.CLUSTER_CLASS });
-
-      return allClusterClasses.filter(cc => cc.spec.infrastructure.ref.name === this.provider);
-    },
     async saveOverride() {
       if ( this.errors ) {
         clear(this.errors);
@@ -292,9 +249,6 @@ export default {
       this.set(this.value.spec.controlPlaneEndpoint, 'port', val);
       this.stepTwoReady();
     },
-    clickedType(obj: Object) {
-      this.clusterClassObj = this.clusterClasses.find(x => x.metadata.name === obj.id);
-    }
   }
 };
 </script>
@@ -320,15 +274,6 @@ export default {
     @cancel="cancel"
     @error="fvUnreportedValidationErrors"
   >
-    <template #stepClusterClass>
-      <CardGrid
-        :rows="options"
-        key-field="id"
-        name-field="label"
-        side-label-field="tag"
-        @clicked="clickedType"
-      />
-    </template>
     <template #stepConfiguration>
       <NameNsDescription
         v-if="!isView"
@@ -354,28 +299,31 @@ export default {
           :options="modeOptions"
         />
       </div>
-      <div v-if="shouldCreateCredential" class="block">
+      <div v-if="shouldCreateCredential">
         <!-- TODO waiting for backend to clarify how we are doing it-->
       </div>
       <div
         v-else
         class="mt-20"
       />
-      <div class="row mb-20 ">
-        <div class="col span-3">
+      <div class="spacer" />
+      <div class="row mb-60">
+        <div class="col span-5">
           <h2>
             <t k="capi.cluster.version.title" />
           </h2>
-          <!-- <div class="row mb-20"> -->
-          <LabeledInput
-            v-model="value.spec.topology.version"
-            :mode="mode"
-            label-key="cluster.kubernetesVersion.label"
-            required
-            :rules="versionRule"
-            @input="stepTwoReady"
-          />
-          <!-- </div> -->
+          <div class="row mb-20">
+            <div class="col span-3">
+              <LabeledInput
+                v-model="value.spec.topology.version"
+                :mode="mode"
+                label-key="cluster.kubernetesVersion.label"
+                required
+                :rules="versionRule"
+                @input="stepTwoReady"
+              />
+            </div>
+          </div>
         </div>
         <div class="col span-3">
           <h2>
@@ -389,7 +337,9 @@ export default {
           />
         </div>
       </div>
-      <div class="mt-20 block">
+
+      <div class="spacer" />
+      <div class="mt-20">
         <h2>
           <t k="capi.cluster.networking.title" />
         </h2>
@@ -402,7 +352,11 @@ export default {
           @services-cidr-blocks-changed="(val) => $set(value.spec.clusterNetwork.services, 'cidrBlocks', val)"
         />
       </div>
-      <div class="mt-20 block">
+
+      <div class="spacer" />
+
+      <div class="spacer" />
+      <div class="mt-20">
         <h2>
           <t k="capi.cluster.workers.title" />
         </h2>
@@ -450,8 +404,3 @@ export default {
     </template>
   </CruResource>
 </template>
-<style lang="scss" scoped>
-.block {
-  margin-bottom: 10px;
-}
-</style>

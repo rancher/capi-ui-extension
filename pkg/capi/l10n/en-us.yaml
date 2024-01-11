@@ -14,14 +14,19 @@ capi:
     embeddedFeatureFlag: "It looks like the Rancher-managed cluster API feature is disabled. To provision and manage RKE2 clusters you must either enable the embedded-cluster-api feature flag or install the Rancher Turtles extension."
   cluster:
     steps:
-      basics:
-        title: Basics
-        label: Basics
+      clusterClass:
+        title: Cluster Class
+        label: Cluster Class
         subtext:  
         description:  ''
       configuration:
         title: Configuration
         label: Configuration
+        subtext:  
+        description:  ''
+      variables:
+        title: Variables
+        label: Variables
         subtext:  
         description:  ''
     secret:

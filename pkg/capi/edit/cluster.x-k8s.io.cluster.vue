@@ -11,6 +11,7 @@ import { DEFAULT_WORKSPACE } from '@shell/config/types';
 import { CAPI, InfrastructureProvider } from '@pkg/capi/types/capi';
 
 import ClusterClassSelector from './ClusterClassSelector';
+import ClusterConfig from './ClusterConfig';
 
 export default {
   name:       'CreateCluster',
@@ -19,6 +20,7 @@ export default {
     Loading,
     ClusterClassSelector,
     SelectIconGrid,
+    ClusterConfig
   },
 
   mixins: [CreateEditView],
@@ -157,8 +159,7 @@ export default {
           />
         </div>
       </template>
-
-      <ClusterClassSelector
+      <ClusterConfig
         v-if="subType"
         v-model="value"
         :initial-value="initialValue"
@@ -166,6 +167,15 @@ export default {
         :mode="mode"
         :provider="subType"
       />
+
+      <!-- <ClusterClassSelector
+        v-if="subType"
+        v-model="value"
+        :initial-value="initialValue"
+        :live-value="liveValue"
+        :mode="mode"
+        :provider="subType"
+      /> -->
 
       <template
         v-if="subType"

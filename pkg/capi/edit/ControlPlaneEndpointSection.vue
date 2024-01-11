@@ -31,7 +31,7 @@ export default {
   <div>
     <div class="row mb-20">
       <div
-        class="col span-3"
+        class="col"
       >
         <LabeledInput
           :value="host"
@@ -43,7 +43,7 @@ export default {
         />
       </div>
       <div
-        class="col span-3"
+        class="col"
       >
         <LabeledInput
           :value="port"

@@ -7,7 +7,7 @@ export default {
   components: { ClusterClassCard },
 
   props: {
-    rows: {
+    cards: {
       type:     Array,
       required: true,
     },
@@ -31,18 +31,16 @@ export default {
       default: 'select-card-grid'
     }
   },
+  computed: {
+    rows() {
+      return this.cards;
+    }
+  },
 
   methods: {
     get,
     select(row, idx) {
-      this.resetSelected();
-      this.rows[idx].selected = true;
       this.$emit('clicked', row, idx);
-    },
-    resetSelected() {
-      this.rows.map((el) => {
-        el.selected = false;
-      });
     },
     capitalize
   },
@@ -58,9 +56,6 @@ export default {
       v-for="(r, idx) in rows"
       :key="get(r, keyField)"
       class="item"
-      :class="{
-        'selected': !!r.selected
-      }"
       :data-testid="componentTestid + '-' + idx"
       @click="select(r, idx)"
     >
@@ -86,9 +81,6 @@ export default {
   .container {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    @media only screen and (max-width: map-get($breakpoints, '--viewport-12')) {
-      grid-template-columns: 1fr;
-    }
   }
   .item {
       //height: $height;
@@ -106,9 +98,5 @@ export default {
         cursor: pointer;
         text-decoration: none !important;
       }
-      &.selected {
-        border-color: red;
-      }
-
     }
 </style>

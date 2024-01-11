@@ -35,14 +35,7 @@ export default {
   methods: {
     get,
     select(row, idx) {
-      this.resetSelected();
-      this.rows[idx].selected = true;
       this.$emit('clicked', row, idx);
-    },
-    resetSelected() {
-      this.rows.map((el) => {
-        el.selected = false;
-      });
     },
     capitalize
   },
@@ -52,15 +45,12 @@ export default {
 <template>
   <div
     v-if="rows.length"
-    class="container"
+    class="grid"
   >
     <div
       v-for="(r, idx) in rows"
       :key="get(r, keyField)"
       class="item"
-      :class="{
-        'selected': !!r.selected
-      }"
       :data-testid="componentTestid + '-' + idx"
       @click="select(r, idx)"
     >
@@ -78,18 +68,11 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-  $height: 300px;
+  $height: 280px;
   $side: 15px;
   $margin: 10px;
   $hover-border-width: 1px;
   $width: 40%;//600px;
-  .container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    @media only screen and (max-width: map-get($breakpoints, '--viewport-12')) {
-      grid-template-columns: 1fr;
-    }
-  }
   .item {
       //height: $height;
       //margin: $margin;
@@ -98,17 +81,13 @@ export default {
       //border-radius: calc( 1.5 * var(--border-radius));
       //border: 1px solid var(--border);
       //text-decoration: none !important;
-      //width: $width;
+      width: $width;
 
-      &:hover {
+      &:hover:not(.disabled) {
         box-shadow: 0 0 30px var(--shadow);
         transition: box-shadow 0.1s ease-in-out;
         cursor: pointer;
         text-decoration: none !important;
       }
-      &.selected {
-        border-color: red;
-      }
-
     }
 </style>
