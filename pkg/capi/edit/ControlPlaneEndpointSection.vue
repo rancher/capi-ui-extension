@@ -17,13 +17,7 @@ export default {
   computed: {
     clusterIsAlreadyCreated() {
       return this.mode === _EDIT;
-    },
-    host() {
-      return this.value.host;
-    },
-    port() {
-      return this.value.port;
-    },
+    }
   }
 };
 </script>
@@ -34,24 +28,22 @@ export default {
         class="col"
       >
         <LabeledInput
-          :value="host"
+          v-model="value.host"
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.controlPlaneEndpoint.host')"
           required
-          @input="$emit('control-plane-endpoint-host-changed', $event)"
         />
       </div>
       <div
         class="col"
       >
         <LabeledInput
-          :value="port"
+          v-model="value.port"
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.controlPlaneEndpoint.port')"
           required
-          @input="$emit('control-plane-endpoint-port-changed-changed', $event)"
         />
       </div>
     </div>

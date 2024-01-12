@@ -225,6 +225,8 @@ export default {
       if ( this.errors ) {
         clear(this.errors);
       }
+      console.log(this.value)
+      console.log(JSON.stringify(this.value))
       await this.value.save();
 
       return this.done();
@@ -384,8 +386,6 @@ export default {
           <ControlPlaneEndpointSection
             v-model="controlPlaneEndpoint"
             :mode="mode"
-            @control-plane-endpoint-host-changed="cpEndpointHostChanged"
-            @control-plane-endpoint-port-changed-changed="cpEndpointPortChanged"
           />
         </div>
       </div>
@@ -396,10 +396,6 @@ export default {
         <NetworkSection
           v-model="clusterNetwork"
           :mode="mode"
-          @api-server-port-changed="(val) => $set(value.spec.clusterNetwork, 'apiServerPort', val)"
-          @service-domain-changed="(val) => $set(value.spec.clusterNetwork, 'serviceDomain', val)"
-          @pods-cidr-blocks-changed="(val) => $set(value.spec.clusterNetwork.pods, 'cidrBlocks', val)"
-          @services-cidr-blocks-changed="(val) => $set(value.spec.clusterNetwork.services, 'cidrBlocks', val)"
         />
       </div>
       <div class="mt-20 block">
@@ -418,7 +414,6 @@ export default {
               :default-add-value="defaultWorkerAddValue"
               :class-options="machineDeploymentOptions"
               :initial-empty-row="true"
-              @input="machineDeploymentsChanged"
             />
           </div>
           <div
@@ -432,7 +427,6 @@ export default {
               :default-add-value="defaultWorkerAddValue"
               :class-options="machinePoolOptions"
               :initial-empty-row="true"
-              @input="machinePoolsChanged"
             />
           </div>
         </div>

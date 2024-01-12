@@ -44,42 +44,38 @@ export default {
         class="col span-3"
       >
         <LabeledInput
-          :value="apiServerPort"
+          v-model="value.apiServerPort"
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.networking.apiServerPort')"
-          @input="$emit('api-server-port-changed', $event)"
         />
       </div>
       <div
         class="col span-3"
       >
         <LabeledInput
-          :value="serviceDomain"
+          v-model="value.serviceDomain"
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.networking.serviceDomain')"
-          @input="$emit('service-domain-changed', $event)"
         />
       </div>
     </div>
     <div class="row mb-20">
       <div class="col span-3">
         <ArrayList
-          :value="podsCidrBlocks"
+          v-model="value.pods.cidrBlocks"
           :protip="false"
           :mode="mode"
           :title="t('capi.cluster.networking.pods')"
-          @input="$emit('pods-cidr-blocks-changed', $event)"
         />
       </div>
       <div class="col span-3">
         <ArrayList
-          :value="servicesCidrBlocks"
+          v-model="value.services.cidrBlocks"
           :protip="false"
           :mode="mode"
           :title="t('capi.cluster.networking.services')"
-          @input="$emit('services-cidr-blocks-changed', $event)"
         />
       </div>
     </div>
