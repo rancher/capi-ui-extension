@@ -41,8 +41,16 @@ typeLabel:
 validation:
   exclusiveMaxValue: '"{key}" must be less than {maximum}.'
   exclusiveMinValue: '"{key}" must be greater than {minimum}.'
-  maxItems: '"{key}" may not contain more than {maxItems} items.'
-  minItems: '"{key}" must contain at least {minItems} items.'
+  maxItems: |-
+    {maxItems, plural,
+      one {"{key}" may contain no more than {maxItems} item.}
+      other {"{key}" may contain no more than {maxItems} items.}
+    }
+  minItems: |-
+    {minItems, plural,
+      one {"{key}" must contain at least {minItems} item.}
+      other {"{key}" must contain at least {minItems} items.}
+    }
   pattern: '"{key}" must match the pattern <code>{pattern}</code>.'
   stringFormat: '"{key}" must be a valid {format}.'
   uniqueItems: '"{key}" may not contain duplicate elements.'

@@ -46,7 +46,7 @@ export default defineComponent({
 
   watch: {
     errorCount: {
-      handler: debounce(function(neu) {
+      handler: debounce(function(this: any, neu) {
         this.$emit('validation-passed', !neu);
       }, 5),
     },
@@ -70,7 +70,7 @@ export default defineComponent({
       if (!this.machineDeploymentClass && !this.machinePoolClass) {
         return allVariableDefinitions;
       }
-      const variableNames = this.machineScopedJsonPatches.reduce((names, patch) => {
+      const variableNames = this.machineScopedJsonPatches.reduce((names: string[], patch: any) => {
         const valueFromVariable = patch?.valueFrom?.variable;
 
         if (!valueFromVariable) {
@@ -100,7 +100,7 @@ export default defineComponent({
 
       const patches = this.clusterClass?.spec?.patches || [];
 
-      patches.forEach((p) => {
+      patches.forEach((p: any) => {
         const definitions = p?.definitions || [];
 
         definitions.forEach((definition: any) => {
@@ -133,29 +133,31 @@ export default defineComponent({
       this.$emit('input', out);
     },
 
-    /**
-   * When the cluster class changes, update the variables array:
-   *  remove any variables not defined in the new cluster class
-   *  if a variable is defined in both cluster classes, clear out the old value
-   *  set default values from the new cluster class definitions
-   */
+    // update the cluster's variables when the cluster class changes
     updateVariableDefaults(neu: ClusterClassVariable[], old: ClusterClassVariable[]) {
+      // remove or update variables from previous cc
       const out = [...this.value].reduce((acc: CapiClusterVariable[], existingVar: CapiClusterVariable) => {
         const neuDef = (neu || []).find(n => n.name === existingVar.name);
 
+        // do not include variables not defined in the new cluster class
         if (!neuDef) {
           return acc;
         }
         const oldDefault = (old || []).find(d => d.name === existingVar.name)?.schema?.openAPIV3Schema?.default;
 
+        // if a variable is set to the previous definition's default, clear it out
         if (isDefined(oldDefault) && existingVar.value === oldDefault) {
           delete existingVar.value;
         }
         let newDefault = neuDef.schema?.openAPIV3Schema?.default;
 
+        // leaving boolean values undefined causes confusing form validation behaviour if the boolean is marked as required
+        // if the default value isn't set for a boolean, assume the default is false
         if (neuDef.schema?.openAPIV3Schema?.type === 'boolean' && !newDefault) {
           newDefault = false;
         }
+
+        // if the value hasn't been touched by the user set it to the new cc default
         if (isDefined(newDefault) && !existingVar.value) {
           existingVar.value = newDefault;
         }
@@ -164,6 +166,7 @@ export default defineComponent({
         return acc;
       }, []);
 
+      // add variables not defined in the old cluster class
       neu.forEach((def) => {
         let newDefault = def.schema?.openAPIV3Schema?.default;
 

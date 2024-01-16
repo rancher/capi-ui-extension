@@ -46,9 +46,9 @@ export default defineComponent({
 
   computed: {
     ...mapGetters({ t: 'i18n/t' }),
-    componentForType() {
+    componentForType(): {component: any, name: string} | undefined {
       const { type } = this.schema;
-      let out = null;
+      let out: any;
 
       if (this.variableOptions) {
         out = { component: LabeledSelect, name: 'text-var' };
@@ -107,7 +107,7 @@ export default defineComponent({
       const required = this.variable?.required;
 
       if (required && this.validateRequired) {
-        out.push(val => !isDefined(val) ? t('validation.required', { key: this.variable.name }) : undefined);
+        out.push((val: any) => !isDefined(val) ? t('validation.required', { key: this.variable.name }) : undefined);
       }
 
       return out;
