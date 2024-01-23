@@ -1,3 +1,5 @@
+action:
+  createCluster: Create Cluster
 capi:
   installation:
     title: Rancher Turtles
