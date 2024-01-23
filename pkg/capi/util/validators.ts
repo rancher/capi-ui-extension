@@ -4,6 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 import { isIpv4 } from '@shell/utils/string';
 import { isValidCIDR, isValidMac } from '@shell/utils/validators/cidr';
 import formRulesGenerator from '@shell/utils/validators/formRules/index.ts';
+import { CP_VERSIONS } from './../types/capi';
 
 /**
  *
@@ -121,3 +122,22 @@ const stringFormatValidators = function(t: Translation, { key = 'Value' }: Valid
 };
 
 export const isDefined = (val: any) => (val || val === false) || !isEmpty(val);
+
+export const versionTest = function(t: Translation, type: string): RegExp {
+  let ending = '';
+
+  if (CP_VERSIONS[type as keyof typeof CP_VERSIONS]) {
+    ending = `\\+(${ CP_VERSIONS[type as keyof typeof CP_VERSIONS].join('|') })`;
+  }
+
+  return new RegExp(`^v(\\d+.){2}\\d+${ ending }$`);
+};
+
+export const versionValidator = function(t: Translation, type: string): Validator[] {
+  const out = [] as any[];
+  const test = versionTest(t, type);
+
+  out.push((val: String) => val && !val.match(test) ? t('validation.version') : undefined);
+
+  return out;
+};

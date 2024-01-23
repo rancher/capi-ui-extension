@@ -1,64 +1,108 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import Tabbed from '@shell/components/Tabbed/index.vue';
-import Tab from '@shell/components/Tabbed/Tab.vue';
-import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
-import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
-
-import { CAPI } from '../types/capi';
-import CCVariables from '../components/CCVariables/index.vue';
-const TEST_CC_ID = 'default/quickstart-more-variables';
+import { SUB_TYPE } from '@shell/config/query-params';
+import { set } from '@shell/utils/object';
+import { DEFAULT_WORKSPACE } from '@shell/config/types';
+import CreateEditView from '@shell/mixins/create-edit-view';
+import Loading from '@shell/components/Loading.vue';
+import CruResource from '@shell/components/CruResource.vue';
+import ClusterConfig from './ClusterConfig.vue';
+import { CAPI, QUERY_PARAMS, ClusterClass } from './../types/capi';
 
 export default defineComponent({
-  name:       'EditCapiCluster',
+  name:       'CreateCluster',
   components: {
-    CCVariables, Tabbed, Tab, LabeledSelect, LabeledInput
+    CruResource,
+    Loading,
+    ClusterConfig
   },
+
+  mixins: [CreateEditView],
+
   props: {
     value: {
       type:    Object,
-      default: () => {
-        return {};
-      }
+      default: null,
+    },
+    componentTestid: {
+      type:    String,
+      default: 'capi-provider-create'
     }
   },
   async fetch() {
-    this.$set(this.value, 'spec', { topology: { variables: [], workers: { machineDeployments: [], machinePools: [] } } });
-    this.clusterClasses = await this.$store.dispatch('management/findAll', { type: CAPI.CLUSTER_CLASS });
-  },
-  data() {
-    return {
-      clusterClassId:            null,
-      clusterClasses:            [],
-      variables:                 [],
-      variablesValid:            true,
-      selectedMachineDeployment: ''
-    };
-  },
+    this.clusterClasses = await this.getClusterClasses() || [];
 
-  computed: {
+    if ( !this.value.spec ) {
+      set(this.value, 'spec', {});
+    }
+    if ( !this.value.id ) {
+      if ( !this.value.metadata ) {
+        set(this.value, 'metadata', {});
+      }
 
-    clusterClassOptions() {
-      return (this.clusterClasses || []).map((cc: any) => {
-        return { label: cc.metadata.name, value: cc.id };
-      });
-    },
-
-    clusterClass() {
-      return this.clusterClassId && this.clusterClasses ? this.clusterClasses.find(cc => cc.id === this.clusterClassId) : null;
-    },
-
-    machineDeploymentOptions() {
-      return (this.clusterClass?.spec?.workers?.machineDeployments || []).map((d: any) => d.class);
+      set(this.value.metadata, 'namespace', DEFAULT_WORKSPACE);
     }
   },
-  methods: {
-    addDeployment() {
-      const idx = (this.value.spec.topology.workers.machineDeployments || []).length;
+  data() {
+    const subType = this.$route.query[SUB_TYPE] || null;
+    const preselectedClass = this.$route.query[QUERY_PARAMS.CLASS] || null;
 
-      this.value.spec.topology.workers.machineDeployments.push({
-        class: this.selectedMachineDeployment, name: `machine-${ idx }`, variables: { overrides: [] }
+    return {
+      subType, preselectedClass, capiProviders: [], clusterClasses: null
+    };
+  },
+  computed: {
+    clusterClassOptions() {
+      const out: string[] = [];
+      const getters = this.$store.getters;
+
+      this.clusterClasses?.forEach((obj: ClusterClass) => {
+        addType(obj);
       });
+
+      return out;
+
+      function addType(obj: Object, disabled = false) {
+        const id = obj?.metadata?.name;
+        const label = getters['i18n/withFallback'](`cluster.clusterClass."${ id }"`, null, id);
+        const description = getters['i18n/withFallback'](`cluster.providerDescription."${ id }"`, null, '');
+        const tag = '';
+
+        const subtype = {
+          id,
+          obj,
+          label,
+          description,
+          tag,
+          selected: false
+        };
+
+        out.push(subtype);
+      }
+    },
+  },
+  methods: {
+    async getClusterClasses() {
+      const allClusterClasses: ClusterClass[] = await this.$store.dispatch('management/findAll', { type: CAPI.CLUSTER_CLASS });
+
+      return allClusterClasses;
+    },
+    cancel() {
+      this.$router.push({
+        name:   'c-cluster-manager-capi',
+        params: {},
+      });
+    },
+    selectType(type: String, fetch = true) {
+      this.subType = type;
+      this.$emit('set-subtype', this.$store.getters['i18n/withFallback'](`cluster.provider."${ type }"`, null, type));
+
+      if ( fetch ) {
+        this.$fetch();
+      }
+    },
+    clickedType(obj: Object) {
+      this.providerInfo = obj;
     }
   }
 });
@@ -66,50 +110,43 @@ export default defineComponent({
 
 <template>
   <div>
-    <div>Is valid: {{ variablesValid }}</div>
-    <div class="row">
-      <div class="col span-6">
-        <LabeledSelect v-if="clusterClasses" v-model="clusterClassId" label="cluster class" :options="clusterClassOptions" />
-      </div>
-    </div>
-    <Tabbed :side-tabs="true">
-      <Tab label="Root Variables" name="rootvariables">
-        <CCVariables v-if="clusterClass" v-model="variables" :cluster-class="clusterClass" @validation-passed="e=>variablesValid=e" />
-      </Tab>
-      <Tab v-if="clusterClass" label="Machine Deployment Variables" name="mcvariables">
-        <div class="row">
-          <div class="col span-6">
-            <LabeledSelect v-model="selectedMachineDeployment" label="machine pool class" :options="machineDeploymentOptions" />
-          </div>
-          <div class="col span-6">
-            <button class="btn-sm role-secondary" type="button" label="machine deployment name" @click="addDeployment">
-              add
-            </button>
-          </div>
-        </div>
-        <template v-for="(md, i) in value.spec.topology.workers.machineDeployments">
-          <hr :key="`${md.class}-${i}-hr`" />
+    <Loading v-if="$fetchState.pending" />
+    <ClusterConfig
+      v-if="preselectedClass"
+      v-model="value"
+      :initial-value="initialValue"
+      :live-value="liveValue"
+      :mode="mode"
+      :preselected-class="preselectedClass"
+    />
+    <CruResource
+      v-else
+      :mode="mode"
+      :validation-passed="true"
+      :selected-subtype="subType"
+      :resource="value"
+      :errors="errors"
 
-          <div :key="`${md.class}-${i}`" class="row mt-10">
-            <div class="col span-6">
-              <LabeledInput v-model="md.name" label="machine deployment name" />
-            </div>
-          </div>
+      :cancel-event="true"
+      :prevent-enter-submit="true"
+      class="create-cluster"
+      @finish="save"
+      @cancel="cancel"
+      @select-type="selectType"
+      @error="e=>errors = e"
+    >
+      <ClusterConfig
+        v-model="value"
+        :initial-value="initialValue"
+        :live-value="liveValue"
+        :mode="mode"
+      />
 
-          <h3 :key="`${md.class}-${i}-title`" class="mt-20">
-            {{ md.class }} Variable Overrides
-          </h3>
-
-          <CCVariables
-            v-if="clusterClass"
-            :key="`${md.class}-${i}-vars`"
-            v-model="md.variables.overrides"
-            :machine-deployment-class="md.class"
-            :cluster-class="clusterClass"
-            @validation-passed="e=>variablesValid=e"
-          />
-        </template>
-      </Tab>
-    </Tabbed>
+      <template
+        #form-footer
+      >
+        <div><!-- Hide the outer footer --></div>
+      </template>
+    </CruResource>
   </div>
 </template>

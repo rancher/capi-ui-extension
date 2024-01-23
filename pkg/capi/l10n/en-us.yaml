@@ -14,6 +14,64 @@ capi:
     disableAction: Disable CAPI Auto-Import
   warnings:
     embeddedFeatureFlag: "It looks like the Rancher-managed cluster API feature is disabled. To provision and manage RKE2 clusters you must either enable the embedded-cluster-api feature flag or install the Rancher Turtles extension."
+  cluster:
+    steps:
+      clusterClass:
+        title: Cluster Class
+        label: Cluster Class
+        subtext:  
+        description:  ''
+      configuration:
+        title: Configuration
+        label: Configuration
+        subtext:  
+        description:  ''
+      variables:
+        title: Variables
+        label: Variables
+        subtext:  
+        description:  ''
+    secret:
+      reuse: Use existing credential
+      create: Create new credential
+    controlPlane:
+      title: Control Plane Options
+      provisioner: Type
+    providerConfig:
+      title: Infrastructure
+    clusterClass:
+      title: Cluster Class
+      label: Cluster Class
+      description: Cluster Class Description
+    variables:
+      title: Variables
+    version:
+      title: Kubernetes Version
+    networking:
+      title: Networking
+      apiServerPort: API Server Port
+      serviceDomain: Service Domain
+      pods: Pod CIDR Blocks
+      services: Service VIP CIDR Blocks
+    controlPlaneEndpoint:
+      title: Control Plane Endpoint
+      host: Host
+      port: Port
+    workers:
+      title: Workers
+      class: Class
+      name: Name
+      machineDeployments:
+        title: Machine Deployments
+      machinePools:
+        title: Machine Pools
+  clusterClassCard:
+    title: 'Cluster Class Name: {name}'
+    controlPlaneName: Control Plane Name
+    controlPlaneKind: Control Plane Kind
+    controlPlaneNamespace: Control Plane Namespace
+    machineDeploymentsCount: '{count} Machine Deployments'
+    machinePoolsCount: '{count} Machine Pools'
 
 nav:
   group:
