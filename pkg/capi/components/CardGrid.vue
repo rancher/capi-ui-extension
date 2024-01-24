@@ -5,13 +5,9 @@ import { get } from '@shell/utils/object';
 import capitalize from 'lodash/capitalize';
 import ClusterClassCard from './../components/ClusterClassCard/index.vue';
 
-interface Card { //TODO check all of these are needed
+interface Card {
   id: String,
   obj: Object,
-  label: String,
-  description: String,
-  disabled: Boolean,
-  tag: String,
   selected: Boolean
 }
 
@@ -89,14 +85,12 @@ export default defineComponent({
 </template>
 
 <style lang="scss" scoped>
-  $height: 300px;
-  $side: 15px;
-  $margin: 10px;
-  $hover-border-width: 1px;
-  $width: 40%;//600px;
   .container {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
+    @media only screen and (max-width: map-get($breakpoints, '--viewport-7')) {
+      grid-template-columns: 1fr 1fr;
+    }
     @media only screen and (max-width: map-get($breakpoints, '--viewport-12')) {
       grid-template-columns: 1fr;
     }

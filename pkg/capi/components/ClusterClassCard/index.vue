@@ -1,14 +1,12 @@
 <script lang='ts'>
 import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
-
-import Card from '@components/Card/Card.vue';
 import ClusterCardField from './ClusterCardField.vue';
 import { Worker } from './../../types/capi';
 
 export default defineComponent({
   name:       'ClusterClassCard',
-  components: { Card, ClusterCardField },
+  components: { ClusterCardField },
 
   props: {
     value: {
@@ -59,14 +57,19 @@ export default defineComponent({
 </script>
 
 <template>
-  <Card :show-highlight-border="false" :show-actions="false" class="card">
-    <template #body>
-      {{ name }}
+  <div
+    class="card-container"
+    data-testid="cluster-class-card"
+  >
+    <div class="card-wrap">
+      <div class="name">
+        {{ name }}
+      </div>
       <div class="description">
         <p>{{ description }}</p>
       </div>
-      <div class="row">
-        <div class="col">
+      <div class="container">
+        <div class="leftcol">
           <ClusterCardField
             :value="controlPlaneName"
             :name="t('capi.clusterClassCard.controlPlaneName')"
@@ -80,7 +83,7 @@ export default defineComponent({
             :name="t('capi.clusterClassCard.controlPlaneNamespace')"
           />
         </div>
-        <div class="col">
+        <div class="rightcol">
           <ClusterCardField
             v-if="machineDeploymentsCount > 0"
             :value="machineDeploymentsList"
@@ -93,15 +96,60 @@ export default defineComponent({
           />
         </div>
       </div>
-    </template>
-  </Card>
+    </div>
+  </div>
 </template>
 
 <style lang="scss" scoped>
-.description {
-  margin-bottom: 10px;
-}
-.card {
+ .card-container {
+  border-radius: var(--border-radius);
+  display: flex;
+  flex-basis: 40%;
+  margin: 10px;
+  min-height: 100px;
+  padding: 10px 20px;
+  box-shadow: 0 0 20px var(--shadow);
   height: 90%;
+
+  .card-wrap {
+    width: 100%;
+  }
+
+ }
+.name {
+  font-size: 16px;
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: bold;
+  color: black;
+  margin-bottom: 10px;
+
 }
+.description {
+  font-size: 12px;
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: normal;
+  color: black;
+  margin-bottom: 20px;
+}
+.container{
+  display: grid;
+  padding: 0px;
+  grid-template-columns: 1fr 1fr;
+  @media only screen and (max-width: map-get($breakpoints, '--viewport-12')) {
+    grid-template-columns: 1fr;
+  }
+
+}
+.leftcol {
+  justify-self: start;
+}
+.rightcol{
+  justify-self: end;
+  @media only screen and (max-width: map-get($breakpoints, '--viewport-12')) {
+    justify-self: start;
+  }
+}
+
 </style>

@@ -36,14 +36,20 @@ export default {
   margin-bottom: 10px;
 
   .text-label {
-    font-size: 14px;
+    font-family: 'Lato';
+    font-size: 12px;
+    font-style: normal;
+    font-weight: normal;
     line-height: $input-line-height;
-    color: var(--body-text);
+    color: #6C6C76;
   }
 
   .value {
-    color: var(--input-label);
+    font-family: 'Lato';
     font-size: 14px;
+    color: black;
+    font-style: normal;
+    font-weight: normal;
     line-height: $input-line-height;
   }
 }

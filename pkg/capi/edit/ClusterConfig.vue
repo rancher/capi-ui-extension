@@ -1,22 +1,23 @@
 <script lang='ts'>
-import {
-  CREDENTIALS_UPDATE_REQUIRED, CREDENTIALS_NOT_REQUIRED, CAPIClusterTopology, CAPIClusterNetwork, CAPIClusterCPEndpoint, ClusterClass, CAPI, Worker
-} from '@pkg/capi/types/capi';
-import ClusterClassVariables from '@pkg/capi/components/CCVariables/index';
-import CreateEditView from '@shell/mixins/create-edit-view';
-import CruResource from '@shell/components/CruResource';
-import Loading from '@shell/components/Loading';
-import FormValidation from '@shell/mixins/form-validation';
-import NameNsDescription from '@shell/components/form/NameNsDescription';
-import { LabeledInput } from '@components/Form/LabeledInput';
+import { defineComponent } from 'vue';
+import { mapGetters } from 'vuex';
 import { set } from '@shell/utils/object';
-import { versionTest, versionValidator } from '@pkg/capi/util/validators';
 import { clear } from '@shell/utils/array';
-import CardGrid from './../components/CardGrid';
-
-import WorkerItem from './WorkerItem';
-import NetworkSection from './NetworkSection';
-import ControlPlaneEndpointSection from './ControlPlaneEndpointSection';
+import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
+import NameNsDescription from '@shell/components/form/NameNsDescription.vue';
+import FormValidation from '@shell/mixins/form-validation';
+import Loading from '@shell/components/Loading.vue';
+import CruResource from '@shell/components/CruResource.vue';
+import CreateEditView from '@shell/mixins/create-edit-view';
+import ClusterClassVariables from '../components/CCVariables/index.vue';
+import { versionTest, versionValidator } from '../util/validators';
+import {
+  CAPIClusterTopology, CAPIClusterNetwork, CAPIClusterCPEndpoint, ClusterClass, CAPI, Worker
+} from '../types/capi';
+import CardGrid from './../components/CardGrid.vue';
+import WorkerItem from './WorkerItem.vue';
+import NetworkSection from './NetworkSection.vue';
+import ControlPlaneEndpointSection from './ControlPlaneEndpointSection.vue';
 
 const defaultTopologyConfig: CAPIClusterTopology = {
   version: '',
@@ -35,7 +36,8 @@ const defaultCPEndpointConfig: CAPIClusterCPEndpoint = {
   port: 49152
 };
 
-export default {
+export default defineComponent({
+  name:       'ClusterConfig',
   components: {
     CruResource,
     Loading,
@@ -119,6 +121,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters({ t: 'i18n/t' }),
     version() {
       return this.value.spec.topology.version;
     },
@@ -133,7 +136,6 @@ export default {
     },
     stepClusterClassRequires() {
       return !!this.clusterClassObj;
-      // return !!this.value.metadata.name && !!this.clusterClass && !!this.variablesReady;
     },
     stepConfigurationRequires() {
       const versionTestString = versionTest(this.$store.getters['i18n/t'], this.controlPlane);
@@ -169,7 +171,7 @@ export default {
     },
     clusterClassOptions() {
       const out: string[] = [];
-      const getters = this.$store.getters;
+      const currentObject = this.clusterClassObj;
 
       this.clusterClasses.forEach((obj: ClusterClass) => {
         addType(obj);
@@ -179,17 +181,10 @@ export default {
 
       function addType(obj: Object, disabled = false) {
         const id = obj?.metadata?.name;
-        const label = getters['i18n/withFallback'](`cluster.clusterClass."${ id }"`, null, id);
-        const description = getters['i18n/withFallback'](`cluster.providerDescription."${ id }"`, null, '');
-        const tag = '';
-
         const subtype = {
           id,
           obj,
-          label,
-          description,
-          tag,
-          selected: false
+          selected: currentObject === obj
         };
 
         out.push(subtype);
@@ -205,7 +200,7 @@ export default {
       return allClusterClasses;
     },
     setClassInfo(name: string) {
-      this.clusterClassObj = this.clusterClasses.find((x) => {
+      this.clusterClassObj = this.clusterClasses.find((x: ClusterClass) => {
         const split = unescape(name).split('/');
 
         return x.metadata.namespace === split[0] && x.metadata.name === split[1];
@@ -215,8 +210,6 @@ export default {
       if ( this.errors ) {
         clear(this.errors);
       }
-      console.log(this.value);
-      console.log(JSON.stringify(this.value));
       await this.value.save();
 
       return this.done();
@@ -298,7 +291,7 @@ export default {
       this.stepClusterClassReady();
     }
   }
-};
+});
 </script>
 <template>
   <Loading v-if="$fetchState.pending" />
