@@ -122,3 +122,4 @@ validation:
   pattern: '"{key}" must match the pattern <code>{pattern}</code>.'
   stringFormat: '"{key}" must be a valid {format}.'
   uniqueItems: '"{key}" may not contain duplicate elements.'
+  version: Version format must match format for this provisioner.

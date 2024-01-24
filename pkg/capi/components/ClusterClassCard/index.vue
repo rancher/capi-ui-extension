@@ -126,7 +126,7 @@ export default defineComponent({
 
 }
 .description {
-  font-size: 12px;
+  font-size: 14px;
   font-family: 'Lato';
   font-style: normal;
   font-weight: normal;
