@@ -1,7 +1,6 @@
 <script lang='ts'>
 import { defineComponent } from 'vue';
-import { mapGetters } from 'vuex';
-import { set } from '@shell/utils/object';
+import { set, clone } from '@shell/utils/object';
 import { clear } from '@shell/utils/array';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 import NameNsDescription from '@shell/components/form/NameNsDescription.vue';
@@ -67,10 +66,10 @@ export default defineComponent({
   },
   async fetch() {
     this.clusterClasses = await this.getClusterClasses() || [];
+    await this.initSpecs();
     if ( this.preselectedClass) {
       this.setClassInfo(this.preselectedClass);
     }
-    await this.initSpecs();
   },
   data() {
     const stepClusterClass = {
@@ -204,6 +203,9 @@ export default defineComponent({
 
         return x.metadata.namespace === split[0] && x.metadata.name === split[1];
       });
+      const clusterClassName = this.clusterClassObj?.metadata?.name;
+
+      this.set(this.value.spec.topology, 'class', clusterClassName);
     },
     async saveOverride() {
       if ( this.errors ) {
@@ -219,15 +221,15 @@ export default defineComponent({
         set(this.value, 'spec', { });
       }
       if ( !this.value.spec.topology ) {
-        set(this.value.spec, 'topology', defaultTopologyConfig);
+        set(this.value.spec, 'topology', clone(defaultTopologyConfig));
       }
 
       if ( !this.value.spec.clusterNetwork ) {
-        set(this.value.spec, 'clusterNetwork', defaultClusterNetwork);
+        set(this.value.spec, 'clusterNetwork', clone(defaultClusterNetwork));
       }
 
       if ( !this.value.spec.controlPlaneEndpoint ) {
-        set(this.value.spec, 'controlPlaneEndpoint', defaultCPEndpointConfig);
+        set(this.value.spec, 'controlPlaneEndpoint', clone(defaultCPEndpointConfig));
       }
     },
 
@@ -287,6 +289,7 @@ export default defineComponent({
     },
     clickedType(obj: Object) {
       this.clusterClassObj = this.clusterClasses.find(x => x.metadata.name === obj.id);
+      this.set(this.value.spec.topology, 'class', obj.id);
       this.stepClusterClassReady();
     }
   }
