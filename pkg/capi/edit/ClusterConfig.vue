@@ -121,7 +121,6 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapGetters({ t: 'i18n/t' }),
     version() {
       return this.value.spec.topology.version;
     },
@@ -374,6 +373,7 @@ export default defineComponent({
       <div class="mt-20 block">
         <h2>
           <t k="capi.cluster.workers.title" />
+          <span class="required">*</span>
         </h2>
         <div class="row mb-20">
           <div
@@ -420,7 +420,7 @@ export default defineComponent({
   </CruResource>
 </template>
 <style lang="scss" scoped>
-.block {
-  margin-bottom: 10px;
+.required {
+  color: var(--error);
 }
 </style>

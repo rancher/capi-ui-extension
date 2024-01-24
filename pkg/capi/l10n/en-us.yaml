@@ -70,8 +70,16 @@ capi:
     controlPlaneName: Control Plane Name
     controlPlaneKind: Control Plane Kind
     controlPlaneNamespace: Control Plane Namespace
-    machineDeploymentsCount: '{count} Machine Deployments'
-    machinePoolsCount: '{count} Machine Pools'
+    machineDeploymentsCount: |-
+      {count, plural,
+        one {{count} Machine Deployment }
+        other {{count} Machine Deployments }
+      }
+    machinePoolsCount: |-
+      {count, plural,
+        one {{count} Machine Pool }
+        other {{count} Machine Pools }
+      }
 
 nav:
   group:
