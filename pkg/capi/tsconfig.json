@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "allowJs": true,
-    // "target": "esnext",
+    "target": "esnext",
     "module": "esnext",
-    "strict": true,
+    // "strict": true, //this causes problems with vuex typing eg "property $store does not exist on type..."
     "jsx": "preserve",
     "importHelpers": true,
     "moduleResolution": "node",
@@ -34,7 +34,7 @@
     ],
     "paths": {
       "@shell/*": [
-        "@rancher/shell/*"
+        "../../node_modules/@rancher/shell/*"
       ],
       "@components/*": [
         "@rancher/components/*"
