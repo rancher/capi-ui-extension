@@ -1,10 +1,10 @@
 <script lang='ts'>
-import { defineComponent } from 'vue';
+import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import ClusterCardField from './ClusterCardField.vue';
 import { Worker } from './../../types/capi';
 
-export default defineComponent({
+export default Vue.extend({
   name:       'ClusterClassCard',
   components: { ClusterCardField },
 

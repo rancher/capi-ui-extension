@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import Vue from 'vue';
 import debounce from 'lodash/debounce';
 import { removeAt } from '@shell/utils/array';
 import { clone } from '@shell/utils/object';
@@ -7,7 +7,7 @@ import { _EDIT, _VIEW } from '@shell/config/query-params';
 import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 
-export default defineComponent({
+export default Vue.extend({
   components: { LabeledSelect, LabeledInput },
   props:      {
     value: {

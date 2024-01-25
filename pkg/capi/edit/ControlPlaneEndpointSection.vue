@@ -1,10 +1,10 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import { _EDIT } from '@shell/config/query-params';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 
-export default defineComponent({
+export default Vue.extend({
   name:       'ControlPlaneEndpointSection',
   components: { LabeledInput },
   props:      {

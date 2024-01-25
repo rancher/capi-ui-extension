@@ -1,11 +1,11 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import { _EDIT } from '@shell/config/query-params';
 import ArrayList from '@shell/components/form/ArrayList.vue';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 
-export default defineComponent({
+export default Vue.extend({
   components: {
     LabeledInput,
     ArrayList

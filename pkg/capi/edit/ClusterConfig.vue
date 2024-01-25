@@ -1,5 +1,5 @@
 <script lang='ts'>
-import { defineComponent } from 'vue';
+import Vue, { VueConstructor } from 'vue';
 import { set, clone } from '@shell/utils/object';
 import { clear } from '@shell/utils/array';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
@@ -11,7 +11,7 @@ import { Translation } from '@rancher/shell/types/t';
 import ClusterClassVariables from '../components/CCVariables/index.vue';
 import { versionTest, versionValidator, nameValidator } from '../util/validators';
 import {
-  CAPIClusterTopology, CAPIClusterNetwork, CAPIClusterCPEndpoint, ClusterClass, CAPI, Worker
+  CAPIClusterTopology, CAPIClusterNetwork, CAPIClusterCPEndpoint, ClusterClass, Worker
 } from '../types/capi';
 import CardGrid from './../components/CardGrid.vue';
 import WorkerItem from './WorkerItem.vue';
@@ -35,7 +35,9 @@ const defaultCPEndpointConfig: CAPIClusterCPEndpoint = {
   port: 49152
 };
 
-export default defineComponent({
+export default (Vue as VueConstructor<
+  Vue & InstanceType<typeof CreateEditView>
+>).extend({
   name:       'ClusterConfig',
   components: {
     CruResource,
@@ -62,14 +64,17 @@ export default defineComponent({
       type:     String,
       required: false,
       default:  ''
+    },
+    clusterClasses: {
+      type:     Array,
+      required: true
     }
   },
-  async fetch() {
-    this.clusterClasses = await this.getClusterClasses() || [];
-    await this.initSpecs();
-    if ( this.preselectedClass) {
-      this.setClassInfo(this.preselectedClass);
-    }
+  beforeMount() {
+    this.initSpecs();
+    this.$nextTick(() => {
+      this.loading = false;
+    });
   },
   data() {
     const store = this.$store as {[key: string]: any};
@@ -117,7 +122,8 @@ export default defineComponent({
         class: ''
       },
       variablesReady:  false,
-      clusterClassObj: null
+      clusterClassObj: null,
+      loading:         true
     };
   },
   computed: {
@@ -140,9 +146,9 @@ export default defineComponent({
       const nameValid = !!this.value.metadata.name;
       const versionTestString = versionTest(this.$store.getters['i18n/t'], this.controlPlane);
       const versionValid = this.version && !!(this.version.match(versionTestString));
-      const controlPlaneEndpointValid = !!this.value.spec.controlPlaneEndpoint.host && !!this.value.spec.controlPlaneEndpoint.port;
-      const machineDeploymentsValid = this.value.spec.topology.workers.machineDeployments.length > 0 && !!this.value.spec.topology.workers.machineDeployments[0]?.name && !!this.value.spec.topology.workers.machineDeployments[0]?.class;
-      const machinePoolsValid = this.value.spec.topology.workers.machinePools.length > 0 && !!this.value.spec.topology.workers.machinePools[0]?.name && !!this.value.spec.topology.workers.machinePools[0]?.class;
+      const controlPlaneEndpointValid = !!this.value?.spec?.controlPlaneEndpoint?.host && !!this.value?.spec?.controlPlaneEndpoint?.port;
+      const machineDeploymentsValid = this.value?.spec?.topology?.workers?.machineDeployments?.length > 0 && !!this.value?.spec?.topology?.workers?.machineDeployments[0]?.name && !!this.value?.spec?.topology?.workers?.machineDeployments[0]?.class;
+      const machinePoolsValid = this.value?.spec?.topology?.workers?.machinePools?.length > 0 && !!this.value?.spec?.topology?.workers?.machinePools[0]?.name && !!this.value?.spec?.topology?.workers?.machinePools[0]?.class;
 
       return nameValid && versionValid && controlPlaneEndpointValid && (machineDeploymentsValid || machinePoolsValid);
     },
@@ -197,11 +203,6 @@ export default defineComponent({
   methods: {
     set,
     generateYaml() {},
-    async getClusterClasses() {
-      const allClusterClasses: ClusterClass[] = await this.$store.dispatch('management/findAll', { type: CAPI.CLUSTER_CLASS });
-
-      return allClusterClasses;
-    },
     setClassInfo(name: string) {
       this.clusterClassObj = this.clusterClasses.find((x: ClusterClass) => {
         const split = unescape(name).split('/');
@@ -244,6 +245,9 @@ export default defineComponent({
 
       if ( !this.value.spec.controlPlaneEndpoint ) {
         set(this.value.spec, 'controlPlaneEndpoint', clone(defaultCPEndpointConfig));
+      }
+      if ( this.preselectedClass) {
+        this.setClassInfo(this.preselectedClass);
       }
     },
 
@@ -302,7 +306,7 @@ export default defineComponent({
       this.stepConfigurationReady();
     },
     clickedType(obj: {[key:string]: any}) {
-      this.clusterClassObj = this.clusterClasses.find(x => x.metadata.name === obj.id);
+      this.clusterClassObj = this.clusterClasses.find((x: ClusterClass) => x.metadata.name === obj.id);
       this.setClass();
       this.setNamespace();
       this.stepClusterClassReady();
@@ -311,7 +315,7 @@ export default defineComponent({
 });
 </script>
 <template>
-  <Loading v-if="$fetchState.pending" />
+  <Loading v-if="loading" />
   <CruResource
     v-else
     :mode="mode"
