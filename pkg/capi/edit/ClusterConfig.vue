@@ -7,6 +7,7 @@ import NameNsDescription from '@shell/components/form/NameNsDescription.vue';
 import Loading from '@shell/components/Loading.vue';
 import CruResource from '@shell/components/CruResource.vue';
 import CreateEditView from '@shell/mixins/create-edit-view';
+import { Translation } from '@rancher/shell/types/t';
 import ClusterClassVariables from '../components/CCVariables/index.vue';
 import { versionTest, versionValidator, nameValidator } from '../util/validators';
 import {
@@ -71,10 +72,12 @@ export default defineComponent({
     }
   },
   data() {
+    const store = this.$store as {[key: string]: any};
+    const t = store.getters['i18n/t'] as Translation;
     const stepClusterClass = {
       name:           'stepClusterClass',
-      title:          this.t('capi.cluster.steps.clusterClass.title'),
-      label:          this.t('capi.cluster.steps.clusterClass.label'),
+      title:          t('capi.cluster.steps.clusterClass.title'),
+      label:          t('capi.cluster.steps.clusterClass.label'),
       subtext:        '',
       descriptionKey: 'capi.cluster.steps.clusterClass.description',
       ready:          false,
@@ -82,8 +85,8 @@ export default defineComponent({
     };
     const stepConfiguration = {
       name:           'stepConfiguration',
-      title:          this.t('capi.cluster.steps.configuration.title'),
-      label:          this.t('capi.cluster.steps.configuration.label'),
+      title:          t('capi.cluster.steps.configuration.title'),
+      label:          t('capi.cluster.steps.configuration.label'),
       subtext:        '',
       descriptionKey: 'capi.cluster.steps.configuration.description',
       ready:          false,
@@ -92,8 +95,8 @@ export default defineComponent({
 
     const stepVariables = {
       name:           'stepVariables',
-      title:          this.t('capi.cluster.steps.variables.title'),
-      label:          this.t('capi.cluster.steps.variables.label'),
+      title:          t('capi.cluster.steps.variables.title'),
+      label:          t('capi.cluster.steps.variables.label'),
       subtext:        '',
       descriptionKey: 'capi.cluster.steps.variables.description',
       ready:          false,
@@ -170,7 +173,7 @@ export default defineComponent({
       return nameValidator(this.$store.getters['i18n/t']);
     },
     clusterClassOptions() {
-      const out: string[] = [];
+      const out: any[] = [];
       const currentObject = this.clusterClassObj;
 
       this.clusterClasses.forEach((obj: ClusterClass) => {
@@ -179,7 +182,7 @@ export default defineComponent({
 
       return out;
 
-      function addType(obj: Object, disabled = false) {
+      function addType(obj: {[key: string]: any}, disabled = false) {
         const id = obj?.metadata?.name;
         const subtype = {
           id,
@@ -298,7 +301,7 @@ export default defineComponent({
       this.set(this.value.spec.controlPlaneEndpoint, 'port', val);
       this.stepConfigurationReady();
     },
-    clickedType(obj: Object) {
+    clickedType(obj: {[key:string]: any}) {
       this.clusterClassObj = this.clusterClasses.find(x => x.metadata.name === obj.id);
       this.setClass();
       this.setNamespace();

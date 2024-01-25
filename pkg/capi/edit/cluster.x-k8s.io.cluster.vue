@@ -6,6 +6,7 @@ import { DEFAULT_WORKSPACE } from '@shell/config/types';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import Loading from '@shell/components/Loading.vue';
 import CruResource from '@shell/components/CruResource.vue';
+import type { Route } from 'vue-router';
 import ClusterConfig from './ClusterConfig.vue';
 import { CAPI, QUERY_PARAMS, ClusterClass } from './../types/capi';
 
@@ -44,8 +45,9 @@ export default defineComponent({
     }
   },
   data() {
-    const subType = this.$route.query[SUB_TYPE] || null;
-    const preselectedClass = this.$route.query[QUERY_PARAMS.CLASS] || null;
+    const route = this.$route as Route;
+    const subType = route.query[SUB_TYPE] || null;
+    const preselectedClass = route.query[QUERY_PARAMS.CLASS] || null;
 
     return {
       subType, preselectedClass, capiProviders: [], clusterClasses: null
@@ -53,7 +55,7 @@ export default defineComponent({
   },
   computed: {
     clusterClassOptions() {
-      const out: string[] = [];
+      const out: any[] = [];
       const getters = this.$store.getters;
 
       this.clusterClasses?.forEach((obj: ClusterClass) => {
@@ -62,7 +64,7 @@ export default defineComponent({
 
       return out;
 
-      function addType(obj: Object, disabled = false) {
+      function addType(obj: {[key: string]: any}, disabled = false) {
         const id = obj?.metadata?.name;
         const label = getters['i18n/withFallback'](`cluster.clusterClass."${ id }"`, null, id);
         const description = getters['i18n/withFallback'](`cluster.providerDescription."${ id }"`, null, '');

@@ -49,8 +49,9 @@ export interface CAPIClusterNetwork {
 
 export interface ClusterClass {
   metadata: {
-    name: String,
-    annotations: Object
+    name: string,
+    namespace: string,
+    annotations?: {[key: string]: string}
   },
   spec: {
     infrastructure: Object,

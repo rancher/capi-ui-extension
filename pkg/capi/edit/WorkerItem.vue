@@ -48,7 +48,7 @@ export default defineComponent({
     },
   },
   data() {
-    const input = (this.value || []).slice();
+    const input = (this.value as any[] || []).slice();
     const rows = [];
 
     for ( const value of input ) {
@@ -112,7 +112,7 @@ export default defineComponent({
     /**
      * Remove item and emits removed row and its own index value
      */
-    remove(row: Object, index: Number) {
+    remove(row: {[key: string]: any}, index: number) {
       this.$emit('remove', { row, index });
       removeAt(this.rows, index);
       this.queueUpdate();
