@@ -123,3 +123,5 @@ validation:
   stringFormat: '"{key}" must be a valid {format}.'
   uniqueItems: '"{key}" may not contain duplicate elements.'
   version: Version format must match format for this provisioner.
+  name: Name is required.
+  port: Port value must be a number.

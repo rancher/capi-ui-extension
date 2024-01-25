@@ -4,12 +4,11 @@ import { set, clone } from '@shell/utils/object';
 import { clear } from '@shell/utils/array';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 import NameNsDescription from '@shell/components/form/NameNsDescription.vue';
-import FormValidation from '@shell/mixins/form-validation';
 import Loading from '@shell/components/Loading.vue';
 import CruResource from '@shell/components/CruResource.vue';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import ClusterClassVariables from '../components/CCVariables/index.vue';
-import { versionTest, versionValidator } from '../util/validators';
+import { versionTest, versionValidator, nameValidator } from '../util/validators';
 import {
   CAPIClusterTopology, CAPIClusterNetwork, CAPIClusterCPEndpoint, ClusterClass, CAPI, Worker
 } from '../types/capi';
@@ -48,7 +47,7 @@ export default defineComponent({
     ClusterClassVariables,
     CardGrid
   },
-  mixins: [CreateEditView, FormValidation],
+  mixins: [CreateEditView],
   props:      {
     mode: {
       type:     String,
@@ -105,7 +104,6 @@ export default defineComponent({
     const addSteps = steps.sort((a, b) => (b.weight || 0) - (a.weight || 0));
 
     return {
-      fvFormRuleSets:          [{ path: 'spec.topology.version', rules: [versionValidator] }],
       addSteps,
       credentialId:            '',
       credential:              null,
@@ -136,13 +134,14 @@ export default defineComponent({
       return !!this.clusterClassObj;
     },
     stepConfigurationRequires() {
+      const nameValid = !!this.value.metadata.name;
       const versionTestString = versionTest(this.$store.getters['i18n/t'], this.controlPlane);
       const versionValid = this.version && !!(this.version.match(versionTestString));
       const controlPlaneEndpointValid = !!this.value.spec.controlPlaneEndpoint.host && !!this.value.spec.controlPlaneEndpoint.port;
       const machineDeploymentsValid = this.value.spec.topology.workers.machineDeployments.length > 0 && !!this.value.spec.topology.workers.machineDeployments[0]?.name && !!this.value.spec.topology.workers.machineDeployments[0]?.class;
       const machinePoolsValid = this.value.spec.topology.workers.machinePools.length > 0 && !!this.value.spec.topology.workers.machinePools[0]?.name && !!this.value.spec.topology.workers.machinePools[0]?.class;
 
-      return versionValid && controlPlaneEndpointValid && (machineDeploymentsValid || machinePoolsValid);
+      return nameValid && versionValid && controlPlaneEndpointValid && (machineDeploymentsValid || machinePoolsValid);
     },
     stepVariablesRequires() {
       return !!this.variablesReady;
@@ -166,6 +165,9 @@ export default defineComponent({
     },
     versionRule() {
       return versionValidator(this.$store.getters['i18n/t'], this.controlPlane);
+    },
+    nameRule() {
+      return nameValidator(this.$store.getters['i18n/t']);
     },
     clusterClassOptions() {
       const out: string[] = [];
@@ -203,9 +205,18 @@ export default defineComponent({
 
         return x.metadata.namespace === split[0] && x.metadata.name === split[1];
       });
+      this.setClass();
+      this.setNamespace();
+    },
+    setClass() {
       const clusterClassName = this.clusterClassObj?.metadata?.name;
 
       this.set(this.value.spec.topology, 'class', clusterClassName);
+    },
+    setNamespace() {
+      const clusterClassNs = this.clusterClassObj?.metadata?.namespace;
+
+      this.set(this.value.metadata, 'namespace', clusterClassNs);
     },
     async saveOverride() {
       if ( this.errors ) {
@@ -289,7 +300,8 @@ export default defineComponent({
     },
     clickedType(obj: Object) {
       this.clusterClassObj = this.clusterClasses.find(x => x.metadata.name === obj.id);
-      this.set(this.value.spec.topology, 'class', obj.id);
+      this.setClass();
+      this.setNamespace();
       this.stepClusterClassReady();
     }
   }
@@ -299,22 +311,20 @@ export default defineComponent({
   <Loading v-if="$fetchState.pending" />
   <CruResource
     v-else
-    ref="cruresource"
     :mode="mode"
-    :validation-passed="fvFormIsValid"
     :show-as-form="true"
     :resource="value"
     :errors="errors"
+    :validation-passed="true"
     :cancel-event="true"
     :done-route="doneRoute"
     :apply-hooks="applyHooks"
-    :generate-yaml="generateYaml"
     :steps="addSteps"
     component-testid="capi-cluster-create"
     @done="done"
+    @error="e=>errors = e"
     @finish="saveOverride"
     @cancel="cancel"
-    @error="fvUnreportedValidationErrors"
   >
     <template #stepClusterClass>
       <CardGrid
@@ -336,7 +346,7 @@ export default defineComponent({
         name-placeholder="cluster.name.placeholder"
         description-label="cluster.description.label"
         description-placeholder="cluster.description.placeholder"
-        :rules="{name:fvGetAndReportPathRules('metadata.name')}"
+        :rules="{name: nameRule}"
         @change="stepConfigurationReady"
       />
       <div class="row mb-20 ">

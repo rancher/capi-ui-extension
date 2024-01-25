@@ -13,6 +13,10 @@ export default defineComponent({
       type:     Object,
       required: true,
     },
+    selected: {
+      type:    Boolean,
+      default: false
+    }
   },
 
   data() {
@@ -58,7 +62,8 @@ export default defineComponent({
 
 <template>
   <div
-    class="card-container"
+    class="cluster-card-container"
+    :class="{selected: !!selected}"
     data-testid="cluster-class-card"
   >
     <div class="card-wrap">
@@ -101,15 +106,47 @@ export default defineComponent({
 </template>
 
 <style lang="scss" scoped>
- .card-container {
-  border-radius: var(--border-radius);
+ .cluster-card-container {
   display: flex;
   flex-basis: 40%;
   margin: 10px;
   min-height: 100px;
   padding: 10px 20px;
-  box-shadow: 0 0 20px var(--shadow);
   height: 90%;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  &.selected {
+    border: 2px solid var(--app-rancher-accent );
+  }
+  &:hover {
+    box-shadow: 0 0 30px var(--shadow);
+    transition: box-shadow 0.1s ease-in-out;
+    cursor: pointer;
+    text-decoration: none !important;
+  }
+  &.rancher {
+    .side-label, .deploys-os-label {
+      background-color: var(--app-rancher-accent);
+      label {
+        color: var(--app-rancher-accent-text);
+      }
+    }
+    &:hover {
+      border-color: var(--app-rancher-accent);
+    }
+  }
+
+  &.partner {
+    .side-label, .deploys-os-label {
+      background-color: var(--app-partner-accent);
+      label {
+        color: var(--app-partner-accent-text);
+      }
+    }
+    &:hover {
+      border-color: var(--app-partner-accent);
+    }
+  }
 
   .card-wrap {
     width: 100%;
@@ -118,19 +155,12 @@ export default defineComponent({
  }
 .name {
   font-size: 16px;
-  font-family: 'Lato';
-  font-style: normal;
   font-weight: bold;
-  color: black;
   margin-bottom: 10px;
 
 }
 .description {
   font-size: 14px;
-  font-family: 'Lato';
-  font-style: normal;
-  font-weight: normal;
-  color: black;
   margin-bottom: 20px;
 }
 .container{
@@ -144,6 +174,7 @@ export default defineComponent({
 }
 .leftcol {
   justify-self: start;
+  margin-right: 10px;
 }
 .rightcol{
   justify-self: end;

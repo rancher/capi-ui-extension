@@ -66,13 +66,12 @@ export default defineComponent({
     <div
       v-for="(r, idx) in rows"
       :key="get(r, keyField)"
-      class="item"
-      :class="{selected: !!r.selected}"
       :data-testid="componentTestid + '-' + idx"
       @click="select(r, idx)"
     >
       <ClusterClassCard
         :value="r.obj"
+        :selected="r.selected"
       />
     </div>
   </div>
@@ -88,26 +87,11 @@ export default defineComponent({
   .container {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    @media only screen and (max-width: map-get($breakpoints, '--viewport-7')) {
+    @media only screen and (max-width: map-get($breakpoints, '--viewport-9')) {
       grid-template-columns: 1fr 1fr;
     }
     @media only screen and (max-width: map-get($breakpoints, '--viewport-12')) {
       grid-template-columns: 1fr;
     }
   }
-  .item {
-      &:hover {
-        box-shadow: 0 0 30px var(--shadow);
-        transition: box-shadow 0.1s ease-in-out;
-        cursor: pointer;
-        text-decoration: none !important;
-      }
-      &.selected {
-        border: 2px solid var(--app-color3-accent);
-      }
-      &:active {
-        border: 2px solid var(--app-color3-accent);
-      }
-
-    }
 </style>
