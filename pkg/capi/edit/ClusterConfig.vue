@@ -104,7 +104,7 @@ export default (Vue as VueConstructor<
       label:          t('capi.cluster.steps.variables.label'),
       subtext:        '',
       descriptionKey: 'capi.cluster.steps.variables.description',
-      ready:          false,
+      ready:          true,
       weight:         30
     };
     const steps = !!this.preselectedClass ? [stepConfiguration, stepVariables] : [stepClusterClass, stepConfiguration, stepVariables];
@@ -121,7 +121,7 @@ export default (Vue as VueConstructor<
         name:  '',
         class: ''
       },
-      variablesReady:  false,
+      variablesReady:  true,
       clusterClassObj: null,
       loading:         true
     };
