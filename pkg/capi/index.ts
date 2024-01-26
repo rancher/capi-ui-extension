@@ -44,7 +44,7 @@ export default function(plugin: IPlugin): void {
       labelKey: 'capi.autoImport.enableAction',
       icon:     'icon-plus',
       enabled(target: any) {
-        return target.metadata.labels[LABELS.AUTO_IMPORT] !== 'true';
+        return target?.metadata?.labels?.[LABELS.AUTO_IMPORT] !== 'true';
       },
       invoke(opts, resources = []) {
         resources.forEach((ns) => {
@@ -60,7 +60,7 @@ export default function(plugin: IPlugin): void {
       labelKey: 'capi.autoImport.disableAction',
       icon:     'icon-minus',
       enabled(target: any) {
-        return target.metadata.labels[LABELS.AUTO_IMPORT] === 'true';
+        return target?.metadata?.labels?.[LABELS.AUTO_IMPORT] === 'true';
       },
       invoke(opts, resources = []) {
         resources.forEach((ns) => {
