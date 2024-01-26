@@ -48,13 +48,13 @@ export default Vue.extend({
       return this.value?.spec?.workers?.machineDeployments?.length;
     },
     machineDeploymentsList() {
-      return this.value?.spec?.workers?.machineDeployments?.map((w: Worker) => w.class).join(',') || '';
+      return this.value?.spec?.workers?.machineDeployments?.map((w: Worker) => w.class).join(', ') || '';
     },
     machinePoolsCount() {
       return this.value?.spec?.workers?.machinePools?.length;
     },
     machinePoolsList() {
-      return this.value?.spec?.workers?.machinePools?.map((w: Worker) => w.class).join(',') || '';
+      return this.value?.spec?.workers?.machinePools?.map((w: Worker) => w.class).join(', ') || '';
     }
   },
 });

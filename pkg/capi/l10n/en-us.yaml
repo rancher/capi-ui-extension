@@ -125,3 +125,5 @@ validation:
   version: Version format must match format for this provisioner.
   name: Name is required.
   port: Port value must be a number.
+error:
+  clusterClassNotFound: Could not find corresponding cluster class. Please check that cluster class exists and is valid.

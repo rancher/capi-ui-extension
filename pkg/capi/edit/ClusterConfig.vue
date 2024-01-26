@@ -12,7 +12,7 @@ import ClusterClassVariables from '../components/CCVariables/index.vue';
 import { versionTest, versionValidator, nameValidator } from '../util/validators';
 import {
   CAPIClusterTopology, CAPIClusterNetwork, CAPIClusterCPEndpoint, ClusterClass, Worker
-} from '../types/capi';
+} from './../types/capi';
 import CardGrid from './../components/CardGrid.vue';
 import WorkerItem from './WorkerItem.vue';
 import NetworkSection from './NetworkSection.vue';
@@ -157,17 +157,17 @@ export default (Vue as VueConstructor<
     },
 
     clusterNetwork() {
-      return this.value.spec.clusterNetwork;
+      return this.value?.spec?.clusterNetwork;
     },
     controlPlaneEndpoint() {
-      return this.value.spec.controlPlaneEndpoint;
+      return this.value?.spec?.controlPlaneEndpoint;
     },
 
     machineDeploymentOptions() {
-      return this.clusterClassObj?.spec?.workers?.machineDeployments?.map( w => w.class);
+      return this.clusterClassObj?.spec?.workers?.machineDeployments?.map( (w: Worker) => w.class);
     },
     machinePoolOptions() {
-      return this.clusterClassObj?.spec?.workers?.machinePools?.map( w => w.class);
+      return this.clusterClassObj?.spec?.workers?.machinePools?.map( (w: Worker) => w.class);
     },
     controlPlane() {
       return this.clusterClassObj?.spec?.controlPlane?.ref?.name;
@@ -209,8 +209,12 @@ export default (Vue as VueConstructor<
 
         return x.metadata.namespace === split[0] && x.metadata.name === split[1];
       });
-      this.setClass();
-      this.setNamespace();
+      if ( !!this.clusterClassObj ) {
+        this.setClass();
+        this.setNamespace();
+      } else {
+        this.errors.push(this.t('validation.required', { key: this.t('harvester.setting.supportBundleImage.repo') }, true));
+      }
     },
     setClass() {
       const clusterClassName = this.clusterClassObj?.metadata?.name;
