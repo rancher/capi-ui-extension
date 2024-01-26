@@ -15,7 +15,14 @@ export default Vue.extend({
     mode: {
       type:     String,
       required: true,
-    }
+    },
+    rules: {
+      default: () => ({
+        host:   [],
+        port:   []
+      }),
+      type: Object,
+    },
   },
   computed: {
     ...mapGetters({ t: 'i18n/t' }),
@@ -36,6 +43,7 @@ export default Vue.extend({
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.controlPlaneEndpoint.host')"
+          :rules="rules.host"
           required
         />
       </div>
@@ -47,6 +55,7 @@ export default Vue.extend({
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.controlPlaneEndpoint.port')"
+          :rules="rules.port"
           required
         />
       </div>

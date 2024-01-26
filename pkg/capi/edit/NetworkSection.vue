@@ -18,7 +18,16 @@ export default Vue.extend({
     mode: {
       type:     String,
       required: true,
-    }
+    },
+    rules: {
+      default: () => ({
+        serviceDomain:     [],
+        apiServerPort:     [],
+        pods:              [],
+        services:          []
+      }),
+      type: Object,
+    },
   },
   computed: {
     ...mapGetters({ t: 'i18n/t' }),
@@ -51,6 +60,8 @@ export default Vue.extend({
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.networking.apiServerPort')"
+          :rules="rules.apiServerPort"
+          required
           @input="$emit('api-server-port-changed', $event)"
         />
       </div>
@@ -62,6 +73,7 @@ export default Vue.extend({
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.networking.serviceDomain')"
+          :rules="rules.serviceDomain"
           @input="$emit('service-domain-changed', $event)"
         />
       </div>
@@ -73,6 +85,7 @@ export default Vue.extend({
           :protip="false"
           :mode="mode"
           :title="t('capi.cluster.networking.pods')"
+          :rules="rules.pods"
           @input="$emit('pods-cidr-blocks-changed', $event)"
         />
       </div>
@@ -82,6 +95,7 @@ export default Vue.extend({
           :protip="false"
           :mode="mode"
           :title="t('capi.cluster.networking.services')"
+          :rules="rules.services"
           @input="$emit('services-cidr-blocks-changed', $event)"
         />
       </div>

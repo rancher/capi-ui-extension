@@ -116,8 +116,6 @@ const stringFormatValidators = function(t: Translation, { key = 'Value' }: Valid
     return regexValidator(errorMessage, /^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$/i);
   case 'uuid5':
     return regexValidator(errorMessage, /^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$/i);
-  case 'port':
-    return regexValidator(errorMessage, /^[1-9]+[0-9]*$/i);
   default:
     return undefined;
   }
@@ -135,19 +133,16 @@ export const versionTest = function(t: Translation, type: string): RegExp {
   return new RegExp(`^v(\\d+.){2}\\d+${ ending }$`);
 };
 
-export const versionValidator = function(t: Translation, type: string): Validator[] {
-  const out = [] as any[];
+export const versionValidator = function(t: Translation, type: string): Validator {
   const test = versionTest(t, type);
 
-  out.push((val: String) => val && !val.match(test) ? t('validation.version') : undefined);
-
-  return out;
+  return regexValidator(t('validation.version'), test);
 };
 
-export const nameValidator = function(t: Translation): Validator[] {
-  const out = [] as any[];
+export const hostValidator = function(t: Translation): Validator {
+  return stringFormatValidators(t, { key: 'Host' }, 'hostname');
+};
 
-  out.push((val: String) => !val ? t('validation.name') : undefined);
-
-  return out;
+export const portValidator = function(t: Translation): Validator {
+  return (val: number) => val && isNaN(val) ? t('validation.port') : undefined;
 };
