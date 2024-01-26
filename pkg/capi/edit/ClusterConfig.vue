@@ -213,7 +213,7 @@ export default (Vue as VueConstructor<
         this.setClass();
         this.setNamespace();
       } else {
-        this.errors.push(this.t('validation.required', { key: this.t('harvester.setting.supportBundleImage.repo') }, true));
+        this.errors.push(this.t('error.clusterClassNotFound'));
       }
     },
     setClass() {
@@ -314,6 +314,18 @@ export default (Vue as VueConstructor<
       this.setClass();
       this.setNamespace();
       this.stepClusterClassReady();
+    },
+    podsCidrBlocksChanged(val: string[]) {
+      if ( !this.value.spec.clusterNetwork?.pods ) {
+        set(this.value.spec.clusterNetwork, 'pods', []);
+      }
+      set(this.value.spec.clusterNetwork.pods, 'cidrBlocks', val);
+    },
+    servicesCidrBlocksChanged(val: string[]) {
+      if ( !this.value.spec.clusterNetwork?.services ) {
+        set(this.value.spec.clusterNetwork, 'services', []);
+      }
+      set(this.value.spec.clusterNetwork.services, 'cidrBlocks', val);
     }
   }
 });
@@ -392,6 +404,10 @@ export default (Vue as VueConstructor<
         <NetworkSection
           v-model="clusterNetwork"
           :mode="mode"
+          @api-server-port-changed="(val) => $set(value.spec.clusterNetwork, 'apiServerPort', val)"
+          @service-domain-changed="(val) => $set(value.spec.clusterNetwork, 'serviceDomain', val)"
+          @pods-cidr-blocks-changed="podsCidrBlocksChanged"
+          @services-cidr-blocks-changed="servicesCidrBlocksChanged"
         />
       </div>
       <div class="mt-20 block">

@@ -26,16 +26,16 @@ export default Vue.extend({
       return this.mode === _EDIT;
     },
     apiServerPort() {
-      return this.value.apiServerPort;
+      return this.value?.apiServerPort;
     },
     serviceDomain() {
-      return this.value.serviceDomain;
+      return this.value?.serviceDomain;
     },
     podsCidrBlocks() {
-      return this.value.pods.cidrBlocks;
+      return this.value?.pods?.cidrBlocks;
     },
     servicesCidrBlocks() {
-      return this.value.services.cidrBlocks;
+      return this.value?.services?.cidrBlocks;
     },
   }
 });
@@ -47,38 +47,42 @@ export default Vue.extend({
         class="col span-3"
       >
         <LabeledInput
-          v-model="value.apiServerPort"
+          :value="apiServerPort"
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.networking.apiServerPort')"
+          @input="$emit('api-server-port-changed', $event)"
         />
       </div>
       <div
         class="col span-3"
       >
         <LabeledInput
-          v-model="value.serviceDomain"
+          :value="serviceDomain"
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.networking.serviceDomain')"
+          @input="$emit('service-domain-changed', $event)"
         />
       </div>
     </div>
     <div class="row mb-20">
       <div class="col span-3">
         <ArrayList
-          v-model="value.pods.cidrBlocks"
+          :value="podsCidrBlocks"
           :protip="false"
           :mode="mode"
           :title="t('capi.cluster.networking.pods')"
+          @input="$emit('pods-cidr-blocks-changed', $event)"
         />
       </div>
       <div class="col span-3">
         <ArrayList
-          v-model="value.services.cidrBlocks"
+          :value="servicesCidrBlocks"
           :protip="false"
           :mode="mode"
           :title="t('capi.cluster.networking.services')"
+          @input="$emit('services-cidr-blocks-changed', $event)"
         />
       </div>
     </div>
