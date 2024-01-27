@@ -4,6 +4,9 @@ export default function(resource: any) {
   if (resource?.metadata?.labels?.[LABELS.AUTO_IMPORT] === 'true') {
     delete resource.metadata.labels[LABELS.AUTO_IMPORT];
   } else {
+    if (!resource.metadata.labels) {
+      resource.metadata.labels = {};
+    }
     resource.metadata.labels[LABELS.AUTO_IMPORT] = 'true';
   }
   try {
