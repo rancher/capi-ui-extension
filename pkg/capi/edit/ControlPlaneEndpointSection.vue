@@ -51,7 +51,7 @@ export default Vue.extend({
         class="col"
       >
         <LabeledInput
-          v-model="value.port"
+          v-model.number="value.port"
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.controlPlaneEndpoint.port')"

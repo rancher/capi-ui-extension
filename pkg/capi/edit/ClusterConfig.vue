@@ -247,20 +247,16 @@ export default (Vue as VueConstructor<
       this.set(this.value.metadata, 'namespace', clusterClassNs);
     },
     async saveOverride() {
-      // These two fields have to be numbers
-      if (this.value?.spec?.controlPlaneEndpoint?.port) {
-        set(this.value.spec.controlPlaneEndpoint, 'port', Number(this.value.spec.controlPlaneEndpoint.port));
-      }
-      if (this.value?.spec?.clusterNetwork?.apiServerPort) {
-        set(this.value.spec.clusterNetwork, 'apiServerPort', Number(this.value.spec.clusterNetwork.apiServerPort));
-      }
-
       if ( this.errors ) {
         clear(this.errors);
       }
-      await this.value.save();
+      try {
+        await this.value.save();
 
-      return this.done();
+        return this.done();
+      } catch (err) {
+        this.errors.push(err);
+      }
     },
 
     initSpecs() {
@@ -392,7 +388,7 @@ export default (Vue as VueConstructor<
           v-model="clusterNetwork"
           :mode="mode"
           :rules="{serviceDomain:fvGetAndReportPathRules('spec.clusterNetwork.serviceDomain'), apiServerPort:fvGetAndReportPathRules('spec.clusterNetwork.apiServerPort'), pods: [], services: [] }"
-          @api-server-port-changed="(val) => $set(value.spec.clusterNetwork, 'apiServerPort', val)"
+          @api-server-port-changed="(val) => $set(value.spec.clusterNetwork, 'apiServerPort', Number(val) || '')"
           @service-domain-changed="(val) => $set(value.spec.clusterNetwork, 'serviceDomain', val)"
           @pods-cidr-blocks-changed="podsCidrBlocksChanged"
           @services-cidr-blocks-changed="servicesCidrBlocksChanged"
