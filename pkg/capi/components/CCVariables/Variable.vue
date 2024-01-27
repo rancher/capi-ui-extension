@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import Vue from 'vue';
 import type { PropType } from 'vue';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
@@ -12,7 +12,7 @@ import { mapGetters } from 'vuex';
 import { Translation } from '@rancher/shell/types/t';
 import type { ClusterClassVariable } from '../../types/clusterClass';
 import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
-export default defineComponent({
+export default Vue.extend({
   name: 'CCVariable',
 
   props: {

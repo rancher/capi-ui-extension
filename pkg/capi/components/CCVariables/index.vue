@@ -1,6 +1,7 @@
 <script lang="ts">
 import debounce from 'lodash/debounce';
-import { defineComponent } from 'vue';
+import Vue from 'vue';
+
 import type { PropType } from 'vue';
 import { randomStr } from '@shell/utils/string';
 import { ClusterClassVariable } from '../../types/clusterClass';
@@ -8,7 +9,7 @@ import type { CapiClusterVariable } from '../../types/cluster.x-k8s.io.cluster';
 import { isDefined } from '../../util/validators';
 import Variable from './Variable.vue';
 
-export default defineComponent({
+export default Vue.extend({
   name: 'ClusterClassVariables',
 
   components: { Variable },
