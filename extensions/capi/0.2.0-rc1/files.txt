@@ -1,0 +1,17 @@
+plugin/capi-0.2.0-rc1.umd.min.4.js
+plugin/capi-0.2.0-rc1.umd.min.4.js.map
+plugin/capi-0.2.0-rc1.umd.min.5.js
+plugin/capi-0.2.0-rc1.umd.min.5.js.map
+plugin/capi-0.2.0-rc1.umd.min.6.js
+plugin/capi-0.2.0-rc1.umd.min.6.js.map
+plugin/capi-0.2.0-rc1.umd.min.7.js
+plugin/capi-0.2.0-rc1.umd.min.7.js.map
+plugin/capi-0.2.0-rc1.umd.min.edit.js
+plugin/capi-0.2.0-rc1.umd.min.edit.js.map
+plugin/capi-0.2.0-rc1.umd.min.formatters.js
+plugin/capi-0.2.0-rc1.umd.min.formatters.js.map
+plugin/capi-0.2.0-rc1.umd.min.js
+plugin/capi-0.2.0-rc1.umd.min.js.map
+plugin/capi-0.2.0-rc1.umd.min.vendors~edit.js
+plugin/capi-0.2.0-rc1.umd.min.vendors~edit.js.map
+plugin/package.json
