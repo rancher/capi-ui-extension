@@ -1,11 +1,12 @@
 {
   "name": "capi",
   "description": "UI for CAPI cluster provisioning using the Rancher Turtles extension",
-  "version": "0.2.0-rc1",
+  "version": "0.2.0",
   "private": false,
   "rancher": {
     "annotations": {
-      "catalog.cattle.io/rancher-version": ">= v2.7.8"
+      "catalog.cattle.io/rancher-version": ">= v2.7.8",
+      "catalog.cattle.io/display-name": "Rancher Turtles UI"
     }
   },
   "scripts": {
