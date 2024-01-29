@@ -3,6 +3,26 @@ entries:
   capi:
   - annotations:
       catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Rancher Turtles UI
+      catalog.cattle.io/kube-version: '>= 1.16.0-0 < 1.28.0-0'
+      catalog.cattle.io/namespace: cattle-ui-plugin-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/permits-os: linux, windows
+      catalog.cattle.io/rancher-version: '>= v2.7.8'
+      catalog.cattle.io/scope: management
+      catalog.cattle.io/ui-component: plugins
+    apiVersion: v2
+    appVersion: 0.2.0
+    created: "2024-01-29T19:05:59.617943203Z"
+    description: UI for CAPI cluster provisioning using the Rancher Turtles extension
+    digest: c39157079c5fe92ffd6720f26993eccb562832be9d8308fcfcb8165f7d121c42
+    name: capi
+    type: application
+    urls:
+    - assets/capi/capi-0.2.0.tgz
+    version: 0.2.0
+  - annotations:
+      catalog.cattle.io/certified: rancher
       catalog.cattle.io/kube-version: '>= 1.16.0-0 < 1.28.0-0'
       catalog.cattle.io/namespace: cattle-ui-plugin-system
       catalog.cattle.io/os: linux
@@ -39,4 +59,4 @@ entries:
     urls:
     - assets/capi/capi-0.1.0.tgz
     version: 0.1.0
-generated: "2024-01-29T18:36:35.812089794Z"
+generated: "2024-01-29T19:05:59.617047308Z"
