@@ -1,7 +1,7 @@
 {
   "name": "capi",
-  "description": "capi plugin",
-  "version": "0.1.0",
+  "description": "UI for CAPI cluster provisioning using the Rancher Turtles extension",
+  "version": "0.2.0-rc1",
   "private": false,
   "rancher": {
     "annotations": {
