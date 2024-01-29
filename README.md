@@ -1,5 +1,5 @@
 # capi-ui-extension
-Rancher Extension used in [rancher/dashboard](https://github.com/rancher/dashboard) for [Rancher Turtles](https://elemental.docs.rancher.com/) CAPI Provisioning UI.
+Rancher Extension used in [rancher/dashboard](https://github.com/rancher/dashboard) for [Rancher Turtles](https://docs.rancher-turtles.com/docs/category/getting-started/) CAPI Provisioning UI.
 
 
 ## Running for Development
