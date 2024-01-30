@@ -5,7 +5,7 @@
   "private": false,
   "rancher": {
     "annotations": {
-      "catalog.cattle.io/rancher-version": ">= v2.7.8",
+      "catalog.cattle.io/rancher-version": ">= v2.8.0",
       "catalog.cattle.io/display-name": "Rancher Turtles UI"
     }
   },
@@ -14,12 +14,12 @@
     "nuxt": "./node_modules/.bin/nuxt"
   },
   "engines": {
-    "node": ">=14"
+    "node": ">=16"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "4.5.18",
-    "@vue/cli-service": "4.5.18",
-    "@vue/cli-plugin-typescript": "4.5.18"
+    "@vue/cli-plugin-babel": "5.0.8",
+    "@vue/cli-service": "5.0.8",
+    "@vue/cli-plugin-typescript": "5.0.8"
   },
   "browserslist": [
     "> 1%",
