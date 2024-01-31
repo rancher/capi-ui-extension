@@ -81,13 +81,37 @@ capi:
         other {{count} Machine Pools }
       }
   experimental: "The Rancher CAPI UI extension is experimental and is not currently supported."
+  provider:
+    title: Provider
+    name:
+      label: Provider name
+      placeholder: Provider name
+    description: 
+      label: Provider description
+      placeholder: Any text you want that better describes this provider
+    type:
+      label: Provider type
+    features:
+      title: Features
+      clusterResourceSet: Enable cluster resource set
+      clusterTopology: Enable cluster topology
+      machinePool: Enable machine pool
+    variables:
+      title: Variables
+      add: Add variable
+    secret:
+      title: Secret Configuration
+      create: Create new secret
+      reuse: Use core provider secret
+      data: Data
+      label: Secret Name
 
 nav:
   group:
     CAPITurtles: CAPI
 
 typeLabel:
-  operator.cluster.x-k8s.io.infrastructureprovider: |-
+  turtles-capi.cattle.io.capiprovider: |-
     {count, plural,
       one { Infrastructure Provider }
       other { Infrastructure Providers }
