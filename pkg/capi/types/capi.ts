@@ -8,7 +8,7 @@ export const LABELS = { AUTO_IMPORT: 'cluster-api.cattle.io/rancher-auto-import'
 
 export const CAPI = {
   CLUSTER_CLASS: 'cluster.x-k8s.io.clusterclass',
-  PROVIDER:      'operator.cluster.x-k8s.io.infrastructureprovider',
+  PROVIDER:      'turtles-capi.cattle.io.capiprovider',
 };
 
 export const CP_VERSIONS = {
@@ -59,3 +59,26 @@ export interface ClusterClass {
     controlPlane: Object
   }
 }
+export const PROVIDER_TYPES = [
+  {
+    id: 'aws', disabled: false, credentialsRequired: true
+  },
+  {
+    id: 'azure', disabled: false, credentialsRequired: true
+  },
+  {
+    id: 'digitalocean', disabled: false, credentialsRequired: true
+  },
+  {
+    id: 'docker', disabled: false, credentialsRequired: false
+  },
+  {
+    id: 'gcp', disabled: false, credentialsRequired: true
+  },
+  {
+    id: 'vsphere', disabled: false, credentialsRequired: true
+  },
+  {
+    id: 'custom', disabled: false, credentialsRequired: false
+  },
+];
