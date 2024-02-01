@@ -10,7 +10,9 @@ import CruResource from '@shell/components/CruResource.vue';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import { Translation } from '@rancher/shell/types/t';
 import ClusterClassVariables from '../components/CCVariables/index.vue';
-import { versionTest, versionValidator, hostValidator, portValidator } from '../util/validators';
+import {
+  versionTest, versionValidator, hostValidator, portValidator, cidrValidator
+} from '../util/validators';
 import {
   CAPIClusterTopology, CAPIClusterNetwork, CAPIClusterCPEndpoint, ClusterClass, Worker
 } from './../types/capi';
@@ -119,6 +121,8 @@ export default (Vue as VueConstructor<
         { path: 'spec.controlPlaneEndpoint.port', rules: ['required', 'port'] },
         { path: 'spec.clusterNetwork.serviceDomain', rules: ['host'] },
         { path: 'spec.clusterNetwork.apiServerPort', rules: ['required', 'port'] },
+        { path: 'spec.clusterNetwork.pods', rules: ['cidr'] },
+        { path: 'spec.clusterNetwork.services', rules: ['cidr'] }
       ],
       credentialId:            '',
       credential:              null,
@@ -171,6 +175,7 @@ export default (Vue as VueConstructor<
         version: versionValidator(this.$store.getters['i18n/t'], this.controlPlane),
         host:    hostValidator(this.$store.getters['i18n/t']),
         port:    portValidator(this.$store.getters['i18n/t']),
+        cidr:    cidrValidator(this.$store.getters['i18n/t'])
       };
     },
     stepConfigurationRequires() {
@@ -387,7 +392,12 @@ export default (Vue as VueConstructor<
         <NetworkSection
           v-model="clusterNetwork"
           :mode="mode"
-          :rules="{serviceDomain:fvGetAndReportPathRules('spec.clusterNetwork.serviceDomain'), apiServerPort:fvGetAndReportPathRules('spec.clusterNetwork.apiServerPort'), pods: [], services: [] }"
+          :rules="{
+            serviceDomain:fvGetAndReportPathRules('spec.clusterNetwork.serviceDomain'),
+            apiServerPort:fvGetAndReportPathRules('spec.clusterNetwork.apiServerPort'),
+            pods: fvGetAndReportPathRules('spec.clusterNetwork.pods'),
+            services: fvGetAndReportPathRules('spec.clusterNetwork.services')
+          }"
           @api-server-port-changed="(val) => $set(value.spec.clusterNetwork, 'apiServerPort', Number(val) || '')"
           @service-domain-changed="(val) => $set(value.spec.clusterNetwork, 'serviceDomain', val)"
           @pods-cidr-blocks-changed="podsCidrBlocksChanged"

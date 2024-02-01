@@ -47,8 +47,9 @@ export default (Vue as VueConstructor<
     this.getClusterClasses().then((cc: any[]) => {
       this.clusterClasses = cc;
       this.loading = false;
-    }).catch((err) => {
-      console.error(err); this.loading = false;
+    }).catch((err: Error) => {
+      this.errors.push(err);
+      this.loading = false;
     });
   },
   data() {
