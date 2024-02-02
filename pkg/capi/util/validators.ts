@@ -3,7 +3,7 @@ import { Translation } from '@shell/types/t';
 import isEmpty from 'lodash/isEmpty';
 import { isIpv4 } from '@shell/utils/string';
 import { isValidCIDR, isValidMac } from '@shell/utils/validators/cidr';
-import formRulesGenerator from '@shell/utils/validators/formRules/index.ts';
+import formRulesGenerator from '@shell/utils/validators/formRules/index';
 import { CP_VERSIONS } from './../types/capi';
 
 /**
