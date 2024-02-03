@@ -150,3 +150,8 @@ export const portValidator = function(t: Translation): Validator {
 export const cidrValidator = function(t: Translation): Validator {
   return stringFormatValidators(t, { key: 'Value' }, 'cidr');
 };
+export const cidrArrayValid = function(arr: string[]) {
+  return arr.every((item: string) => {
+    return isValidCIDR(item);
+  });
+};

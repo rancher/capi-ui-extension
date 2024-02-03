@@ -11,7 +11,7 @@ import CreateEditView from '@shell/mixins/create-edit-view';
 import { Translation } from '@rancher/shell/types/t';
 import ClusterClassVariables from '../components/CCVariables/index.vue';
 import {
-  versionTest, versionValidator, hostValidator, portValidator, cidrValidator
+  versionTest, versionValidator, hostValidator, portValidator, cidrValidator, cidrArrayValid
 } from '../util/validators';
 import {
   CAPIClusterTopology, CAPIClusterNetwork, CAPIClusterCPEndpoint, ClusterClass, Worker
@@ -37,6 +37,10 @@ const defaultCPEndpointConfig: CAPIClusterCPEndpoint = {
   host: '',
   port: 49152
 };
+
+interface Step {
+  name: String
+}
 
 export default (Vue as VueConstructor<
   Vue & InstanceType<typeof CreateEditView>
@@ -140,7 +144,7 @@ export default (Vue as VueConstructor<
 
   watch: {
     clusterClassObj(neu) {
-      const step = this.addSteps.find(s => s.name === 'stepClusterClass');
+      const step = this.addSteps.find((s: Step) => s.name === 'stepClusterClass');
 
       if (step) {
         this.$set(step, 'ready', !!neu);
@@ -148,13 +152,13 @@ export default (Vue as VueConstructor<
     },
 
     stepConfigurationRequires(neu) {
-      const step = this.addSteps.find(s => s.name === 'stepConfiguration');
+      const step = this.addSteps.find((s: Step) => s.name === 'stepConfiguration');
 
       this.$set(step, 'ready', neu);
     },
 
     variablesReady(neu) {
-      const step = this.addSteps.find(s => s.name === 'stepVariables');
+      const step = this.addSteps.find((s: Step) => s.name === 'stepVariables');
 
       this.$set(step, 'ready', neu);
     }
@@ -185,7 +189,9 @@ export default (Vue as VueConstructor<
       const controlPlaneEndpointValid: boolean = !!this.value?.spec?.controlPlaneEndpoint?.host && this.value?.spec?.controlPlaneEndpoint?.port && !isNaN(this.value.spec.controlPlaneEndpoint.port);
       const machineDeploymentsValid: boolean = this.value?.spec?.topology?.workers?.machineDeployments?.length > 0 && !!this.value?.spec?.topology?.workers?.machineDeployments[0]?.name && !!this.value?.spec?.topology?.workers?.machineDeployments[0]?.class;
       const machinePoolsValid: boolean = this.value?.spec?.topology?.workers?.machinePools?.length > 0 && !!this.value?.spec?.topology?.workers?.machinePools[0]?.name && !!this.value?.spec?.topology?.workers?.machinePools[0]?.class;
-      const networkValid:boolean = !!this.value?.spec?.clusterNetwork?.apiServerPort && !isNaN(this.value?.spec?.clusterNetwork?.apiServerPort);
+      const networkPodsValid: boolean = !this.value?.spec?.clusterNetwork?.pods?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.pods.cidrBlocks);
+      const networkServicesValid: boolean = !this.value?.spec?.clusterNetwork?.services?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.services.cidrBlocks);
+      const networkValid:boolean = !!this.value?.spec?.clusterNetwork?.apiServerPort && !isNaN(this.value?.spec?.clusterNetwork?.apiServerPort) && networkPodsValid && networkServicesValid;
 
       return nameValid && versionValid && controlPlaneEndpointValid && networkValid && (machineDeploymentsValid || machinePoolsValid);
     },
@@ -214,7 +220,7 @@ export default (Vue as VueConstructor<
 
       return out;
 
-      function addType(obj: {[key: string]: any}, disabled = false) {
+      function addType(obj: {[key: string]: any}) {
         const id = obj?.metadata?.name;
         const subtype = {
           id,
