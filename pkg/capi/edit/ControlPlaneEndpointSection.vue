@@ -44,7 +44,6 @@ export default Vue.extend({
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.controlPlaneEndpoint.host')"
           :rules="rules.host"
-          required
         />
       </div>
       <div
@@ -56,7 +55,6 @@ export default Vue.extend({
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.controlPlaneEndpoint.port')"
           :rules="rules.port"
-          required
         />
       </div>
     </div>
