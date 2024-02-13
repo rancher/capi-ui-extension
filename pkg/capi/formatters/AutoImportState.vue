@@ -18,7 +18,7 @@ export default {
 
   computed: {
     isAutoImport() {
-      return this.row.metadata.labels[LABELS.AUTO_IMPORT] === 'true';
+      return this.row?.metadata?.labels[LABELS.AUTO_IMPORT] === 'true';
     }
   }
 };
