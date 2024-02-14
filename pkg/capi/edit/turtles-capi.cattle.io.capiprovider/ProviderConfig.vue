@@ -6,7 +6,6 @@ import { clear } from '@shell/utils/array';
 import { NAMESPACE, SECRET } from '@shell/config/types';
 import CruResource from '@shell/components/CruResource.vue';
 import Loading from '@shell/components/Loading.vue';
-import RadioGroup from '@components/Form/Radio/RadioGroup.vue';
 import SelectCredential from '@shell/edit/provisioning.cattle.io.cluster/SelectCredential.vue';
 import FormValidation from '@shell/mixins/form-validation';
 import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
@@ -24,26 +23,31 @@ import { providerVersionValidator, urlValidator } from '../../util/validators';
 const defaultSpec = {
   name:         '',
   type:         'infrastructure',
-  variables:    {},
   configSecret: { name: '' },
   credentials:  { rancherCloudCredential: '' },
+  features:     {
+    clusterResourceSet: true,
+    clusterTopology:    true,
+    machinePool:        true,
+  },
+  variables: {}
 };
 const customProviderSpec = {
   name:         '',
   type:         'infrastructure',
-  variables:    {},
   configSecret: { name: '' },
   credentials:  { rancherCloudCredential: '' },
   fetchConfig:  { url: '' },
-  version:      ''
+  version:      '',
+  features:     {
+    clusterResourceSet: true,
+    clusterTopology:    true,
+    machinePool:        true,
+  },
+  variables: {}
 };
-const defaultFeatures = {
-  clusterResourceSet: true,
-  clusterTopology:    true,
-  machinePool:        true,
-};
-const INFRASTRUCTURE_TYPE = 'infrastructure';
-const providerTypes = [INFRASTRUCTURE_TYPE, 'bootstrap', 'controlPlane'];
+
+const providerTypes = ['infrastructure', 'bootstrap', 'controlPlane'];
 
 interface Secret {
   metadata: {
@@ -63,7 +67,6 @@ export default (Vue as VueConstructor<
     CruResource,
     Loading,
     NameNsDescription,
-    RadioGroup,
     SelectCredential,
     Checkbox,
     KeyValue,
@@ -113,8 +116,7 @@ export default (Vue as VueConstructor<
       allNamespaces:         [],
       needCredential:     providerDetails?.needCredentials || false,
       requireCredentials: providerDetails?.requireCredentials || false,
-      typeOptions:        providerTypes,
-      shouldCreateSecret: true
+      typeOptions:        providerTypes
     };
   },
   computed: {
@@ -162,9 +164,6 @@ export default (Vue as VueConstructor<
         } else {
           set(this.value, 'spec', clone(customProviderSpec));
         }
-        set(this.value.spec, 'features', clone(defaultFeatures));
-      } else if (this.value.spec?.configSecret?.name === this.coreProviderSecret?.metadata?.name) {
-        this.shouldCreateSecret = false;
       }
       if (!this.value.spec.configSecret.name) {
         set(this.value.spec.configSecret, 'name', this.generateName(this.provider)); // Defines the name of the secret that will be created or adjusted based on the content of the spec.features and spec.variables.
@@ -172,20 +171,6 @@ export default (Vue as VueConstructor<
     },
     generateName(name: string) {
       return name ? `${ name }-credentials-${ randomStr(5).toLowerCase() }` : undefined;
-    },
-    typeChanged(type: string) {
-      if ( type === INFRASTRUCTURE_TYPE && !this.value.spec.features) {
-        set(this.value.spec, 'features', clone(defaultFeatures));
-      } else {
-        set(this.value.spec, 'features', undefined);
-      }
-    },
-    shouldCreateSecretChanged(val: boolean) {
-      if ( val ) {
-        set(this.value.spec.configSecret, 'name', this.generateName(this.provider));
-      } else {
-        set(this.value.spec.configSecret, 'name', this.coreProviderSecret.metadata.name);
-      }
     },
     async getDependencies() {
       const inStore = this.$store.getters['currentStore'](NAMESPACE);
@@ -270,7 +255,6 @@ export default (Vue as VueConstructor<
           :options="typeOptions"
           label-key="capi.provider.type.label"
           required
-          @input="typeChanged($event)"
         />
       </div>
       <div
@@ -300,19 +284,8 @@ export default (Vue as VueConstructor<
     <h2 class="mb-20">
       <t k="capi.provider.secret.title" />
     </h2>
-    <div v-if="!requireCredentials">
-      <RadioGroup
-        v-model="shouldCreateSecret"
-        name="shouldCreateSecret"
-        :disabled="isEdit"
-        :mode="mode"
-        :options="modeOptions"
-        class="mb-40"
-        @input="shouldCreateSecretChanged($event)"
-      />
-    </div>
     <SelectCredential
-      v-if="needCredential && shouldCreateSecret"
+      v-if="needCredential"
       v-model="value.spec.credentials.rancherCloudCredential"
       :mode="mode"
       :provider="provider"
@@ -328,19 +301,19 @@ export default (Vue as VueConstructor<
         v-model="value.spec.features.clusterResourceSet"
         :mode="mode"
         :label="t('capi.provider.features.clusterResourceSet')"
-        :disabled="isEdit || !shouldCreateSecret"
+        :disabled="isEdit"
       />
       <Checkbox
         v-model="value.spec.features.clusterTopology"
         :mode="mode"
         :label="t('capi.provider.features.clusterTopology')"
-        :disabled="isEdit || !shouldCreateSecret"
+        :disabled="isEdit"
       />
       <Checkbox
         v-model="value.spec.features.machinePool"
         :mode="mode"
         :label="t('capi.provider.features.machinePool')"
-        :disabled="isEdit || !shouldCreateSecret"
+        :disabled="isEdit"
       />
     </div>
     <div v-if="hasVariables">
@@ -353,7 +326,7 @@ export default (Vue as VueConstructor<
         :mode="mode"
         :read-allowed="false"
         :value-can-be-empty="true"
-        :disabled="isEdit || !shouldCreateSecret"
+        :disabled="isEdit"
       />
     </div>
   </CruResource>
