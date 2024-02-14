@@ -83,14 +83,19 @@ capi:
   experimental: "The Rancher CAPI UI extension is experimental and is not currently supported."
   provider:
     title: Provider
+    label: Provider
     name:
-      label: Provider name
+      label: Name
       placeholder: Provider name
     description: 
       label: Provider description
       placeholder: Any text you want that better describes this provider
     type:
       label: Provider type
+    version:
+      label: Version
+    fetchConfigURL:
+      label: URL
     features:
       title: Features
       clusterResourceSet: Enable cluster resource set
@@ -150,5 +155,6 @@ validation:
   version: Version format must match format for this provisioner.
   name: Name is required.
   port: Port value must be a number.
+  url: '"Value" must be a valid URL.'
 error:
   clusterClassNotFound: Could not find corresponding cluster class. Please check that cluster class exists and is valid.
