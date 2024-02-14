@@ -146,3 +146,11 @@ export const hostValidator = function(t: Translation): Validator {
 export const portValidator = function(t: Translation): Validator {
   return (val: number) => val && isNaN(val) ? t('validation.port') : undefined;
 };
+
+export const urlValidator = function(t: Translation): Validator {
+  return (val: string) => val && !val.match(/^https?:\/\/(.*)$/) ? t('validation.url') : undefined;
+};
+
+export const providerVersionValidator = function(t: Translation, required: boolean): Validator {
+  return (val: string) => required && !val.match(/^v.+/i) ? t('validation.version') : undefined;
+};

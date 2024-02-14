@@ -1,11 +1,11 @@
 <script lang="ts">
-import Vue from 'vue';
+import Vue, { VueConstructor } from 'vue';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import CruResource from '@shell/components/CruResource.vue';
 import SelectIconGrid from '@shell/components/SelectIconGrid.vue';
 import { SUB_TYPE } from '@shell/config/query-params';
 
-import { PROVIDER_TYPES } from '../types/capi';
+import { PROVIDER_TYPES } from '../../types/capi';
 import ProviderConfig from './ProviderConfig.vue';
 
 interface ProviderType {
@@ -16,7 +16,9 @@ interface ProviderType {
   disabled: boolean,
 }
 
-export default Vue.extend({
+export default (Vue as VueConstructor<
+  Vue & InstanceType<typeof CreateEditView>
+>).extend({
   name: 'CreateProvider',
 
   components: {
@@ -77,7 +79,7 @@ export default Vue.extend({
         let icon;
 
         try {
-          icon = require(`../assets/images/providers/${ id }.svg`);
+          icon = require(`../../assets/images/providers/${ id }.svg`);
         } catch (e) {
           icon = require('~shell/assets/images/generic-driver.svg');
         }

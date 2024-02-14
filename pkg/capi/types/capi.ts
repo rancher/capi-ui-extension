@@ -6,6 +6,9 @@ export const BLANK_CLUSTER = '_';
 
 export const LABELS = { AUTO_IMPORT: 'cluster-api.cattle.io/rancher-auto-import' };
 
+export const RANCHER_TURTLES_SYSTEM_NAMESPACE = 'capi-system';
+export const RANCHER_TURTLES_SYSTEM_NAME = 'capi-env-variables';
+
 export const CAPI = {
   CLUSTER_CLASS: 'cluster.x-k8s.io.clusterclass',
   PROVIDER:      'turtles-capi.cattle.io.capiprovider',
@@ -59,26 +62,33 @@ export interface ClusterClass {
     controlPlane: Object
   }
 }
-export const PROVIDER_TYPES = [
+export interface Provider {
+  id: string,
+  disabled: boolean,
+  needCredentials: boolean,
+  requireCredentials: boolean
+}
+
+export const PROVIDER_TYPES: Provider[] = [
   {
-    id: 'aws', disabled: false, credentialsRequired: true
+    id: 'aws', disabled: false, needCredentials: true, requireCredentials: true
   },
   {
-    id: 'azure', disabled: false, credentialsRequired: true
+    id: 'azure', disabled: false, needCredentials: true, requireCredentials: false
   },
   {
-    id: 'digitalocean', disabled: false, credentialsRequired: true
+    id: 'digitalocean', disabled: false, needCredentials: true, requireCredentials: false
   },
   {
-    id: 'docker', disabled: false, credentialsRequired: false
+    id: 'docker', disabled: false, needCredentials: false, requireCredentials: false
   },
   {
-    id: 'gcp', disabled: false, credentialsRequired: true
+    id: 'gcp', disabled: false, needCredentials: true, requireCredentials: false
   },
   {
-    id: 'vsphere', disabled: false, credentialsRequired: true
+    id: 'vsphere', disabled: false, needCredentials: true, requireCredentials: false
   },
   {
-    id: 'custom', disabled: false, credentialsRequired: false
+    id: 'custom', disabled: false, needCredentials: false, requireCredentials: false
   },
 ];
