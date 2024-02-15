@@ -84,6 +84,7 @@ capi:
   provider:
     title: Provider
     label: Provider
+    banner: Editing configuration will affect all clusters that are using this provider and may cause errors.
     name:
       label: Name
       placeholder: Provider name
