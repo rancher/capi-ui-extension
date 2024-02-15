@@ -115,8 +115,8 @@ export default (Vue as VueConstructor<
       fvFormRuleSets:          [
         { path: 'metadata.name', rules: ['required'] },
         { path: 'spec.topology.version', rules: ['required', 'version'] },
-        { path: 'spec.controlPlaneEndpoint.host', rules: ['required', 'host'] },
-        { path: 'spec.controlPlaneEndpoint.port', rules: ['required', 'port'] },
+        { path: 'spec.controlPlaneEndpoint.host', rules: ['host'] },
+        { path: 'spec.controlPlaneEndpoint.port', rules: ['port'] },
         { path: 'spec.clusterNetwork.serviceDomain', rules: ['host'] },
         { path: 'spec.clusterNetwork.apiServerPort', rules: ['required', 'port'] },
       ],
@@ -177,12 +177,13 @@ export default (Vue as VueConstructor<
       const nameValid: boolean = !!this.value.metadata.name;
       const versionTestString: RegExp = versionTest(this.$store.getters['i18n/t'], this.controlPlane);
       const versionValid: boolean = this.value?.spec?.topology?.version && !!(this.value?.spec?.topology?.version.match(versionTestString));
-      const controlPlaneEndpointValid: boolean = !!this.value?.spec?.controlPlaneEndpoint?.host && this.value?.spec?.controlPlaneEndpoint?.port && !isNaN(this.value.spec.controlPlaneEndpoint.port);
+      const controlPlaneEndpointPortValid: boolean = !portValidator(this.$store.getters['i18n/t'])(this.value?.spec?.controlPlaneEndpoint?.port);
+      const controlPlaneEndpointHostValid: boolean = !hostValidator(this.$store.getters['i18n/t'])(this.value?.spec?.controlPlaneEndpoint?.host);
       const machineDeploymentsValid: boolean = this.value?.spec?.topology?.workers?.machineDeployments?.length > 0 && !!this.value?.spec?.topology?.workers?.machineDeployments[0]?.name && !!this.value?.spec?.topology?.workers?.machineDeployments[0]?.class;
       const machinePoolsValid: boolean = this.value?.spec?.topology?.workers?.machinePools?.length > 0 && !!this.value?.spec?.topology?.workers?.machinePools[0]?.name && !!this.value?.spec?.topology?.workers?.machinePools[0]?.class;
       const networkValid:boolean = !!this.value?.spec?.clusterNetwork?.apiServerPort && !isNaN(this.value?.spec?.clusterNetwork?.apiServerPort);
 
-      return nameValid && versionValid && controlPlaneEndpointValid && networkValid && (machineDeploymentsValid || machinePoolsValid);
+      return nameValid && versionValid && controlPlaneEndpointHostValid && controlPlaneEndpointPortValid && networkValid && (machineDeploymentsValid || machinePoolsValid);
     },
     clusterNetwork() {
       return this.value?.spec?.clusterNetwork;
