@@ -6,8 +6,8 @@ import CreateEditView from '@shell/mixins/create-edit-view';
 import Loading from '@shell/components/Loading.vue';
 import CruResource from '@shell/components/CruResource.vue';
 import type { Route } from 'vue-router';
+import { CAPI, QUERY_PARAMS, ClusterClass } from '../../types/capi';
 import ClusterConfig from './ClusterConfig.vue';
-import { CAPI, QUERY_PARAMS, ClusterClass } from './../types/capi';
 
 export default (Vue as VueConstructor<
   Vue & InstanceType<typeof CreateEditView>
