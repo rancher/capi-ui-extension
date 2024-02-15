@@ -15,6 +15,7 @@ import NameNsDescription from '@shell/components/form/NameNsDescription.vue';
 import KeyValue from '@shell/components/form/KeyValue.vue';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
+import Banner from '@components/Banner/Banner.vue';
 import { _EDIT, _CREATE } from '@shell/config/query-params';
 import { allHash } from '@shell/utils/promise';
 import { PROVIDER_TYPES, RANCHER_TURTLES_SYSTEM_NAMESPACE, RANCHER_TURTLES_SYSTEM_NAME, Provider } from '../../types/capi';
@@ -71,7 +72,8 @@ export default (Vue as VueConstructor<
     Checkbox,
     KeyValue,
     LabeledInput,
-    LabeledSelect
+    LabeledSelect,
+    Banner
   },
   mixins: [CreateEditView, FormValidation],
   props:      {
@@ -153,6 +155,9 @@ export default (Vue as VueConstructor<
     },
     isCustom() {
       return this.provider === 'custom';
+    },
+    shouldShowBanner() {
+      return this.isEdit && (this.hasFeatures || this.hasVariables);
     }
   },
   methods:  {
@@ -228,6 +233,7 @@ export default (Vue as VueConstructor<
       :mode="mode"
       :namespaced="true"
       :namespace-options="allNamespaces"
+      :namespace-new-allowed="true"
       name-label="capi.provider.name.label"
       name-placeholder="capi.provider.name.placeholder"
       description-label="capi.provider.description.label"
@@ -281,7 +287,7 @@ export default (Vue as VueConstructor<
       </div>
     </div>
     <div v-if="needCredential" class="mb-40" />
-    <h2 class="mb-20">
+    <h2 v-if="hasFeatures || hasVariables" class="mb-20">
       <t k="capi.provider.secret.title" />
     </h2>
     <SelectCredential
@@ -293,6 +299,12 @@ export default (Vue as VueConstructor<
       :showing-form="showForm"
       class="mb-40"
     />
+    <Banner
+      v-if="shouldShowBanner"
+      color="info"
+    >
+      {{ t('capi.provider.banner') }}
+    </Banner>
     <div v-if="hasFeatures" class="mb-40">
       <h3 class="mb-20">
         <t k="capi.provider.features.title" />
@@ -301,19 +313,16 @@ export default (Vue as VueConstructor<
         v-model="value.spec.features.clusterResourceSet"
         :mode="mode"
         :label="t('capi.provider.features.clusterResourceSet')"
-        :disabled="isEdit"
       />
       <Checkbox
         v-model="value.spec.features.clusterTopology"
         :mode="mode"
         :label="t('capi.provider.features.clusterTopology')"
-        :disabled="isEdit"
       />
       <Checkbox
         v-model="value.spec.features.machinePool"
         :mode="mode"
         :label="t('capi.provider.features.machinePool')"
-        :disabled="isEdit"
       />
     </div>
     <div v-if="hasVariables">
@@ -326,7 +335,6 @@ export default (Vue as VueConstructor<
         :mode="mode"
         :read-allowed="false"
         :value-can-be-empty="true"
-        :disabled="isEdit"
       />
     </div>
   </CruResource>

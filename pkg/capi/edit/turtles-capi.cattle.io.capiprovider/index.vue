@@ -79,9 +79,13 @@ export default (Vue as VueConstructor<
         let icon;
 
         try {
-          icon = require(`../../assets/images/providers/${ id }.svg`);
+          icon = require(`~shell/assets/images/providers/${ id }.svg`);
         } catch (e) {
-          icon = require('~shell/assets/images/generic-driver.svg');
+          try {
+            icon = require(`../../assets/images/providers/${ id }.svg`);
+          } catch (e) {
+            icon = require('~shell/assets/images/generic-driver.svg');
+          }
         }
 
         const providerType: ProviderType = {
