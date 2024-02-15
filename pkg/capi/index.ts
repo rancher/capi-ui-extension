@@ -3,6 +3,7 @@ import {
   ActionLocation, IPlugin, PanelLocation, TableColumnLocation, TabLocation
 } from '@shell/core/types';
 import { _CLONE, _CREATE, _EDIT } from '@shell/config/query-params';
+import { MANAGEMENT } from '@shell/config/types';
 import { LABELS } from './types/capi';
 import capiRouting from './routes/capi-routing';
 import toggleAutoImport from './util/auto-import';
@@ -44,7 +45,9 @@ export default function(plugin: IPlugin): void {
       labelKey: 'capi.autoImport.enableAction',
       icon:     'icon-plus',
       enabled(target: any) {
-        return target?.metadata?.labels?.[LABELS.AUTO_IMPORT] !== 'true';
+        const isProject = target.type === MANAGEMENT.PROJECT;
+
+        return !isProject && target?.metadata?.labels?.[LABELS.AUTO_IMPORT] !== 'true';
       },
       invoke(opts, resources = []) {
         resources.forEach((ns) => {
@@ -60,7 +63,9 @@ export default function(plugin: IPlugin): void {
       labelKey: 'capi.autoImport.disableAction',
       icon:     'icon-minus',
       enabled(target: any) {
-        return target?.metadata?.labels?.[LABELS.AUTO_IMPORT] === 'true';
+        const isProject = target.type === MANAGEMENT.PROJECT;
+
+        return !isProject && target?.metadata?.labels?.[LABELS.AUTO_IMPORT] === 'true';
       },
       invoke(opts, resources = []) {
         resources.forEach((ns) => {
@@ -77,9 +82,10 @@ export default function(plugin: IPlugin): void {
       name:     'capi-auto-import',
       labelKey: 'capi.autoImport.label',
       getValue: (row: any) => {
-        return row.labels[LABELS.AUTO_IMPORT] === 'true';
+        return row?.labels?.[LABELS.AUTO_IMPORT] === 'true';
       },
-      width:     100,
+      width:     200,
+      align:     'center',
       formatter: 'AutoImportState'
     }
   );
