@@ -80,6 +80,7 @@ capi:
         one {{count} Machine Pool }
         other {{count} Machine Pools }
       }
+  experimental: "Warning! The Rancher CAPI UI extension should be considered experimental and is currently not supported."
 
 nav:
   group:

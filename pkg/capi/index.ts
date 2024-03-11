@@ -3,8 +3,8 @@ import {
   ActionLocation, IPlugin, PanelLocation, TableColumnLocation, TabLocation
 } from '@shell/core/types';
 import { _CLONE, _CREATE, _EDIT } from '@shell/config/query-params';
-import { MANAGEMENT } from '@shell/config/types';
-import { LABELS } from './types/capi';
+import { MANAGEMENT, CAPI as RANCHER_CAPI } from '@shell/config/types';
+import { LABELS, CAPI as TURTLES_CAPI } from './types/capi';
 import capiRouting from './routes/capi-routing';
 import toggleAutoImport from './util/auto-import';
 
@@ -94,5 +94,41 @@ export default function(plugin: IPlugin): void {
   plugin.addPanel(PanelLocation.RESOURCE_LIST,
     { resource: ['provisioning.cattle.io.cluster'] },
     { component: () => import('./components/ClusterListBanner.vue') }
+  );
+
+  plugin.addPanel(PanelLocation.RESOURCE_LIST,
+    {
+      resource: [RANCHER_CAPI.CAPI_CLUSTER,
+        TURTLES_CAPI.CLUSTER_CLASS,
+        TURTLES_CAPI.PROVIDER,
+        RANCHER_CAPI.MACHINE,
+        RANCHER_CAPI.MACHINE_SET,
+        RANCHER_CAPI.MACHINE_DEPLOYMENT]
+    },
+    { component: () => import('./components/ExperimentalBanner.vue') }
+  );
+
+  plugin.addPanel(PanelLocation.DETAIL_TOP,
+    {
+      resource: [RANCHER_CAPI.CAPI_CLUSTER,
+        TURTLES_CAPI.CLUSTER_CLASS,
+        TURTLES_CAPI.PROVIDER,
+        RANCHER_CAPI.MACHINE,
+        RANCHER_CAPI.MACHINE_SET,
+        RANCHER_CAPI.MACHINE_DEPLOYMENT]
+    },
+    { component: () => import('./components/ExperimentalBanner.vue') }
+  );
+
+  plugin.addPanel(PanelLocation.DETAILS_MASTHEAD,
+    {
+      resource: [RANCHER_CAPI.CAPI_CLUSTER,
+        TURTLES_CAPI.CLUSTER_CLASS,
+        TURTLES_CAPI.PROVIDER,
+        RANCHER_CAPI.MACHINE,
+        RANCHER_CAPI.MACHINE_SET,
+        RANCHER_CAPI.MACHINE_DEPLOYMENT]
+    },
+    { component: () => import('./components/ExperimentalBanner.vue') }
   );
 }
