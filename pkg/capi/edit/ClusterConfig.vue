@@ -10,7 +10,9 @@ import CruResource from '@shell/components/CruResource.vue';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import { Translation } from '@rancher/shell/types/t';
 import ClusterClassVariables from '../components/CCVariables/index.vue';
-import { versionTest, versionValidator, hostValidator, portValidator } from '../util/validators';
+import {
+  versionTest, versionValidator, hostValidator, portValidator, cidrValidator, cidrArrayValid
+} from '../util/validators';
 import {
   CAPIClusterTopology, CAPIClusterNetwork, CAPIClusterCPEndpoint, ClusterClass, Worker
 } from './../types/capi';
@@ -35,6 +37,10 @@ const defaultCPEndpointConfig: CAPIClusterCPEndpoint = {
   host: '',
   port: 49152
 };
+
+interface Step {
+  name: String
+}
 
 export default (Vue as VueConstructor<
   Vue & InstanceType<typeof CreateEditView>
@@ -119,6 +125,8 @@ export default (Vue as VueConstructor<
         { path: 'spec.controlPlaneEndpoint.port', rules: ['port'] },
         { path: 'spec.clusterNetwork.serviceDomain', rules: ['host'] },
         { path: 'spec.clusterNetwork.apiServerPort', rules: ['required', 'port'] },
+        { path: 'spec.clusterNetwork.pods', rules: ['cidr'] },
+        { path: 'spec.clusterNetwork.services', rules: ['cidr'] }
       ],
       credentialId:            '',
       credential:              null,
@@ -136,7 +144,7 @@ export default (Vue as VueConstructor<
 
   watch: {
     clusterClassObj(neu) {
-      const step = this.addSteps.find(s => s.name === 'stepClusterClass');
+      const step = this.addSteps.find((s: Step) => s.name === 'stepClusterClass');
 
       if (step) {
         this.$set(step, 'ready', !!neu);
@@ -144,13 +152,13 @@ export default (Vue as VueConstructor<
     },
 
     stepConfigurationRequires(neu) {
-      const step = this.addSteps.find(s => s.name === 'stepConfiguration');
+      const step = this.addSteps.find((s: Step) => s.name === 'stepConfiguration');
 
       this.$set(step, 'ready', neu);
     },
 
     variablesReady(neu) {
-      const step = this.addSteps.find(s => s.name === 'stepVariables');
+      const step = this.addSteps.find((s: Step) => s.name === 'stepVariables');
 
       this.$set(step, 'ready', neu);
     }
@@ -171,6 +179,7 @@ export default (Vue as VueConstructor<
         version: versionValidator(this.$store.getters['i18n/t'], this.controlPlane),
         host:    hostValidator(this.$store.getters['i18n/t']),
         port:    portValidator(this.$store.getters['i18n/t']),
+        cidr:    cidrValidator(this.$store.getters['i18n/t'])
       };
     },
     stepConfigurationRequires() {
@@ -181,7 +190,9 @@ export default (Vue as VueConstructor<
       const controlPlaneEndpointHostValid: boolean = !hostValidator(this.$store.getters['i18n/t'])(this.value?.spec?.controlPlaneEndpoint?.host);
       const machineDeploymentsValid: boolean = this.value?.spec?.topology?.workers?.machineDeployments?.length > 0 && !!this.value?.spec?.topology?.workers?.machineDeployments[0]?.name && !!this.value?.spec?.topology?.workers?.machineDeployments[0]?.class;
       const machinePoolsValid: boolean = this.value?.spec?.topology?.workers?.machinePools?.length > 0 && !!this.value?.spec?.topology?.workers?.machinePools[0]?.name && !!this.value?.spec?.topology?.workers?.machinePools[0]?.class;
-      const networkValid:boolean = !!this.value?.spec?.clusterNetwork?.apiServerPort && !isNaN(this.value?.spec?.clusterNetwork?.apiServerPort);
+      const networkPodsValid: boolean = !this.value?.spec?.clusterNetwork?.pods?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.pods.cidrBlocks);
+      const networkServicesValid: boolean = !this.value?.spec?.clusterNetwork?.services?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.services.cidrBlocks);
+      const networkValid:boolean = !!this.value?.spec?.clusterNetwork?.apiServerPort && !isNaN(this.value?.spec?.clusterNetwork?.apiServerPort) && networkPodsValid && networkServicesValid;
 
       return nameValid && versionValid && controlPlaneEndpointHostValid && controlPlaneEndpointPortValid && networkValid && (machineDeploymentsValid || machinePoolsValid);
     },
@@ -210,7 +221,7 @@ export default (Vue as VueConstructor<
 
       return out;
 
-      function addType(obj: {[key: string]: any}, disabled = false) {
+      function addType(obj: {[key: string]: any}) {
         const id = obj?.metadata?.name;
         const subtype = {
           id,
@@ -388,7 +399,12 @@ export default (Vue as VueConstructor<
         <NetworkSection
           v-model="clusterNetwork"
           :mode="mode"
-          :rules="{serviceDomain:fvGetAndReportPathRules('spec.clusterNetwork.serviceDomain'), apiServerPort:fvGetAndReportPathRules('spec.clusterNetwork.apiServerPort'), pods: [], services: [] }"
+          :rules="{
+            serviceDomain:fvGetAndReportPathRules('spec.clusterNetwork.serviceDomain'),
+            apiServerPort:fvGetAndReportPathRules('spec.clusterNetwork.apiServerPort'),
+            pods: fvGetAndReportPathRules('spec.clusterNetwork.pods'),
+            services: fvGetAndReportPathRules('spec.clusterNetwork.services')
+          }"
           @api-server-port-changed="(val) => $set(value.spec.clusterNetwork, 'apiServerPort', Number(val) || '')"
           @service-domain-changed="(val) => $set(value.spec.clusterNetwork, 'serviceDomain', val)"
           @pods-cidr-blocks-changed="podsCidrBlocksChanged"
