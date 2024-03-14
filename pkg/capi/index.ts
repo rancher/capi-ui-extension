@@ -108,18 +108,6 @@ export default function(plugin: IPlugin): void {
     { component: () => import('./components/ExperimentalBanner.vue') }
   );
 
-  plugin.addPanel(PanelLocation.DETAIL_TOP,
-    {
-      resource: [RANCHER_CAPI.CAPI_CLUSTER,
-        TURTLES_CAPI.CLUSTER_CLASS,
-        TURTLES_CAPI.PROVIDER,
-        RANCHER_CAPI.MACHINE,
-        RANCHER_CAPI.MACHINE_SET,
-        RANCHER_CAPI.MACHINE_DEPLOYMENT]
-    },
-    { component: () => import('./components/ExperimentalBanner.vue') }
-  );
-
   plugin.addPanel(PanelLocation.DETAILS_MASTHEAD,
     {
       resource: [RANCHER_CAPI.CAPI_CLUSTER,

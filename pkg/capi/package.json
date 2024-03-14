@@ -1,6 +1,6 @@
 {
   "name": "capi",
-  "description": "UI for CAPI cluster provisioning.",
+  "description": "UI for CAPI cluster provisioning",
   "version": "0.2.0",
   "private": false,
   "rancher": {
