@@ -25,7 +25,7 @@ const defaultSpec = {
   name:         '',
   type:         'infrastructure',
   configSecret: { name: '' },
-  credentials:  { rancherCloudCredential: '' },
+  credentials:  { rancherCloudCredentialNamespaceName: '' },
   features:     {
     clusterResourceSet: true,
     clusterTopology:    true,
@@ -37,7 +37,7 @@ const customProviderSpec = {
   name:         '',
   type:         'infrastructure',
   configSecret: { name: '' },
-  credentials:  { rancherCloudCredential: '' },
+  credentials:  { rancherCloudCredentialNamespaceName: '' },
   fetchConfig:  { url: '' },
   version:      '',
   features:     {
@@ -139,7 +139,7 @@ export default (Vue as VueConstructor<
       }];
     },
     showForm() {
-      return !!this.value.spec.credentials.rancherCloudCredential || !this.needCredential;
+      return !!this.value.spec.credentials.rancherCloudCredentialNamespaceName || !this.needCredential;
     },
     isCreate() {
       return this.mode === _CREATE;
@@ -292,7 +292,7 @@ export default (Vue as VueConstructor<
     </h2>
     <SelectCredential
       v-if="needCredential"
-      v-model="value.spec.credentials.rancherCloudCredential"
+      v-model="value.spec.credentials.rancherCloudCredentialNamespaceName"
       :mode="mode"
       :provider="provider"
       :cancel="cancelCredential"
