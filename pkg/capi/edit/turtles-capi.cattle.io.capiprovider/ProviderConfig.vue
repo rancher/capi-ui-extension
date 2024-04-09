@@ -104,7 +104,7 @@ export default (Vue as VueConstructor<
   },
   data() {
     const providerDetails: Provider = PROVIDER_TYPES.find(p => p.id === this.provider) || {
-      needCredentials: false, requireCredentials: false, disabled: false, id: '0'
+      needCredentials: false, disabled: false, id: '0'
     };
 
     return {
@@ -117,7 +117,6 @@ export default (Vue as VueConstructor<
       ],
       allNamespaces:         [],
       needCredential:     providerDetails?.needCredentials || false,
-      requireCredentials: providerDetails?.requireCredentials || false,
       typeOptions:        providerTypes
     };
   },
@@ -191,6 +190,9 @@ export default (Vue as VueConstructor<
     async saveOverride(btnCb: Function) {
       if ( this.errors ) {
         clear(this.errors);
+      }
+      if ( !this.needCredential && !this.value.spec?.credentials?.rancherCloudCredentialNamespaceName ) {
+        this.value.spec.credentials = null;
       }
       try {
         await this.value.save();
