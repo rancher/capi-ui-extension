@@ -89,7 +89,7 @@ capi:
       label: Name
       placeholder: Provider name
     description: 
-      label: Provider description
+      label: Description
       placeholder: Any text you want that better describes this provider
     type:
       label: Provider type
@@ -97,6 +97,8 @@ capi:
       label: Version
     fetchConfigURL:
       label: URL
+    cloudCredential:
+      title: Cloud Credential
     features:
       title: Features
       clusterResourceSet: Enable cluster resource set
@@ -104,7 +106,7 @@ capi:
       machinePool: Enable machine pool
     variables:
       title: Variables
-      add: Add variable
+      add: Add
     secret:
       title: Secret Configuration
       create: Create new secret
