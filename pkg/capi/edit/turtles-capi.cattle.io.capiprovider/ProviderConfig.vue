@@ -87,7 +87,7 @@ export default (Vue as VueConstructor<
   beforeMount() {
     this.getDependencies().then((hash: Hash) => {
       this.allNamespaces = hash.namespaces || [];
-      this.coreProviderSecret = hash.coreProviderSecret || {}; // .filter((v: Secret) => v.metadata.namespace === RANCHER_TURTLES_SYSTEM_NAMESPACE && v.metadata.name === RANCHER_TURTLES_SYSTEM_NAME )[0] || {};
+      this.coreProviderSecret = hash.coreProviderSecret || {};
       this.initSpecs();
       this.loading = false;
     }).catch((err: Error) => {
@@ -198,11 +198,10 @@ export default (Vue as VueConstructor<
       const { $store } = this;
       const hashPromises = {
         namespaces:         $store.dispatch(`${ inStore }/findAll`, { type: NAMESPACE }),
-        coreProviderSecret: $store.dispatch(`management/find`, { type: SECRET, id: `${ RANCHER_TURTLES_SYSTEM_NAMESPACE }/${ RANCHER_TURTLES_SYSTEM_NAME }` })
+        coreProviderSecret: $store.dispatch(`management/find`, {
+          type: SECRET, id: `${ RANCHER_TURTLES_SYSTEM_NAMESPACE }/${ RANCHER_TURTLES_SYSTEM_NAME }`, opt: { watch: false, force: true }
+        } )
       };
-
-      // This should be removed once we use @shell v2.8.3 or higher
-      await $store.dispatch('management/unsubscribe');
 
       return await allHash(hashPromises);
     },
