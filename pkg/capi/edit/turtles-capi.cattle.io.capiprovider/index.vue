@@ -52,17 +52,12 @@ export default (Vue as VueConstructor<
   },
 
   data() {
-    const subType = this.$route.query[SUB_TYPE] || null;
+    const subType: string = this.$route.query[SUB_TYPE] || null;
 
     return { subType };
   },
 
   computed: {
-
-    templateOptions() {
-      return [];
-    },
-
     subTypes() {
       const out: ProviderType[] = [];
       const getters = this.$store.getters;
@@ -73,7 +68,7 @@ export default (Vue as VueConstructor<
 
       return out;
 
-      function addType(id: string, disabled = false, iconClass = undefined) {
+      function addType(id: string, disabled = false) {
         const label = getters['i18n/withFallback'](`cluster.provider."${ id }"`, null, id);
         const description = getters['i18n/withFallback'](`cluster.providerDescription."${ id }"`, null, '');
         let icon;
@@ -98,9 +93,6 @@ export default (Vue as VueConstructor<
 
         out.push(providerType);
       }
-    },
-    showAsForm() {
-      return true;
     }
   },
 

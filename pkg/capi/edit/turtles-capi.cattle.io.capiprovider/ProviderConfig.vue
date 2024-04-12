@@ -21,17 +21,17 @@ import { allHash } from '@shell/utils/promise';
 import { PROVIDER_TYPES, RANCHER_TURTLES_SYSTEM_NAMESPACE, RANCHER_TURTLES_SYSTEM_NAME, Provider } from '../../types/capi';
 import { providerVersionValidator, urlValidator } from '../../util/validators';
 
+const defaultFeatures = {
+  clusterResourceSet: true,
+  clusterTopology:    true,
+  machinePool:        true
+};
+const defaultVariables = {};
 const defaultSpec = {
   name:         '',
   type:         'infrastructure',
   configSecret: { name: '' },
-  credentials:  { rancherCloudCredentialNamespaceName: '' },
-  features:     {
-    clusterResourceSet: true,
-    clusterTopology:    true,
-    machinePool:        true,
-  },
-  variables: {}
+  credentials:  { rancherCloudCredentialNamespaceName: '' }
 };
 const customProviderSpec = {
   name:         '',
@@ -39,13 +39,7 @@ const customProviderSpec = {
   configSecret: { name: '' },
   credentials:  { rancherCloudCredentialNamespaceName: '' },
   fetchConfig:  { url: '' },
-  version:      '',
-  features:     {
-    clusterResourceSet: true,
-    clusterTopology:    true,
-    machinePool:        true,
-  },
-  variables: {}
+  version:      ''
 };
 
 const providerTypes = ['infrastructure', 'bootstrap', 'controlPlane'];
@@ -93,7 +87,7 @@ export default (Vue as VueConstructor<
   beforeMount() {
     this.getDependencies().then((hash: Hash) => {
       this.allNamespaces = hash.namespaces || [];
-      this.coreProviderSecret = hash.coreProviderSecret.filter((v: Secret) => v.metadata.namespace === RANCHER_TURTLES_SYSTEM_NAMESPACE && v.metadata.name === RANCHER_TURTLES_SYSTEM_NAME )[0] || {};
+      this.coreProviderSecret = hash.coreProviderSecret || {}; // .filter((v: Secret) => v.metadata.namespace === RANCHER_TURTLES_SYSTEM_NAMESPACE && v.metadata.name === RANCHER_TURTLES_SYSTEM_NAME )[0] || {};
       this.initSpecs();
       this.loading = false;
     }).catch((err: Error) => {
@@ -128,15 +122,6 @@ export default (Vue as VueConstructor<
         url:     urlValidator(this.$store.getters['i18n/t'])
       };
     },
-    modeOptions() {
-      return [{
-        label: this.t('capi.provider.secret.reuse'),
-        value: false,
-      }, {
-        label: this.t('capi.provider.secret.create'),
-        value: true,
-      }];
-    },
     showForm() {
       return !!this.value.spec.credentials.rancherCloudCredentialNamespaceName || !this.needCredential;
     },
@@ -157,21 +142,53 @@ export default (Vue as VueConstructor<
     },
     shouldShowBanner() {
       return this.isEdit && (this.hasFeatures || this.hasVariables);
+    },
+    waitingForCredential() {
+      return this.needCredential && !this.value.spec.credentials.rancherCloudCredentialNamespaceName;
     }
   },
   methods:  {
     initSpecs() {
       if ( !this.value.spec ) {
+        const defaultsFromCoreProvider = this.getSpecFromCoreSecret();
+
         if ( this.provider !== 'custom') {
-          set(this.value, 'spec', clone(defaultSpec));
+          set(this.value, 'spec', { ...defaultSpec, ...defaultsFromCoreProvider });
           set(this.value.spec, 'name', this.provider); // Defines the provider kind to provision.
         } else {
-          set(this.value, 'spec', clone(customProviderSpec));
+          set(this.value, 'spec', { ...customProviderSpec, ...defaultsFromCoreProvider });
         }
       }
       if (!this.value.spec.configSecret.name) {
         set(this.value.spec.configSecret, 'name', this.generateName(this.provider)); // Defines the name of the secret that will be created or adjusted based on the content of the spec.features and spec.variables.
       }
+    },
+    getSpecFromCoreSecret() {
+      const coreProviderSecretData = this.coreProviderSecret?.data;
+
+      if (coreProviderSecretData) {
+        const FEATURES_KEYS = ['EXP_CLUSTER_RESOURCE_SET', 'CLUSTER_TOPOLOGY', 'EXP_MACHINE_POOL'];
+
+        const variables = clone(coreProviderSecretData);
+
+        FEATURES_KEYS.forEach((key) => {
+          delete variables[key];
+        });
+
+        return {
+          features: {
+            clusterResourceSet: coreProviderSecretData.EXP_CLUSTER_RESOURCE_SET === 'dHJ1ZQ==',
+            clusterTopology:    coreProviderSecretData.CLUSTER_TOPOLOGY === 'dHJ1ZQ==',
+            machinePool:        coreProviderSecretData.EXP_MACHINE_POOL === 'dHJ1ZQ=='
+          },
+          variables
+        };
+      }
+
+      return {
+        features:  clone(defaultFeatures),
+        variables: clone(defaultVariables)
+      };
     },
     generateName(name: string) {
       return name ? `${ name }-credentials-${ randomStr(5).toLowerCase() }` : undefined;
@@ -181,8 +198,11 @@ export default (Vue as VueConstructor<
       const { $store } = this;
       const hashPromises = {
         namespaces:         $store.dispatch(`${ inStore }/findAll`, { type: NAMESPACE }),
-        coreProviderSecret: $store.dispatch(`management/findAll`, { type: SECRET })
+        coreProviderSecret: $store.dispatch(`management/find`, { type: SECRET, id: `${ RANCHER_TURTLES_SYSTEM_NAMESPACE }/${ RANCHER_TURTLES_SYSTEM_NAME }` })
       };
+
+      // This should be removed once we use @shell v2.8.3 or higher
+      await $store.dispatch('management/unsubscribe');
 
       return await allHash(hashPromises);
     },
@@ -242,102 +262,122 @@ export default (Vue as VueConstructor<
       description-placeholder="capi.provider.description.placeholder"
       :rules="{name:fvGetAndReportPathRules('metadata.name')}"
     />
-    <div v-if="isCustom" class="row mb-40">
-      <div
-        class="col span-3"
-      >
-        <LabeledInput
-          v-model="value.spec.name"
-          :mode="mode"
-          label-key="capi.provider.label"
-          required
-          :rules="fvGetAndReportPathRules('spec.name')"
-        />
+    <div v-if="isCustom">
+      <div class="row mb-20">
+        <div
+          class="col span-3"
+        >
+          <LabeledInput
+            v-model="value.spec.name"
+            :mode="mode"
+            label-key="capi.provider.label"
+            required
+            :rules="fvGetAndReportPathRules('spec.name')"
+          />
+        </div>
+        <div
+          class="col span-3"
+        >
+          <LabeledSelect
+            v-model="value.spec.type"
+            :mode="mode"
+            :options="typeOptions"
+            label-key="capi.provider.type.label"
+            required
+          />
+        </div>
+        <div
+          class="col span-3"
+        >
+          <LabeledInput
+            v-model="value.spec.version"
+            :mode="mode"
+            label-key="capi.provider.version.label"
+            required
+            :rules="fvGetAndReportPathRules('spec.version')"
+          />
+        </div>
       </div>
-      <div
-        class="col span-3"
-      >
-        <LabeledSelect
-          v-model="value.spec.type"
-          :mode="mode"
-          :options="typeOptions"
-          label-key="capi.provider.type.label"
-          required
-        />
-      </div>
-      <div
-        class="col span-3"
-      >
-        <LabeledInput
-          v-model="value.spec.version"
-          :mode="mode"
-          label-key="capi.provider.version.label"
-          required
-          :rules="fvGetAndReportPathRules('spec.version')"
-        />
-      </div>
-      <div
-        class="col span-3"
-      >
-        <LabeledInput
-          v-model="value.spec.fetchConfig.url"
-          :mode="mode"
-          label-key="capi.provider.fetchConfigURL.label"
-          required
-          :rules="fvGetAndReportPathRules('spec.fetchConfig.url')"
-        />
+      <div class="row mb-40">
+        <div
+          class="col span-6"
+        >
+          <LabeledInput
+            v-model="value.spec.fetchConfig.url"
+            :mode="mode"
+            label-key="capi.provider.fetchConfigURL.label"
+            required
+            :rules="fvGetAndReportPathRules('spec.fetchConfig.url')"
+          />
+        </div>
       </div>
     </div>
     <div v-if="needCredential" class="mb-40" />
     <h2 v-if="hasFeatures || hasVariables" class="mb-20">
       <t k="capi.provider.secret.title" />
     </h2>
-    <SelectCredential
-      v-if="needCredential"
-      v-model="value.spec.credentials.rancherCloudCredentialNamespaceName"
-      :mode="mode"
-      :provider="provider"
-      :cancel="cancelCredential"
-      :showing-form="showForm"
-      class="mb-40"
-    />
-    <Banner
-      v-if="shouldShowBanner"
-      color="info"
-    >
-      {{ t('capi.provider.banner') }}
-    </Banner>
-    <div v-if="hasFeatures" class="mb-40">
+    <div v-if="needCredential">
       <h3 class="mb-20">
-        <t k="capi.provider.features.title" />
+        <t k="capi.provider.cloudCredential.title" />
       </h3>
-      <Checkbox
-        v-model="value.spec.features.clusterResourceSet"
+      <SelectCredential
+        v-model="value.spec.credentials.rancherCloudCredentialNamespaceName"
         :mode="mode"
-        :label="t('capi.provider.features.clusterResourceSet')"
-      />
-      <Checkbox
-        v-model="value.spec.features.clusterTopology"
-        :mode="mode"
-        :label="t('capi.provider.features.clusterTopology')"
-      />
-      <Checkbox
-        v-model="value.spec.features.machinePool"
-        :mode="mode"
-        :label="t('capi.provider.features.machinePool')"
+        :provider="provider"
+        :cancel="cancelCredential"
+        :showing-form="showForm"
+        class="mb-40"
       />
     </div>
-    <div v-if="hasVariables">
-      <h3>
-        <t k="capi.provider.variables.title" />
-      </h3>
-      <KeyValue
-        v-model="value.spec.variables"
-        :add-label="t('capi.provider.variables.add')"
-        :mode="mode"
-        :read-allowed="false"
-        :value-can-be-empty="true"
-      />
+    <div v-if="!waitingForCredential">
+      <Banner
+        v-if="shouldShowBanner"
+        color="info"
+      >
+        {{ t('capi.provider.banner') }}
+      </Banner>
+      <div v-if="hasFeatures" class="mb-40">
+        <h3 class="mb-20">
+          <t k="capi.provider.features.title" />
+        </h3>
+        <Checkbox
+          v-model="value.spec.features.clusterResourceSet"
+          :mode="mode"
+          :label="t('capi.provider.features.clusterResourceSet')"
+        />
+        <Checkbox
+          v-model="value.spec.features.clusterTopology"
+          :mode="mode"
+          :label="t('capi.provider.features.clusterTopology')"
+        />
+        <Checkbox
+          v-model="value.spec.features.machinePool"
+          :mode="mode"
+          :label="t('capi.provider.features.machinePool')"
+        />
+      </div>
+      <div v-if="hasVariables">
+        <h3>
+          <t k="capi.provider.variables.title" />
+        </h3>
+        <KeyValue
+          v-model="value.spec.variables"
+          :add-label="t('capi.provider.variables.add')"
+          :mode="mode"
+          :value-can-be-empty="true"
+          :handle-base64="true"
+          :value-trim="false"
+          :add-allowed="true"
+          :read-allowed="true"
+          :parse-lines-from-file="true"
+        />
+      </div>
     </div>
+    <template
+      v-if="waitingForCredential"
+      #form-footer
+    >
+      <div><!-- Hide the outer footer --></div>
+    </template>
   </CruResource>
 </template>
