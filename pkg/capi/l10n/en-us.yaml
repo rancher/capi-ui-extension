@@ -81,13 +81,45 @@ capi:
         other {{count} Machine Pools }
       }
   experimental: "The Rancher CAPI UI extension is experimental and is not currently supported."
+  provider:
+    title: Provider
+    label: Provider
+    banner: Editing configuration will affect all clusters that are using this provider and may cause errors.
+    name:
+      label: Name
+      placeholder: Provider name
+    description: 
+      label: Description
+      placeholder: Any text you want that better describes this provider
+    type:
+      label: Provider type
+    version:
+      label: Version
+    fetchConfigURL:
+      label: URL
+    cloudCredential:
+      title: Cloud Credential
+    features:
+      title: Features
+      clusterResourceSet: Enable cluster resource set
+      clusterTopology: Enable cluster topology
+      machinePool: Enable machine pool
+    variables:
+      title: Variables
+      add: Add
+    secret:
+      title: Secret Configuration
+      create: Create new secret
+      reuse: Use core provider secret
+      data: Data
+      label: Secret Name
 
 nav:
   group:
     CAPITurtles: CAPI
 
 typeLabel:
-  operator.cluster.x-k8s.io.infrastructureprovider: |-
+  turtles-capi.cattle.io.capiprovider: |-
     {count, plural,
       one { Infrastructure Provider }
       other { Infrastructure Providers }
@@ -126,5 +158,6 @@ validation:
   version: Version format must match format for this provisioner.
   name: Name is required.
   port: Port value must be a number.
+  url: '"Value" must be a valid URL.'
 error:
   clusterClassNotFound: Could not find corresponding cluster class. Please check that cluster class exists and is valid.

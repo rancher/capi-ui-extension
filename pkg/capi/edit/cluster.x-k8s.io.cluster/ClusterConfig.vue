@@ -2,21 +2,21 @@
 import Vue, { VueConstructor } from 'vue';
 import { set, clone } from '@shell/utils/object';
 import { clear } from '@shell/utils/array';
-import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
+import LabeledInput from '@components/Form/LabeledInput/LabeledInput';
 import NameNsDescription from '@shell/components/form/NameNsDescription.vue';
 import FormValidation from '@shell/mixins/form-validation';
 import Loading from '@shell/components/Loading.vue';
 import CruResource from '@shell/components/CruResource.vue';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import { Translation } from '@rancher/shell/types/t';
-import ClusterClassVariables from '../components/CCVariables/index.vue';
+import ClusterClassVariables from '../../components/CCVariables/index.vue';
 import {
   versionTest, versionValidator, hostValidator, portValidator, cidrValidator, cidrArrayValid
-} from '../util/validators';
+} from '../../util/validators';
 import {
   CAPIClusterTopology, CAPIClusterNetwork, CAPIClusterCPEndpoint, ClusterClass, Worker
-} from './../types/capi';
-import CardGrid from './../components/CardGrid.vue';
+} from '../../types/capi';
+import CardGrid from '../../components/CardGrid.vue';
 import WorkerItem from './WorkerItem.vue';
 import NetworkSection from './NetworkSection.vue';
 import ControlPlaneEndpointSection from './ControlPlaneEndpointSection.vue';
@@ -131,7 +131,6 @@ export default (Vue as VueConstructor<
       credentialId:            '',
       credential:              null,
       versionInfo:             {},
-      allNamespaces:           [],
       defaultWorkerAddValue:   {
         name:  '',
         class: ''
@@ -361,7 +360,6 @@ export default (Vue as VueConstructor<
         v-model="value"
         :mode="mode"
         :namespaced="false"
-        :namespace-options="allNamespaces"
         name-label="cluster.name.label"
         name-placeholder="cluster.name.placeholder"
         description-label="cluster.description.label"

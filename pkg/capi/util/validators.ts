@@ -155,3 +155,10 @@ export const cidrArrayValid = function(arr: string[]) {
     return isValidCIDR(item);
   });
 };
+export const urlValidator = function(t: Translation): Validator {
+  return (val: string) => val && !val.match(/^https?:\/\/(.*)$/) ? t('validation.url') : undefined;
+};
+
+export const providerVersionValidator = function(t: Translation, required: boolean): Validator {
+  return (val: string) => required && !val.match(/^v(\d+.){2}\d*$/) ? t('validation.version') : undefined;
+};
