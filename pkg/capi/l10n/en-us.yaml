@@ -122,8 +122,8 @@ nav:
 typeLabel:
   turtles-capi.cattle.io.capiprovider: |-
     {count, plural,
-      one { Infrastructure Provider }
-      other { Infrastructure Providers }
+      one { CAPI Provider }
+      other { CAPI Providers }
     }
   cluster.x-k8s.io.machineset: |-
     {count, plural,
