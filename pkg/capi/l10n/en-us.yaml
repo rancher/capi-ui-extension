@@ -97,6 +97,7 @@ capi:
       label: Version
     fetchConfigURL:
       label: URL
+      placeholder: https://github.com/example/releases/latest/client.yaml
     cloudCredential:
       title: Cloud Credential
     features:

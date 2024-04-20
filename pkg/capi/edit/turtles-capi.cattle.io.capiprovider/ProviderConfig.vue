@@ -223,8 +223,8 @@ export default (Vue as VueConstructor<
       }
     },
     cancelCredential() {
-      if ( this.$refs.cruresource ) {
-        this.$refs.cruresource.emitOrRoute();
+      if ( this.$refs.providercruresource ) {
+        this.$refs.providercruresource.emitOrRoute();
       }
     }
   }
@@ -235,6 +235,7 @@ export default (Vue as VueConstructor<
   <Loading v-if="loading" />
   <CruResource
     v-else
+    ref="providercruresource"
     :mode="mode"
     :validation-passed="fvFormIsValid"
     :resource="value"
@@ -305,6 +306,7 @@ export default (Vue as VueConstructor<
             v-model="value.spec.fetchConfig.url"
             :mode="mode"
             label-key="capi.provider.fetchConfigURL.label"
+            placeholder-key="capi.provider.fetchConfigURL.placeholder"
             required
             :rules="fvGetAndReportPathRules('spec.fetchConfig.url')"
           />
