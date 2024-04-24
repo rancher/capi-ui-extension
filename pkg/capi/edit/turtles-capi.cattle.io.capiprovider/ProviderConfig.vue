@@ -107,7 +107,7 @@ export default (Vue as VueConstructor<
         { path: 'metadata.name', rules: ['required'] },
         { path: 'spec.name', rules: ['required'] },
         { path: 'spec.version', rules: ['version'] },
-        { path: 'spec.fetchConfig.url', rules: ['required', 'url'] },
+        { path: 'spec.fetchConfig.url', rules: ['url'] },
       ],
       allNamespaces:         [],
       needCredential:     providerDetails?.needCredentials || false,
@@ -153,10 +153,10 @@ export default (Vue as VueConstructor<
         const defaultsFromCoreProvider = this.getSpecFromCoreSecret();
 
         if ( this.provider !== 'custom') {
-          set(this.value, 'spec', { ...defaultSpec, ...defaultsFromCoreProvider });
+          set(this.value, 'spec', { ...clone(defaultSpec), ...defaultsFromCoreProvider });
           set(this.value.spec, 'name', this.provider); // Defines the provider kind to provision.
         } else {
-          set(this.value, 'spec', { ...customProviderSpec, ...defaultsFromCoreProvider });
+          set(this.value, 'spec', { ...clone(customProviderSpec), ...defaultsFromCoreProvider });
         }
       }
       if (!this.value.spec.configSecret.name) {
@@ -214,7 +214,7 @@ export default (Vue as VueConstructor<
         this.value.spec.credentials = null;
       }
       try {
-        await this.value.save();
+        await this.save();
 
         return this.done();
       } catch (err) {
@@ -271,6 +271,7 @@ export default (Vue as VueConstructor<
             v-model="value.spec.name"
             :mode="mode"
             label-key="capi.provider.label"
+            placeholder-key="capi.provider.placeholder"
             required
             :rules="fvGetAndReportPathRules('spec.name')"
           />
@@ -283,6 +284,7 @@ export default (Vue as VueConstructor<
             :mode="mode"
             :options="typeOptions"
             label-key="capi.provider.type.label"
+            :disabled="isEdit"
             required
           />
         </div>
@@ -293,7 +295,7 @@ export default (Vue as VueConstructor<
             v-model="value.spec.version"
             :mode="mode"
             label-key="capi.provider.version.label"
-            required
+            placeholder-key="capi.provider.version.placeholder"
             :rules="fvGetAndReportPathRules('spec.version')"
           />
         </div>
@@ -307,7 +309,6 @@ export default (Vue as VueConstructor<
             :mode="mode"
             label-key="capi.provider.fetchConfigURL.label"
             placeholder-key="capi.provider.fetchConfigURL.placeholder"
-            required
             :rules="fvGetAndReportPathRules('spec.fetchConfig.url')"
           />
         </div>
