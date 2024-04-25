@@ -160,5 +160,5 @@ export const urlValidator = function(t: Translation): Validator {
 };
 
 export const providerVersionValidator = function(t: Translation, required: boolean): Validator {
-  return (val: string) => required && !val.match(/^v(\d+.){2}\d*$/) ? t('validation.version') : undefined;
+  return (val: string) => required && !val.match(/^(\.*\w*)*$/) ? t('validation.version') : undefined;
 };

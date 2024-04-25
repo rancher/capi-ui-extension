@@ -84,6 +84,7 @@ capi:
   provider:
     title: Provider
     label: Provider
+    placeholder: eg. custom-provider
     banner: Editing configuration will affect all clusters that are using this provider and may cause errors.
     name:
       label: Name
@@ -95,8 +96,10 @@ capi:
       label: Provider type
     version:
       label: Version
+      placeholder: eg. v1.0.0
     fetchConfigURL:
       label: URL
+      placeholder: https://github.com/example/releases/latest/client.yaml
     cloudCredential:
       title: Cloud Credential
     features:
@@ -119,10 +122,15 @@ nav:
     CAPITurtles: CAPI
 
 typeLabel:
+  cluster.x-k8s.io.cluster: |-
+    {count, plural,
+      one { Cluster }
+      other { Clusters }
+    }
   turtles-capi.cattle.io.capiprovider: |-
     {count, plural,
-      one { Infrastructure Provider }
-      other { Infrastructure Providers }
+      one { Provider }
+      other { Providers }
     }
   cluster.x-k8s.io.machineset: |-
     {count, plural,
