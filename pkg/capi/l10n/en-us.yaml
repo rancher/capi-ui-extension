@@ -94,6 +94,12 @@ capi:
       placeholder: Any text you want that better describes this provider
     type:
       label: Provider type
+      infrastructure:
+        label: Infrastructure
+      bootstrap:
+        label: Bootstrap
+      controlPlane:
+        label: Control Plane
     version:
       label: Version
       placeholder: eg. v1.0.0
