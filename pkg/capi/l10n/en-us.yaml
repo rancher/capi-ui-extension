@@ -170,8 +170,8 @@ validation:
   stringFormat: '"{key}" must be a valid {format}.'
   uniqueItems: '"{key}" may not contain duplicate elements.'
   version: Version format must match format for this provisioner.
-  name: Name is required.
+  name: Name is required and must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character.
   port: Port value must be a number.
-  url: '"Value" must be a valid URL.'
+  url: '"Value" must be a valid URL.' 
 error:
   clusterClassNotFound: Could not find corresponding cluster class. Please check that cluster class exists and is valid.

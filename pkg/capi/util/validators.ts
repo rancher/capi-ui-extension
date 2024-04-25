@@ -159,6 +159,10 @@ export const urlValidator = function(t: Translation): Validator {
   return (val: string) => val && !val.match(/^https?:\/\/(.*)$/) ? t('validation.url') : undefined;
 };
 
-export const providerVersionValidator = function(t: Translation, required: boolean): Validator {
-  return (val: string) => required && !val.match(/^(\.*\w*)*$/) ? t('validation.version') : undefined;
+export const providerVersionValidator = function(t: Translation): Validator {
+  return (val: string) => val && !val.match(/^(\.*\w*)*$/) ? t('validation.version') : undefined;
+};
+
+export const providerNameValidator = function(t: Translation): Validator {
+  return (val: string) => !val || !val.match(/^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/) ? t('validation.name') : undefined;
 };
