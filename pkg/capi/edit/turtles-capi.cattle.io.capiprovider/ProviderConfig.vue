@@ -42,8 +42,6 @@ const customProviderSpec = {
   version:      ''
 };
 
-const providerTypes = ['infrastructure', 'bootstrap', 'controlPlane'];
-
 interface Secret {
   metadata: {
     name: string,
@@ -111,7 +109,7 @@ export default (Vue as VueConstructor<
       ],
       allNamespaces:         [],
       needCredential:     providerDetails?.needCredentials || false,
-      typeOptions:        providerTypes
+      typeOptions:        [{ label: this.t('capi.provider.type.infrastructure.label'), value: 'infrastructure' }, { label: this.t('capi.provider.type.bootstrap.label'), value: 'bootstrap' }, { label: this.t('capi.provider.type.controlPlane.label'), value: 'controlPlane' }]
     };
   },
   computed: {
@@ -364,7 +362,7 @@ export default (Vue as VueConstructor<
           :add-label="t('capi.provider.variables.add')"
           :mode="mode"
           :value-can-be-empty="true"
-          :handle-base64="true"
+          :handle-base64="false"
           :value-trim="false"
           :add-allowed="true"
           :read-allowed="true"
