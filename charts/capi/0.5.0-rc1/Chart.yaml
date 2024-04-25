@@ -1,0 +1,17 @@
+annotations:
+  catalog.cattle.io/certified: rancher
+  catalog.cattle.io/kube-version: '>= 1.16.0-0 < 1.29.0-0'
+  catalog.cattle.io/namespace: cattle-ui-plugin-system
+  catalog.cattle.io/os: linux
+  catalog.cattle.io/permits-os: linux, windows
+  catalog.cattle.io/rancher-version: '>= v2.8.0'
+  catalog.cattle.io/scope: management
+  catalog.cattle.io/ui-component: plugins
+  catalog.cattle.io/display-name: CAPI UI
+  catalog.cattle.io/experimental: 'true'
+apiVersion: v2
+appVersion: 0.5.0-rc1
+description: UI for CAPI cluster provisioning
+name: capi
+type: application
+version: 0.5.0-rc1
