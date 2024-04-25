@@ -19,7 +19,7 @@ import Banner from '@components/Banner/Banner.vue';
 import { _EDIT, _CREATE } from '@shell/config/query-params';
 import { allHash } from '@shell/utils/promise';
 import { PROVIDER_TYPES, RANCHER_TURTLES_SYSTEM_NAMESPACE, RANCHER_TURTLES_SYSTEM_NAME, Provider } from '../../types/capi';
-import { providerVersionValidator, urlValidator } from '../../util/validators';
+import { providerNameValidator, providerVersionValidator, urlValidator } from '../../util/validators';
 
 const defaultFeatures = {
   clusterResourceSet: true,
@@ -102,7 +102,7 @@ export default (Vue as VueConstructor<
     return {
       loading:            true,
       fvFormRuleSets:          [
-        { path: 'metadata.name', rules: ['required'] },
+        { path: 'metadata.name', rules: ['name'] },
         { path: 'spec.name', rules: ['required'] },
         { path: 'spec.version', rules: ['version'] },
         { path: 'spec.fetchConfig.url', rules: ['url'] },
@@ -116,7 +116,8 @@ export default (Vue as VueConstructor<
     ...mapGetters(['namespaces']),
     fvExtraRules() {
       return {
-        version: providerVersionValidator(this.$store.getters['i18n/t'], this.isCustom),
+        name:    providerNameValidator(this.$store.getters['i18n/t']),
+        version: providerVersionValidator(this.$store.getters['i18n/t']),
         url:     urlValidator(this.$store.getters['i18n/t'])
       };
     },
