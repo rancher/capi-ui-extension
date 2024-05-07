@@ -235,6 +235,7 @@ export default (Vue as VueConstructor<
   <CruResource
     v-else
     ref="providercruresource"
+    :can-yaml="false"
     :mode="mode"
     :validation-passed="fvFormIsValid"
     :resource="value"
