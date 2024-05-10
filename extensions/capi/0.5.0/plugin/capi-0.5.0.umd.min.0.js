@@ -1,0 +1,2 @@
+(("undefined"!==typeof self?self:this)["webpackJsonpcapi_0_5_0"]=("undefined"!==typeof self?self:this)["webpackJsonpcapi_0_5_0"]||[]).push([[0],{"46c7":function(e,n,a){"use strict";a.r(n);var t=function(){var e=this,n=e._self._c;e._self._setupProxy;return n("Banner",{attrs:{color:"warning","label-key":"capi.experimental"}})},l=[],s=a("8bbf"),r=a.n(s),i=a("eb32"),p=r.a.extend({name:"ExperimentalWarningBanner",components:{Banner:i["a"]}}),f=p,c=a("d802"),o=Object(c["a"])(f,t,l,!1,null,null,null);n["default"]=o.exports}}]);
+//# sourceMappingURL=capi-0.5.0.umd.min.0.js.map
