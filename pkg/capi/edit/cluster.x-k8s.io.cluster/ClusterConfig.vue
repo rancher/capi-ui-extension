@@ -2,7 +2,7 @@
 import Vue, { VueConstructor } from 'vue';
 import { set, clone } from '@shell/utils/object';
 import { clear } from '@shell/utils/array';
-import LabeledInput from '@components/Form/LabeledInput/LabeledInput';
+import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 import NameNsDescription from '@shell/components/form/NameNsDescription.vue';
 import FormValidation from '@shell/mixins/form-validation';
 import Loading from '@shell/components/Loading.vue';
