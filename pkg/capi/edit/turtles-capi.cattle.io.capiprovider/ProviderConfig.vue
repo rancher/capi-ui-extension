@@ -109,7 +109,12 @@ export default (Vue as VueConstructor<
       ],
       allNamespaces:         [],
       needCredential:     providerDetails?.needCredentials || false,
-      typeOptions:        [{ label: this.t('capi.provider.type.infrastructure.label'), value: 'infrastructure' }, { label: this.t('capi.provider.type.bootstrap.label'), value: 'bootstrap' }, { label: this.t('capi.provider.type.controlPlane.label'), value: 'controlPlane' }]
+      typeOptions:        [
+        { label: this.t('capi.provider.type.infrastructure.label'), value: 'infrastructure' }, 
+        { label: this.t('capi.provider.type.bootstrap.label'), value: 'bootstrap' }, 
+        { label: this.t('capi.provider.type.controlPlane.label'), value: 'controlPlane' }, 
+        { label: this.t('capi.provider.type.addon.label'), value: 'addon' }
+      ]
     };
   },
   computed: {
