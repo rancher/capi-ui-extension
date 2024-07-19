@@ -117,7 +117,7 @@ export default (Vue as VueConstructor<
     fvExtraRules() {
       return {
         name:    providerNameValidator(this.$store.getters['i18n/t']),
-        version: providerVersionValidator(this.$store.getters['i18n/t']),
+        version: providerVersionValidator(this.$store.getters['i18n/t'], this.isCustom),
         url:     urlValidator(this.$store.getters['i18n/t'])
       };
     },
@@ -213,9 +213,7 @@ export default (Vue as VueConstructor<
         this.value.spec.credentials = null;
       }
       try {
-        await this.save();
-
-        return this.done();
+        await this.save(btnCb, null);
       } catch (err) {
         this.errors.push(err);
         btnCb(false);
@@ -297,6 +295,7 @@ export default (Vue as VueConstructor<
             label-key="capi.provider.version.label"
             placeholder-key="capi.provider.version.placeholder"
             :rules="fvGetAndReportPathRules('spec.version')"
+            required
           />
         </div>
       </div>
