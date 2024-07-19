@@ -85,7 +85,7 @@ export const PROVIDER_TYPES: Provider[] = [
     id: 'gcp', disabled: false, needCredentials: true
   },
   {
-    id: 'vmwarevsphere', disabled: false, needCredentials: true
+    id: 'vsphere', disabled: false, needCredentials: true
   },
   {
     id: 'custom', disabled: false, needCredentials: false
