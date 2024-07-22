@@ -171,7 +171,7 @@ validation:
   pattern: '"{key}" must match the pattern <code>{pattern}</code>.'
   stringFormat: '"{key}" must be a valid {format}.'
   uniqueItems: '"{key}" may not contain duplicate elements.'
-  version: Version format must match format for this provisioner.
+  version: "Version format  should be in the semver format prefixed with 'v'. Example: v1.9.3"
   name: Name is required and must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character.
   port: Port value must be a number.
   url: '"Value" must be a valid URL.' 
