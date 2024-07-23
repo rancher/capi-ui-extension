@@ -114,7 +114,7 @@ export default Vue.extend({
       });
 
       return out;
-    },
+    }
   },
 
   methods: {
@@ -147,7 +147,7 @@ export default Vue.extend({
         const oldDefault = (old || []).find(d => d.name === existingVar.name)?.schema?.openAPIV3Schema?.default;
 
         // if a variable is set to the previous definition's default, clear it out
-        if (isDefined(oldDefault) && existingVar.value === oldDefault) {
+        if (oldDefault !== undefined && existingVar.value === oldDefault) {
           delete existingVar.value;
         }
         let newDefault = neuDef.schema?.openAPIV3Schema?.default;
@@ -159,7 +159,7 @@ export default Vue.extend({
         }
 
         // if the value hasn't been touched by the user set it to the new cc default
-        if (isDefined(newDefault) && !existingVar.value) {
+        if (newDefault !== undefined && !existingVar.value) {
           existingVar.value = newDefault;
         }
         acc.push(existingVar);
@@ -174,7 +174,7 @@ export default Vue.extend({
         if (def.schema?.openAPIV3Schema?.type === 'boolean' && !newDefault) {
           newDefault = false;
         }
-        if (isDefined(newDefault) && !out.find(v => v.name === def.name)) {
+        if (newDefault !== undefined && !out.find(v => v.name === def.name)) {
           out.push({ name: def.name, value: newDefault });
         }
       });

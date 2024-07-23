@@ -1,6 +1,8 @@
 <script lang="ts">
 import Vue from 'vue';
 import type { PropType } from 'vue';
+import isEqual from 'lodash/isEqual';
+
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
 import KeyValue from '@shell/components/form/KeyValue.vue';
@@ -46,6 +48,7 @@ export default Vue.extend({
 
   computed: {
     ...mapGetters({ t: 'i18n/t' }),
+
     componentForType(): {component: any, name: string} | undefined {
       const { type } = this.schema;
       let out: any;
@@ -101,6 +104,9 @@ export default Vue.extend({
     },
 
     validationRules() {
+      if (this.isDefaultValue) {
+        return [];
+      }
       const t = this.t as Translation;
       const out = openAPIV3SchemaValidators(t, { key: this.variable.name }, this.schema);
 
@@ -111,6 +117,16 @@ export default Vue.extend({
       }
 
       return out;
+    },
+
+    isDefaultValue() {
+      const defaulVal = this.schema.default;
+
+      if (defaulVal !== undefined) {
+        return isEqual(defaulVal, this.value);
+      }
+
+      return false;
     },
 
     isValid() {
