@@ -1,5 +1,4 @@
 <script lang='ts'>
-import Vue, { VueConstructor } from 'vue';
 import { mapGetters } from 'vuex';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import { clear } from '@shell/utils/array';
@@ -53,9 +52,7 @@ interface Hash {
   coreProviderSecret: Secret[]
 }
 
-export default (Vue as VueConstructor<
-  Vue & InstanceType<typeof CreateEditView>
->).extend({
+export default {
   components: {
     CruResource,
     Loading,
@@ -230,7 +227,7 @@ export default (Vue as VueConstructor<
       }
     }
   }
-});
+};
 </script>
 
 <template>

@@ -16,9 +16,7 @@ interface ProviderType {
   disabled: boolean,
 }
 
-export default (Vue as VueConstructor<
-  Vue & InstanceType<typeof CreateEditView>
->).extend({
+export default {
   name: 'CreateProvider',
 
   components: {
@@ -110,7 +108,7 @@ export default (Vue as VueConstructor<
       this.$emit('set-subtype', this.$store.getters['i18n/withFallback'](`cluster.provider."${ type }"`, null, type));
     },
   },
-});
+};
 </script>
 
 <template>

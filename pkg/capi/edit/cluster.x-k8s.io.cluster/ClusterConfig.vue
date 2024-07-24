@@ -1,5 +1,4 @@
 <script lang='ts'>
-import Vue, { VueConstructor } from 'vue';
 import { set, clone } from '@shell/utils/object';
 import { clear } from '@shell/utils/array';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
@@ -42,9 +41,7 @@ interface Step {
   name: String
 }
 
-export default (Vue as VueConstructor<
-  Vue & InstanceType<typeof CreateEditView>
->).extend({
+export default {
   name:       'ClusterConfig',
   components: {
     CruResource,
@@ -221,7 +218,7 @@ export default (Vue as VueConstructor<
       return out;
 
       function addType(obj: {[key: string]: any}) {
-        const id = obj?.metadata?.name;
+        const id = obj?.metadata?.uid;
         const subtype = {
           id,
           obj,
@@ -307,7 +304,7 @@ export default (Vue as VueConstructor<
       });
     },
     clickedType(obj: {[key:string]: any}) {
-      this.clusterClassObj = this.clusterClasses.find((x: ClusterClass) => x.metadata.name === obj.id);
+      this.clusterClassObj = this.clusterClasses.find((x: ClusterClass) => x.metadata.uid === obj.id);
       this.setClass();
       this.setNamespace();
     },
@@ -324,7 +321,7 @@ export default (Vue as VueConstructor<
       set(this.value.spec.clusterNetwork.services, 'cidrBlocks', val);
     }
   }
-});
+};
 </script>
 <template>
   <Loading v-if="loading" />
