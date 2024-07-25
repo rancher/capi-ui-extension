@@ -51,6 +51,7 @@ export interface CAPIClusterNetwork {
 }
 
 export interface ClusterClass {
+  id: string,
   metadata: {
     name: string,
     namespace: string,

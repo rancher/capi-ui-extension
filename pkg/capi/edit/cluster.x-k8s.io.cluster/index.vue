@@ -1,4 +1,5 @@
 <script lang="ts">
+import { defineComponent } from 'vue';
 import { SUB_TYPE } from '@shell/config/query-params';
 import { set } from '@shell/utils/object';
 import CreateEditView from '@shell/mixins/create-edit-view';
@@ -8,7 +9,7 @@ import type { Route } from 'vue-router';
 import { CAPI, QUERY_PARAMS, ClusterClass } from '../../types/capi';
 import ClusterConfig from './ClusterConfig.vue';
 
-export default {
+export default defineComponent({
   name:       'CreateCluster',
   components: {
     CruResource,
@@ -75,7 +76,7 @@ export default {
       });
     }
   }
-};
+});
 </script>
 
 <template>

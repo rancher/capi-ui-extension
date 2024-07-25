@@ -1,4 +1,5 @@
 <script lang='ts'>
+import { defineComponent, PropType } from 'vue';
 import { set, clone } from '@shell/utils/object';
 import { clear } from '@shell/utils/array';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
@@ -41,7 +42,7 @@ interface Step {
   name: String
 }
 
-export default {
+export default defineComponent({
   name:       'ClusterConfig',
   components: {
     CruResource,
@@ -70,7 +71,7 @@ export default {
       default:  ''
     },
     clusterClasses: {
-      type:     Array,
+      type:     Array as PropType<ClusterClass[]>,
       required: true
     }
   },
@@ -112,6 +113,7 @@ export default {
       weight:         30
     };
     const addSteps = !!this.preselectedClass ? [stepConfiguration, stepVariables] : [stepClusterClass, stepConfiguration, stepVariables];
+    const clusterClassObj: ClusterClass | null = null;
 
     return {
       addSteps,
@@ -133,7 +135,7 @@ export default {
         class: ''
       },
       variablesReady:  true,
-      clusterClassObj: null,
+      clusterClassObj,
       loading:         true
     };
   },
@@ -218,7 +220,7 @@ export default {
       return out;
 
       function addType(obj: {[key: string]: any}) {
-        const id = obj?.metadata?.uid;
+        const id = obj?.id;
         const subtype = {
           id,
           obj,
@@ -236,7 +238,7 @@ export default {
         const split = unescape(name).split('/');
 
         return x.metadata.namespace === split[0] && x.metadata.name === split[1];
-      });
+      }) || null;
       if ( !!this.clusterClassObj ) {
         this.setClass();
         this.setNamespace();
@@ -304,7 +306,7 @@ export default {
       });
     },
     clickedType(obj: {[key:string]: any}) {
-      this.clusterClassObj = this.clusterClasses.find((x: ClusterClass) => x.metadata.uid === obj.id);
+      this.clusterClassObj = this.clusterClasses.find((x: ClusterClass) => x.id === obj.id) || null;
       this.setClass();
       this.setNamespace();
     },
@@ -321,7 +323,7 @@ export default {
       set(this.value.spec.clusterNetwork.services, 'cidrBlocks', val);
     }
   }
-};
+});
 </script>
 <template>
   <Loading v-if="loading" />
