@@ -113,7 +113,6 @@ export default defineComponent({
       weight:         30
     };
     const addSteps = !!this.preselectedClass ? [stepConfiguration, stepVariables] : [stepClusterClass, stepConfiguration, stepVariables];
-    const clusterClassObj: ClusterClass | null = null;
 
     return {
       addSteps,
@@ -135,7 +134,7 @@ export default defineComponent({
         class: ''
       },
       variablesReady:  true,
-      clusterClassObj,
+      clusterClassObj: null as ClusterClass | null,
       loading:         true
     };
   },

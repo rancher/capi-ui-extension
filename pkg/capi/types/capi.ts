@@ -59,8 +59,11 @@ export interface ClusterClass {
   },
   spec: {
     infrastructure: Object,
-    workers: Object,
-    controlPlane: Object
+    workers: {
+      machinePools: [],
+      machineDeployments: []
+    },
+    controlPlane: {ref: {name: string}}
   }
 }
 export interface Provider {
