@@ -1,5 +1,5 @@
 <script lang="ts">
-import Vue, { VueConstructor } from 'vue';
+import { defineComponent } from 'vue';
 import { SUB_TYPE } from '@shell/config/query-params';
 import { set } from '@shell/utils/object';
 import CreateEditView from '@shell/mixins/create-edit-view';
@@ -9,9 +9,7 @@ import type { Route } from 'vue-router';
 import { CAPI, QUERY_PARAMS, ClusterClass } from '../../types/capi';
 import ClusterConfig from './ClusterConfig.vue';
 
-export default (Vue as VueConstructor<
-  Vue & InstanceType<typeof CreateEditView>
->).extend({
+export default defineComponent({
   name:       'CreateCluster',
   components: {
     CruResource,

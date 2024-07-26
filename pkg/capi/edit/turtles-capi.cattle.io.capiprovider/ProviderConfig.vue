@@ -1,5 +1,5 @@
 <script lang='ts'>
-import Vue, { VueConstructor } from 'vue';
+import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import { clear } from '@shell/utils/array';
@@ -42,6 +42,8 @@ const customProviderSpec = {
   version:      ''
 };
 
+const providerTypes = ['infrastructure', 'bootstrap', 'controlPlane', 'addon' ];
+
 interface Secret {
   metadata: {
     name: string,
@@ -53,9 +55,7 @@ interface Hash {
   coreProviderSecret: Secret[]
 }
 
-export default (Vue as VueConstructor<
-  Vue & InstanceType<typeof CreateEditView>
->).extend({
+export default defineComponent({
   components: {
     CruResource,
     Loading,
@@ -109,12 +109,7 @@ export default (Vue as VueConstructor<
       ],
       allNamespaces:         [],
       needCredential:     providerDetails?.needCredentials || false,
-      typeOptions:        [
-        { label: this.t('capi.provider.type.infrastructure.label'), value: 'infrastructure' }, 
-        { label: this.t('capi.provider.type.bootstrap.label'), value: 'bootstrap' }, 
-        { label: this.t('capi.provider.type.controlPlane.label'), value: 'controlPlane' }, 
-        { label: this.t('capi.provider.type.addon.label'), value: 'addon' }
-      ]
+      
     };
   },
   computed: {
@@ -126,6 +121,9 @@ export default (Vue as VueConstructor<
         url:     urlValidator(this.$store.getters['i18n/t'])
       };
     },
+    typeOptions() {
+      return providerTypes.map((type)=>{return {label: this.t(`capi.provider.type.${type}.label`), value: type}});
+    },        
     showForm() {
       return !!this.value.spec.credentials.rancherCloudCredentialNamespaceName || !this.needCredential;
     },

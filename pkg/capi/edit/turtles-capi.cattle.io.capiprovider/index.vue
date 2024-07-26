@@ -1,5 +1,5 @@
 <script lang="ts">
-import Vue, { VueConstructor } from 'vue';
+import { defineComponent } from 'vue';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import CruResource from '@shell/components/CruResource.vue';
 import SelectIconGrid from '@shell/components/SelectIconGrid.vue';
@@ -15,10 +15,11 @@ interface ProviderType {
   icon: HTMLImageElement
   disabled: boolean,
 }
+type Route = {
+  query: {[index: string]:any},
+};
 
-export default (Vue as VueConstructor<
-  Vue & InstanceType<typeof CreateEditView>
->).extend({
+export default defineComponent({
   name: 'CreateProvider',
 
   components: {
@@ -52,7 +53,8 @@ export default (Vue as VueConstructor<
   },
 
   data() {
-    const subType: string = this.$route.query[SUB_TYPE] || null;
+    const route = this.$route as Route;
+    const subType: string | null = route?.query[SUB_TYPE] || null;
 
     return { subType };
   },

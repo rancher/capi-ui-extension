@@ -1,5 +1,5 @@
 <script lang='ts'>
-import Vue, { VueConstructor } from 'vue';
+import { defineComponent, PropType } from 'vue';
 import { set, clone } from '@shell/utils/object';
 import { clear } from '@shell/utils/array';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
@@ -42,9 +42,7 @@ interface Step {
   name: String
 }
 
-export default (Vue as VueConstructor<
-  Vue & InstanceType<typeof CreateEditView>
->).extend({
+export default defineComponent({
   name:       'ClusterConfig',
   components: {
     CruResource,
@@ -73,7 +71,7 @@ export default (Vue as VueConstructor<
       default:  ''
     },
     clusterClasses: {
-      type:     Array,
+      type:     Array as PropType<ClusterClass[]>,
       required: true
     }
   },
@@ -136,7 +134,7 @@ export default (Vue as VueConstructor<
         class: ''
       },
       variablesReady:  true,
-      clusterClassObj: null,
+      clusterClassObj: null as ClusterClass | null,
       loading:         true
     };
   },
@@ -221,7 +219,7 @@ export default (Vue as VueConstructor<
       return out;
 
       function addType(obj: {[key: string]: any}) {
-        const id = obj?.metadata?.name;
+        const id = obj?.id;
         const subtype = {
           id,
           obj,
@@ -239,7 +237,7 @@ export default (Vue as VueConstructor<
         const split = unescape(name).split('/');
 
         return x.metadata.namespace === split[0] && x.metadata.name === split[1];
-      });
+      }) || null;
       if ( !!this.clusterClassObj ) {
         this.setClass();
         this.setNamespace();
@@ -307,7 +305,7 @@ export default (Vue as VueConstructor<
       });
     },
     clickedType(obj: {[key:string]: any}) {
-      this.clusterClassObj = this.clusterClasses.find((x: ClusterClass) => x.metadata.name === obj.id);
+      this.clusterClassObj = this.clusterClasses.find((x: ClusterClass) => x.id === obj.id) || null;
       this.setClass();
       this.setNamespace();
     },
