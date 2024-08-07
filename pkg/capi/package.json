@@ -5,7 +5,7 @@
   "private": false,
   "rancher": {
     "annotations": {
-      "catalog.cattle.io/rancher-version": ">= v2.8.0",
+      "catalog.cattle.io/rancher-version": ">= 2.9.0-0",
       "catalog.cattle.io/display-name": "CAPI UI",
       "catalog.cattle.io/experimental": "true"
     }
