@@ -1,5 +1,5 @@
 import SteveModel from '@shell/plugins/steve/steve-class';
-import { CAPI } from '@shell/config/types';
+import { CAPI, MANAGEMENT, LOCAL_CLUSTER } from '@shell/config/types';
 import { BLANK_CLUSTER, QUERY_PARAMS } from '../types/capi';
 
 export default class ClusterClass extends SteveModel {
@@ -29,5 +29,10 @@ export default class ClusterClass extends SteveModel {
     };
 
     this.currentRouter().push(location);
+  }
+
+  saveYaml(yaml) {
+    const localCluster = this.$rootGetters['management/byId'](MANAGEMENT.CLUSTER, LOCAL_CLUSTER);
+    return localCluster.doAction('apply', { yaml });
   }
 }
