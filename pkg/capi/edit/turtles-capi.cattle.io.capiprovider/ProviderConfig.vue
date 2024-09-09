@@ -42,7 +42,7 @@ const customProviderSpec = {
   version:      ''
 };
 
-const providerTypes = ['infrastructure', 'bootstrap', 'controlPlane', 'addon' ];
+const providerTypes = ['infrastructure', 'bootstrap', 'controlPlane', 'addon'];
 
 interface Secret {
   metadata: {
@@ -95,9 +95,7 @@ export default defineComponent({
     });
   },
   data() {
-    const providerDetails: Provider = PROVIDER_TYPES.find(p => p.id === this.provider) || {
-      needCredentials: false, disabled: false, id: '0'
-    };
+    const providerDetails: Provider = PROVIDER_TYPES.find(p => p.id === this.provider) || { disabled: false, id: '0' };
 
     return {
       loading:            true,
@@ -108,8 +106,8 @@ export default defineComponent({
         { path: 'spec.fetchConfig.url', rules: ['url'] },
       ],
       allNamespaces:         [],
-      needCredential:     providerDetails?.needCredentials || false,
-      
+      credentialComponent:     providerDetails?.credential,
+
     };
   },
   computed: {
@@ -122,10 +120,12 @@ export default defineComponent({
       };
     },
     typeOptions() {
-      return providerTypes.map((type)=>{return {label: this.t(`capi.provider.type.${type}.label`), value: type}});
-    },        
+      return providerTypes.map((type) => {
+        return { label: this.t(`capi.provider.type.${ type }.label`), value: type };
+      });
+    },
     showForm() {
-      return !!this.value.spec.credentials.rancherCloudCredentialNamespaceName || !this.needCredential;
+      return !!this.value.spec.credentials.rancherCloudCredentialNamespaceName || !this.credentialComponent;
     },
     isCreate() {
       return this.mode === _CREATE;
@@ -146,7 +146,7 @@ export default defineComponent({
       return this.isEdit && (this.hasFeatures || this.hasVariables);
     },
     waitingForCredential() {
-      return this.needCredential && !this.value.spec.credentials.rancherCloudCredentialNamespaceName;
+      return this.credentialComponent && !this.value.spec.credentials.rancherCloudCredentialNamespaceName;
     }
   },
   methods:  {
@@ -212,7 +212,7 @@ export default defineComponent({
       if ( this.errors ) {
         clear(this.errors);
       }
-      if ( !this.needCredential && !this.value.spec?.credentials?.rancherCloudCredentialNamespaceName ) {
+      if ( !this.credentialComponent && !this.value.spec?.credentials?.rancherCloudCredentialNamespaceName ) {
         this.value.spec.credentials = null;
       }
       try {
@@ -316,18 +316,18 @@ export default defineComponent({
         </div>
       </div>
     </div>
-    <div v-if="needCredential" class="mb-40" />
+    <div v-if="credentialComponent" class="mb-40" />
     <h2 v-if="hasFeatures || hasVariables" class="mb-20">
       <t k="capi.provider.secret.title" />
     </h2>
-    <div v-if="needCredential">
+    <div v-if="credentialComponent">
       <h3 class="mb-20">
         <t k="capi.provider.cloudCredential.title" />
       </h3>
       <SelectCredential
         v-model="value.spec.credentials.rancherCloudCredentialNamespaceName"
         :mode="mode"
-        :provider="provider"
+        :provider="credentialComponent"
         :cancel="cancelCredential"
         :showing-form="showForm"
         class="mb-40"
