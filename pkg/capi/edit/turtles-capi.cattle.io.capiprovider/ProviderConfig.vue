@@ -42,7 +42,7 @@ const customProviderSpec = {
   version:      ''
 };
 
-const providerTypes = ['infrastructure', 'bootstrap', 'controlPlane', 'addon'];
+const providerTypes = ['infrastructure', 'bootstrap', 'controlPlane', 'addon', 'ipam', 'runtimeextension', 'core'];
 
 interface Secret {
   metadata: {
