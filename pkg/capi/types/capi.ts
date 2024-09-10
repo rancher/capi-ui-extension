@@ -69,29 +69,25 @@ export interface ClusterClass {
 export interface Provider {
   id: string,
   disabled: boolean,
-  needCredentials: boolean
+  credential?: string
 }
 
 export const PROVIDER_TYPES: Provider[] = [
   {
-    id: 'aws', disabled: false, needCredentials: true
+    id: 'aws', disabled: false, credential: 'aws'
   },
   {
-    id: 'azure', disabled: false, needCredentials: true
+    id: 'azure', disabled: false, credential: 'azure'
   },
   {
-    id: 'digitalocean', disabled: false, needCredentials: true
+    id: 'digitalocean', disabled: false, credential: 'digitalocean'
+  },
+  { id: 'docker', disabled: false },
+  {
+    id: 'gcp', disabled: false, credential: 'gcp'
   },
   {
-    id: 'docker', disabled: false, needCredentials: false
+    id: 'vsphere', disabled: false, credential: 'vmwarevsphere'
   },
-  {
-    id: 'gcp', disabled: false, needCredentials: true
-  },
-  {
-    id: 'vsphere', disabled: false, needCredentials: true
-  },
-  {
-    id: 'custom', disabled: false, needCredentials: false
-  },
+  { id: 'custom', disabled: false },
 ];

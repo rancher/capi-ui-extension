@@ -102,6 +102,12 @@ capi:
         label: Control Plane
       addon:
         label: Add-On
+      ipam:
+        label: IPAM
+      runtimeextension:
+        label: Runtime Extension
+      core:
+        label: Core
     version:
       label: Version
       placeholder: eg. v1.0.0
