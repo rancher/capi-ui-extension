@@ -1,15 +1,17 @@
-import { importTypes } from '@rancher/auto-import';
-import {
-  ActionLocation, IPlugin, PanelLocation, TableColumnLocation, TabLocation
-} from '@shell/core/types';
-import { _CLONE, _CREATE, _EDIT } from '@shell/config/query-params';
-import { MANAGEMENT, CAPI as RANCHER_CAPI } from '@shell/config/types';
-import { LABELS, CAPI as TURTLES_CAPI } from './types/capi';
-import capiRouting from './routes/capi-routing';
-import toggleAutoImport from './util/auto-import';
+
+// import { importTypes } from '@rancher/auto-import';
+// import {
+//   ActionLocation, IPlugin, PanelLocation, TableColumnLocation, TabLocation
+// } from '@shell/core/types';
+// import { _CLONE, _CREATE, _EDIT } from '@shell/config/query-params';
+// import { MANAGEMENT, CAPI as RANCHER_CAPI } from '@shell/config/types';
+// import { LABELS, CAPI as TURTLES_CAPI } from './types/capi';
+// import capiRouting from './routes/capi-routing';
+// import toggleAutoImport from './util/auto-import';
 
 // Init the package
 export default function(plugin: any): void {
+    debugger
   // Auto-import model, detail, edit from the folders
 //   importTypes(plugin);
 
