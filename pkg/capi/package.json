@@ -5,7 +5,7 @@
   "private": false,
   "rancher": {
     "annotations": {
-      "catalog.cattle.io/rancher-version": ">= 2.9.0-0",
+      "catalog.cattle.io/rancher-version": ">= 2.10.0-0",
       "catalog.cattle.io/display-name": "CAPI UI",
       "catalog.cattle.io/experimental": "true"
     }
@@ -15,7 +15,7 @@
     "nuxt": "./node_modules/.bin/nuxt"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=20"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "5.0.8",

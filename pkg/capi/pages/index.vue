@@ -6,58 +6,58 @@ import { CAPI } from '../types/capi.ts';
 export default {
   name: 'CAPITurtlesDashboard',
 
-  async middleware({ redirect, route, store } ) {
-    try {
-      const clusterClassSchema = await store.dispatch('management/find', {
-        type: SCHEMA,
-        id:   CAPI.CLUSTER_CLASS,
-        opt:  { force: true },
-      });
+//   async middleware({ redirect, route, store } ) {
+//     try {
+//       const clusterClassSchema = await store.dispatch('management/find', {
+//         type: SCHEMA,
+//         id:   CAPI.CLUSTER_CLASS,
+//         opt:  { force: true },
+//       });
 
-      if (clusterClassSchema) {
-        return redirect({
-          name:   'c-cluster-product-resource',
-          params: {
-            ...route.params,
-            cluster:  '_',
-            resource: RANCHER_CAPI.CAPI_CLUSTER,
-            product:  'manager'
-          }
-        });
-      }
-    } catch {}
-  },
+//       if (clusterClassSchema) {
+//         return redirect({
+//           name:   'c-cluster-product-resource',
+//           params: {
+//             ...route.params,
+//             cluster:  '_',
+//             resource: RANCHER_CAPI.CAPI_CLUSTER,
+//             product:  'manager'
+//           }
+//         });
+//       }
+//     } catch {}
+//   },
 
-  components: { Banner },
+//   components: { Banner },
 
-  async fetch() {
-    if (this.$store.getters['management/canList'](MANAGEMENT.FEATURE)) {
-      this.features = await this.$store.dispatch('management/findAll', { type: MANAGEMENT.FEATURE });
-    }
-  },
-  data() {
-    return { features: [] };
-  },
+//   async fetch() {
+//     if (this.$store.getters['management/canList'](MANAGEMENT.FEATURE)) {
+//       this.features = await this.$store.dispatch('management/findAll', { type: MANAGEMENT.FEATURE });
+//     }
+//   },
+//   data() {
+//     return { features: [] };
+//   },
 
-  computed: {
-    // if the flag is undefined that is equivalent to this feature being enabled
-    embeddedCapiEnabled() {
-      const embeddedCapiFeature = this.features.find(f => f.id === 'embedded-cluster-api');
+//   computed: {
+//     // if the flag is undefined that is equivalent to this feature being enabled
+//     embeddedCapiEnabled() {
+//       const embeddedCapiFeature = this.features.find(f => f.id === 'embedded-cluster-api');
 
-      return embeddedCapiFeature?.spec?.value || !embeddedCapiFeature;
-    },
+//       return embeddedCapiFeature?.spec?.value || !embeddedCapiFeature;
+//     },
 
-    hasClusterClassSchema() {
-      return !!this.$store.getters['management/schemaFor'](CAPI.CLUSTER_CLASS);
-    },
-  }
+//     hasClusterClassSchema() {
+//       return !!this.$store.getters['management/schemaFor'](CAPI.CLUSTER_CLASS);
+//     },
+//   }
 
 };
 </script>
 
 <template>
   <div>
-    <div v-if="embeddedCapiEnabled || !hasClusterClassSchema" class="centered">
+    <!-- <div v-if="embeddedCapiEnabled || !hasClusterClassSchema" class="centered">
       <h1 class="mb-20">
         {{ t("capi.installation.title") }}
       </h1>
@@ -71,7 +71,7 @@ export default {
           <t v-if="!hasClusterClassSchema" k="capi.installation.turtlesNeeded" raw />
         </div>
       </Banner>
-    </div>
+    </div> -->
   </div>
 </template>
 
