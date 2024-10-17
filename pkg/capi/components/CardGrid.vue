@@ -1,5 +1,5 @@
 <script lang="ts">
-import Vue from 'vue';
+import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
 import { get } from '@shell/utils/object';
 import capitalize from 'lodash/capitalize';
@@ -11,9 +11,10 @@ interface Card {
   selected: Boolean
 }
 
-export default Vue.extend({
+export default defineComponent({
   components: { ClusterClassCard },
   name:       'CardGrid',
+  emits: ['clicked'],
 
   props: {
     rows: {

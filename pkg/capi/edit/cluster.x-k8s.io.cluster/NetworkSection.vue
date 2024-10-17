@@ -1,57 +1,58 @@
 <script lang="ts">
-import Vue from 'vue';
+import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
 import { _EDIT } from '@shell/config/query-params';
 import ArrayList from '@shell/components/form/ArrayList.vue';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     LabeledInput,
     ArrayList
   },
-  props:      {
-    value: {
-      type:     Object,
-      required: true,
-    },
-    mode: {
-      type:     String,
-      required: true,
-    },
-    rules: {
-      default: () => ({
-        serviceDomain:     [],
-        apiServerPort:     [],
-        pods:              [],
-        services:          []
-      }),
-      type: Object,
-    },
-  },
-  computed: {
-    ...mapGetters({ t: 'i18n/t' }),
-    clusterIsAlreadyCreated() {
-      return this.mode === _EDIT;
-    },
-    apiServerPort() {
-      return this.value?.apiServerPort;
-    },
-    serviceDomain() {
-      return this.value?.serviceDomain;
-    },
-    podsCidrBlocks() {
-      return this.value?.pods?.cidrBlocks;
-    },
-    servicesCidrBlocks() {
-      return this.value?.services?.cidrBlocks;
-    },
-  }
+//   emits: ['api-server-port-changed', 'service-domain-changed', 'pods-cidr-blocks-changed', 'services-cidr-blocks-changed' ],
+//   props:      {
+//     value: {
+//       type:     Object,
+//       required: true,
+//     },
+//     mode: {
+//       type:     String,
+//       required: true,
+//     },
+//     rules: {
+//       default: () => ({
+//         serviceDomain:     [],
+//         apiServerPort:     [],
+//         pods:              [],
+//         services:          []
+//       }),
+//       type: Object,
+//     },
+//   },
+//   computed: {
+//     ...mapGetters({ t: 'i18n/t' }),
+//     clusterIsAlreadyCreated() {
+//       return this.mode === _EDIT;
+//     },
+//     apiServerPort() {
+//       return this.value?.apiServerPort;
+//     },
+//     serviceDomain() {
+//       return this.value?.serviceDomain;
+//     },
+//     podsCidrBlocks() {
+//       return this.value?.pods?.cidrBlocks;
+//     },
+//     servicesCidrBlocks() {
+//       return this.value?.services?.cidrBlocks;
+//     },
+//   }
 });
 </script>
 <template>
   <div>
-    <div class="row mb-20">
+    <!-- <div class="row mb-20">
       <div
         class="col span-3"
       >
@@ -99,6 +100,6 @@ export default Vue.extend({
           @input="$emit('services-cidr-blocks-changed', $event)"
         />
       </div>
-    </div>
+    </div> -->
   </div>
 </template>

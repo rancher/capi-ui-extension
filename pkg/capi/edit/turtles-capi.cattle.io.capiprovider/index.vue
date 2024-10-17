@@ -28,95 +28,96 @@ export default defineComponent({
     ProviderConfig
   },
 
-  mixins: [CreateEditView],
+//   mixins: [CreateEditView],
+//   emits:['set-subtype'],
 
-  props: {
+//   props: {
 
-    value: {
-      type:    Object,
-      default: null,
-    },
+//     value: {
+//       type:    Object,
+//       default: null,
+//     },
 
-    /**
-     * Inherited global identifier prefix for tests
-     * Define a term based on the parent component to avoid conflicts on multiple components
-     */
-    componentTestid: {
-      type:    String,
-      default: 'capi-provider-create'
-    }
-  },
-  beforeMount() {
-    if ( this.value?.spec?.name) {
-      this.selectType(this.value.spec.name);
-    }
-  },
+//     /**
+//      * Inherited global identifier prefix for tests
+//      * Define a term based on the parent component to avoid conflicts on multiple components
+//      */
+//     componentTestid: {
+//       type:    String,
+//       default: 'capi-provider-create'
+//     }
+//   },
+//   beforeMount() {
+//     if ( this.value?.spec?.name) {
+//       this.selectType(this.value.spec.name);
+//     }
+//   },
 
-  data() {
-    const route = this.$route as Route;
-    const subType: string | null = route?.query[SUB_TYPE] || null;
+//   data() {
+//     const route = this.$route as Route;
+//     const subType: string | null = route?.query[SUB_TYPE] || null;
 
-    return { subType };
-  },
+//     return { subType };
+//   },
 
-  computed: {
-    subTypes() {
-      const out: ProviderType[] = [];
-      const getters = this.$store.getters;
+//   computed: {
+//     subTypes() {
+//       const out: ProviderType[] = [];
+//       const getters = this.$store.getters;
 
-      PROVIDER_TYPES?.forEach((provider) => {
-        addType(provider.id, provider.disabled);
-      });
+//       PROVIDER_TYPES?.forEach((provider) => {
+//         addType(provider.id, provider.disabled);
+//       });
 
-      return out;
+//       return out;
 
-      function addType(id: string, disabled = false) {
-        const label = getters['i18n/withFallback'](`cluster.provider."${ id }"`, null, id);
-        const description = getters['i18n/withFallback'](`cluster.providerDescription."${ id }"`, null, '');
-        let icon;
+//       function addType(id: string, disabled = false) {
+//         const label = getters['i18n/withFallback'](`cluster.provider."${ id }"`, null, id);
+//         const description = getters['i18n/withFallback'](`cluster.providerDescription."${ id }"`, null, '');
+//         let icon;
 
-        try {
-          icon = require(`~shell/assets/images/providers/${ id }.svg`);
-        } catch (e) {
-          try {
-            icon = require(`../../assets/images/providers/${ id }.svg`);
-          } catch (e) {
-            icon = require('~shell/assets/images/generic-driver.svg');
-          }
-        }
+//         try {
+//           icon = require(`~shell/assets/images/providers/${ id }.svg`);
+//         } catch (e) {
+//           try {
+//             icon = require(`../../assets/images/providers/${ id }.svg`);
+//           } catch (e) {
+//             icon = require('~shell/assets/images/generic-driver.svg');
+//           }
+//         }
 
-        const providerType: ProviderType = {
-          id,
-          label,
-          description,
-          icon,
-          disabled
-        };
+//         const providerType: ProviderType = {
+//           id,
+//           label,
+//           description,
+//           icon,
+//           disabled
+//         };
 
-        out.push(providerType);
-      }
-    }
-  },
+//         out.push(providerType);
+//       }
+//     }
+//   },
 
-  methods: {
+//   methods: {
+//     clickedType(obj: ProviderType) {
+//       const id = obj.id;
 
-    clickedType(obj: ProviderType) {
-      const id = obj.id;
+//       this.$router.applyQuery({ [SUB_TYPE]: id });
+//       this.selectType(id);
+//     },
 
-      this.$router.applyQuery({ [SUB_TYPE]: id });
-      this.selectType(id);
-    },
-
-    selectType(type: string) {
-      this.subType = type;
-      this.$emit('set-subtype', this.$store.getters['i18n/withFallback'](`cluster.provider."${ type }"`, null, type));
-    },
-  },
+//     selectType(type: string) {
+//       this.subType = type;
+//       this.$emit('set-subtype', this.$store.getters['i18n/withFallback'](`cluster.provider."${ type }"`, null, type));
+//     },
+//   },
 });
 </script>
 
 <template>
-  <CruResource
+    <div></div>
+  <!-- <CruResource
     :mode="mode"
     :validation-passed="true"
     :selected-subtype="subType"
@@ -147,20 +148,21 @@ export default defineComponent({
     </template>
     <ProviderConfig
       v-if="subType"
-      v-model="value"
+      value="value"
       :initial-value="initialValue"
       :live-value="liveValue"
       :mode="mode"
       :provider="subType"
+      @input="$emit('input', $event)"
     />
 
     <template
       v-if="subType"
       #form-footer
     >
-      <div><!-- Hide the outer footer --></div>
+      <div/>
     </template>
-  </CruResource>
+  </CruResource> -->
 </template>
 
 <style lang='scss'>

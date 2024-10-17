@@ -33,64 +33,65 @@ export default defineComponent({
       required: true
     }
   },
-  beforeMount() {
-    if ( !this.value.spec ) {
-      set(this.value, 'spec', {});
-    }
-    if ( !this.value.id ) {
-      if ( !this.value.metadata ) {
-        set(this.value, 'metadata', {});
-      }
-    }
-    this.getClusterClasses().then((cc: any[]) => {
-      this.clusterClasses = cc;
-      this.loading = false;
-    }).catch((err: Error) => {
-      this.errors.push(err);
-      this.loading = false;
-    });
-  },
-  data() {
-    const route = this.$route as Route;
-    const subType = route.query[SUB_TYPE] || null;
-    const classFromURL = route.query[QUERY_PARAMS.CLASS];
-    const curClass = this.value?.spec?.topology?.class;
-    const curNs = this.value?.metadata?.namespace;
-    const classFromValue = curNs && curClass ? escape(`${ curNs }/${ curClass }`) : null;
-    const preselectedClass = classFromURL || classFromValue || null;
+//   beforeMount() {
+//     if ( !this.value.spec ) {
+//       set(this.value, 'spec', {});
+//     }
+//     if ( !this.value.id ) {
+//       if ( !this.value.metadata ) {
+//         set(this.value, 'metadata', {});
+//       }
+//     }
+//     this.getClusterClasses().then((cc: any[]) => {
+//       this.clusterClasses = cc;
+//       this.loading = false;
+//     }).catch((err: Error) => {
+//       this.errors.push(err);
+//       this.loading = false;
+//     });
+//   },
+//   data() {
+//     const route = this.$route as Route;
+//     const subType = route.query[SUB_TYPE] || null;
+//     const classFromURL = route.query[QUERY_PARAMS.CLASS];
+//     const curClass = this.value?.spec?.topology?.class;
+//     const curNs = this.value?.metadata?.namespace;
+//     const classFromValue = curNs && curClass ? escape(`${ curNs }/${ curClass }`) : null;
+//     const preselectedClass = classFromURL || classFromValue || null;
 
-    return {
-      subType, preselectedClass, capiProviders: [], clusterClasses: [] as any[], loading: true
-    };
-  },
-  methods: {
-    async getClusterClasses() {
-      const allClusterClasses: ClusterClass[] = await this.$store.dispatch('management/findAll', { type: CAPI.CLUSTER_CLASS });
+//     return {
+//       subType, preselectedClass, capiProviders: [], clusterClasses: [] as any[], loading: true
+//     };
+//   },
+//   methods: {
+//     async getClusterClasses() {
+//       const allClusterClasses: ClusterClass[] = await this.$store.dispatch('management/findAll', { type: CAPI.CLUSTER_CLASS });
 
-      return allClusterClasses;
-    },
-    cancel() {
-      this.$router.push({
-        name:   'c-cluster-manager-capi',
-        params: {},
-      });
-    }
-  }
+//       return allClusterClasses;
+//     },
+//     cancel() {
+//       this.$router.push({
+//         name:   'c-cluster-manager-capi',
+//         params: {},
+//       });
+//     }
+//   }
 });
 </script>
 
 <template>
   <div>
-    <Loading v-if="loading" />
+    <!-- <Loading v-if="loading" />
     <div v-else>
       <ClusterConfig
         v-if="preselectedClass"
-        v-model="value"
+        value="value"
         :initial-value="initialValue"
         :live-value="liveValue"
         :mode="mode"
         :preselected-class="preselectedClass"
         :cluster-classes="clusterClasses"
+        @input="$emit('input', $event)"
       />
       <CruResource
         v-else
@@ -106,19 +107,20 @@ export default defineComponent({
         @error="e=>errors = e"
       >
         <ClusterConfig
-          v-model="value"
+          value="value"
           :initial-value="initialValue"
           :live-value="liveValue"
           :mode="mode"
           :cluster-classes="clusterClasses"
+          @input="$emit('input', $event)"
         />
 
         <template
           #form-footer
         >
-          <div><!-- Hide the outer footer --></div>
+          <div/>
         </template>
       </CruResource>
-    </div>
+    </div> -->
   </div>
 </template>

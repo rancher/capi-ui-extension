@@ -1,5 +1,5 @@
 <script lang="ts">
-import Vue from 'vue';
+import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
 import isEqual from 'lodash/isEqual';
 
@@ -14,9 +14,10 @@ import { mapGetters } from 'vuex';
 import { Translation } from '@rancher/shell/types/t';
 import type { ClusterClassVariable } from '../../types/clusterClass';
 import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
-export default Vue.extend({
-  name: 'CCVariable',
 
+export default defineComponent({
+  name: 'CCVariable',
+  emits: ['validation-passed', 'input'],
   props: {
     variable: {
       type:     Object as PropType<ClusterClassVariable>,

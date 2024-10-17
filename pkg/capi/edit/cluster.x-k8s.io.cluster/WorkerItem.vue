@@ -1,5 +1,5 @@
 <script lang="ts">
-import Vue from 'vue';
+import { defineComponent } from 'vue';
 import debounce from 'lodash/debounce';
 import { removeAt } from '@shell/utils/array';
 import { clone } from '@shell/utils/object';
@@ -7,137 +7,138 @@ import { _EDIT, _VIEW } from '@shell/config/query-params';
 import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 
-export default Vue.extend({
+export default defineComponent({
   components: { LabeledSelect, LabeledInput },
-  props:      {
-    value: {
-      type:     Array,
-      default:  null,
-    },
-    mode: {
-      type:    String,
-      default: _EDIT,
-    },
-    title: {
-      type:     String,
-      required: true
-    },
-    classOptions: {
-      type:     Array,
-      default:  null,
-    },
-    addAllowed: {
-      type:    Boolean,
-      default: true,
-    },
-    removeAllowed: {
-      type:    Boolean,
-      default: true,
-    },
-    defaultAddValue: {
-      type:    [String, Number, Object, Array],
-      default: ''
-    },
-    loading: {
-      type:    Boolean,
-      default: false
-    },
-    disabled: {
-      type:    Boolean,
-      default: false,
-    },
-  },
-  data() {
-    const input = (this.value as any[] || []).slice();
-    const rows = [];
+//   emits:['add', 'remove', 'input'],
+//   props: {
+//     value: {
+//       type:     Array,
+//       default:  null,
+//     },
+//     mode: {
+//       type:    String,
+//       default: _EDIT,
+//     },
+//     title: {
+//       type:     String,
+//       required: true
+//     },
+//     classOptions: {
+//       type:     Array,
+//       default:  null,
+//     },
+//     addAllowed: {
+//       type:    Boolean,
+//       default: true,
+//     },
+//     removeAllowed: {
+//       type:    Boolean,
+//       default: true,
+//     },
+//     defaultAddValue: {
+//       type:    [String, Number, Object, Array],
+//       default: ''
+//     },
+//     loading: {
+//       type:    Boolean,
+//       default: false
+//     },
+//     disabled: {
+//       type:    Boolean,
+//       default: false,
+//     },
+//   },
+//   data() {
+//     const input = (this.value as any[] || []).slice();
+//     const rows = [];
 
-    for ( const value of input ) {
-      rows.push({ value });
-    }
-    if ( !rows.length ) {
-      const value = this.defaultAddValue ? clone(this.defaultAddValue) : '';
+//     for ( const value of input ) {
+//       rows.push({ value });
+//     }
+//     if ( !rows.length ) {
+//       const value = this.defaultAddValue ? clone(this.defaultAddValue) : '';
 
-      rows.push({ value });
-    }
+//       rows.push({ value });
+//     }
 
-    return { rows, lastUpdateWasFromValue: false };
-  },
+//     return { rows, lastUpdateWasFromValue: false };
+//   },
 
-  computed: {
-    isView() {
-      return this.mode === _VIEW;
-    },
-    removeLabel() {
-      return this.$store.getters['i18n/t']('generic.remove');
-    },
-    addLabel() {
-      return this.$store.getters['i18n/t']('generic.add');
-    }
-  },
-  watch:    {
-    value() {
-      this.lastUpdateWasFromValue = true;
-      this.rows = (this.value || []).map(v => ({ value: v }));
-    },
-    rows: {
-      deep: true,
-      handler() {
-        // lastUpdateWasFromValue is used to break a cycle where when rows are updated
-        // this was called which then forced rows to updated again
-        if (!this.lastUpdateWasFromValue) {
-          this.queueUpdate();
-        }
-        this.lastUpdateWasFromValue = false;
-      }
-    }
-  },
-  created() {
-    this.queueUpdate = debounce(this.update, 50);
-  },
-  methods: {
-    add() {
-      this.rows.push({ value: clone(this.defaultAddValue) });
-      if (this.defaultAddValue) {
-        this.queueUpdate();
-      }
-      this.$nextTick(() => {
-        const inputs = this.$refs.value;
+//   computed: {
+//     isView() {
+//       return this.mode === _VIEW;
+//     },
+//     removeLabel() {
+//       return this.$store.getters['i18n/t']('generic.remove');
+//     },
+//     addLabel() {
+//       return this.$store.getters['i18n/t']('generic.add');
+//     }
+//   },
+//   watch:    {
+//     value() {
+//       this.lastUpdateWasFromValue = true;
+//       this.rows = (this.value || []).map(v => ({ value: v }));
+//     },
+//     rows: {
+//       deep: true,
+//       handler() {
+//         // lastUpdateWasFromValue is used to break a cycle where when rows are updated
+//         // this was called which then forced rows to updated again
+//         if (!this.lastUpdateWasFromValue) {
+//           this.queueUpdate();
+//         }
+//         this.lastUpdateWasFromValue = false;
+//       }
+//     }
+//   },
+//   created() {
+//     this.queueUpdate = debounce(this.update, 50);
+//   },
+//   methods: {
+//     add() {
+//       this.rows.push({ value: clone(this.defaultAddValue) });
+//       if (this.defaultAddValue) {
+//         this.queueUpdate();
+//       }
+//       this.$nextTick(() => {
+//         const inputs = this.$refs.value;
 
-        if ( inputs && inputs.length > 0 ) {
-          inputs[inputs.length - 1].focus();
-        }
-        this.$emit('add');
-      });
-    },
-    /**
-     * Remove item and emits removed row and its own index value
-     */
-    remove(row: {[key: string]: any}, index: number) {
-      this.$emit('remove', { row, index });
-      removeAt(this.rows, index);
-      this.queueUpdate();
-    },
-    update() {
-      if ( this.isView ) {
-        return;
-      }
-      const out = [];
+//         if ( inputs && inputs.length > 0 ) {
+//           inputs[inputs.length - 1].focus();
+//         }
+//         this.$emit('add');
+//       });
+//     },
+//     /**
+//      * Remove item and emits removed row and its own index value
+//      */
+//     remove(row: {[key: string]: any}, index: number) {
+//       this.$emit('remove', { row, index });
+//       removeAt(this.rows, index);
+//       this.queueUpdate();
+//     },
+//     update() {
+//       if ( this.isView ) {
+//         return;
+//       }
+//       const out = [];
 
-      for ( const row of this.rows ) {
-        const value = row.value;
+//       for ( const row of this.rows ) {
+//         const value = row.value;
 
-        if ( typeof value !== 'undefined' ) {
-          out.push(value);
-        }
-      }
-      this.$emit('input', out);
-    },
-  }
+//         if ( typeof value !== 'undefined' ) {
+//           out.push(value);
+//         }
+//       }
+//       this.$emit('input', out);
+//     },
+//   }
 });
 </script>
 <template>
   <div>
-    <div
+    <!-- <div
       v-if="title"
       class="clearfix"
     >
@@ -177,18 +178,20 @@ export default Vue.extend({
               >
                 <LabeledInput
                   ref="value"
-                  v-model="row.value.name"
+                  value="row.value.name"
                   :mode="mode"
                   :disabled="false"
                   :label="t('capi.cluster.workers.name')"
+                  @input="$emit('input', $event)"
                 />
               </div>
               <div class="col mt-20">
                 <LabeledSelect
-                  v-model="row.value.class"
+                  value="row.value.class"
                   :mode="mode"
                   :options="classOptions"
                   label-key="capi.cluster.workers.class"
+                  @input="$emit('input', $event)"
                 />
               </div>
             </slot>
@@ -249,6 +252,6 @@ export default Vue.extend({
           {{ addLabel }}
         </button>
       </slot>
-    </div>
+    </div> -->
   </div>
 </template>
