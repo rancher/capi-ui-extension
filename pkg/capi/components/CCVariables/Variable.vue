@@ -162,7 +162,6 @@ export default defineComponent({
           out = JSON.parse(e);
         } catch {}
       }
-      //this.$emit('update:value', out);
       this.$emit('input', out);
     }
   },

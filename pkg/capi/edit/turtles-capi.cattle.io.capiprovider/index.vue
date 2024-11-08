@@ -171,7 +171,7 @@ export default defineComponent({
       v-if="subType"
       #form-footer
     >
-      <div/>
+      <div><!-- Hide the outer footer --></div>
     </template>
   </CruResource>
 </template>

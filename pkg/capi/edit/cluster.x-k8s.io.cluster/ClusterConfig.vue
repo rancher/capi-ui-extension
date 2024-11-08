@@ -1,6 +1,6 @@
 <script lang='ts'>
 import { defineComponent, PropType } from 'vue';
-import { set } from '@shell/utils/object';
+import { set, clone } from '@shell/utils/object';
 import { clear } from '@shell/utils/array';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 import NameNsDescription from '@shell/components/form/NameNsDescription.vue';
@@ -18,7 +18,6 @@ import CardGrid from '../../components/CardGrid.vue';
 import WorkerItem from './WorkerItem.vue';
 import NetworkSection from './NetworkSection.vue';
 import ControlPlaneEndpointSection from './ControlPlaneEndpointSection.vue';
-import { set, clone } from '@shell/utils/object';
 
 interface Step {
   name: String
@@ -43,7 +42,6 @@ const defaultCPEndpointConfig: CAPIClusterCPEndpoint = {
 
 export default defineComponent({
   name:       'ClusterConfig',
-  inheritAttrs: false,
   components: {
     CruResource,
     Loading,

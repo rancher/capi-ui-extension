@@ -45,6 +45,7 @@ export default defineComponent({
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.controlPlaneEndpoint.host')"
           :rules="rules.host"
+          type="number"
         />
       </div>
       <div
@@ -56,6 +57,7 @@ export default defineComponent({
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.controlPlaneEndpoint.port')"
           :rules="rules.port"
+          type="number"
         />
     </div>
     </div>
