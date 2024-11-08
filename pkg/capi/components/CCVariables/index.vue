@@ -1,6 +1,6 @@
 <script lang="ts">
 import debounce from 'lodash/debounce';
-import Vue from 'vue';
+import { defineComponent } from 'vue';
 
 import type { PropType } from 'vue';
 import { randomStr } from '@shell/utils/string';
@@ -9,10 +9,11 @@ import type { CapiClusterVariable } from '../../types/cluster.x-k8s.io.cluster';
 import { isDefined } from '../../util/validators';
 import Variable from './Variable.vue';
 
-export default Vue.extend({
+export default defineComponent({
   name: 'ClusterClassVariables',
 
   components: { Variable },
+  emits:['validation-passed', 'update:value'],
 
   props: {
     clusterClass: {
@@ -131,7 +132,7 @@ export default Vue.extend({
       } else {
         out.push({ value: val, name: variableDef.name });
       }
-      this.$emit('input', out);
+      this.$emit('update:value', out);
     },
 
     // update the cluster's variables when the cluster class changes
@@ -180,7 +181,7 @@ export default Vue.extend({
       });
 
       this.errorCount = 0;
-      this.$emit('input', out);
+      this.$emit('update:value', out);
     },
 
     updateErrors(isValid: boolean) {
@@ -210,9 +211,8 @@ export default Vue.extend({
 <template>
   <div class="variables">
     <template v-if="variableDefinitions && variableDefinitions.length">
-      <template v-for="(variableDef, i) in variableDefinitions">
+      <template v-for="(variableDef, i) in variableDefinitions" :key="`${variableDef.name}`">
         <Variable
-          :key="`${variableDef.name}`"
           :ref="`${variableDef.name}-input`"
           :variable="variableDef"
           :value="valueFor(variableDef)"

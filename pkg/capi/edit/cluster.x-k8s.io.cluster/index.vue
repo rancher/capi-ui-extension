@@ -16,7 +16,7 @@ export default defineComponent({
     Loading,
     ClusterConfig
   },
-
+  emits: ['update:value'],
   mixins: [CreateEditView],
 
   props: {
@@ -64,6 +64,21 @@ export default defineComponent({
     };
   },
   methods: {
+    handleValueChanged(newVal: {k: string, val: any}) {
+        const k = newVal.k;
+        const v = newVal.val;
+        const path = k.split('.');
+        let currentObj = this.value;
+
+        for (let j = 0; j < path.length - 1; j++) {
+            if(!currentObj[path[j]]){
+                currentObj[path[j]] = {};
+            }
+          currentObj = currentObj[path[j]];
+        }
+
+        currentObj[path[path.length - 1]] = v;
+    },
     async getClusterClasses() {
       const allClusterClasses: ClusterClass[] = await this.$store.dispatch('management/findAll', { type: CAPI.CLUSTER_CLASS });
 
@@ -85,12 +100,13 @@ export default defineComponent({
     <div v-else>
       <ClusterConfig
         v-if="preselectedClass"
-        v-model="value"
+        :value="value"
         :initial-value="initialValue"
         :live-value="liveValue"
         :mode="mode"
         :preselected-class="preselectedClass"
         :cluster-classes="clusterClasses"
+        @update:value="handleValueChanged"
       />
       <CruResource
         v-else
@@ -106,11 +122,12 @@ export default defineComponent({
         @error="e=>errors = e"
       >
         <ClusterConfig
-          v-model="value"
+          :value="value"
           :initial-value="initialValue"
           :live-value="liveValue"
           :mode="mode"
           :cluster-classes="clusterClasses"
+          @update:value="handleValueChanged"
         />
 
         <template

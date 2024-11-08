@@ -4,7 +4,6 @@ import CreateEditView from '@shell/mixins/create-edit-view';
 import CruResource from '@shell/components/CruResource.vue';
 import SelectIconGrid from '@shell/components/SelectIconGrid.vue';
 import { SUB_TYPE } from '@shell/config/query-params';
-
 import { PROVIDER_TYPES } from '../../types/capi';
 import ProviderConfig from './ProviderConfig.vue';
 
@@ -29,6 +28,7 @@ export default defineComponent({
   },
 
   mixins: [CreateEditView],
+  emits:['set-subtype', 'update:value'],
 
   props: {
 
@@ -99,11 +99,10 @@ export default defineComponent({
   },
 
   methods: {
-
     clickedType(obj: ProviderType) {
       const id = obj.id;
 
-      this.$router.applyQuery({ [SUB_TYPE]: id });
+      this.$router?.applyQuery({ [SUB_TYPE]: id });
       this.selectType(id);
     },
 
@@ -111,12 +110,27 @@ export default defineComponent({
       this.subType = type;
       this.$emit('set-subtype', this.$store.getters['i18n/withFallback'](`cluster.provider."${ type }"`, null, type));
     },
+    handleValueChanged(newVal: {k: string, val: any}) {
+        const k = newVal.k;
+        const v = newVal.val;
+        const path = k.split('.');
+        let currentObj = this.value;
+
+        for (let j = 0; j < path.length - 1; j++) {
+            if(!currentObj[path[j]]){
+                currentObj[path[j]] = {};
+            }
+          currentObj = currentObj[path[j]];
+        }
+
+        currentObj[path[path.length - 1]] = v;
+    }
   },
 });
 </script>
 
 <template>
-  <CruResource
+  <CruResource               
     :mode="mode"
     :validation-passed="true"
     :selected-subtype="subType"
@@ -147,18 +161,17 @@ export default defineComponent({
     </template>
     <ProviderConfig
       v-if="subType"
-      v-model="value"
-      :initial-value="initialValue"
-      :live-value="liveValue"
+      :value="value"
       :mode="mode"
       :provider="subType"
+      @update:value="handleValueChanged"
     />
 
     <template
       v-if="subType"
       #form-footer
     >
-      <div><!-- Hide the outer footer --></div>
+      <div/>
     </template>
   </CruResource>
 </template>

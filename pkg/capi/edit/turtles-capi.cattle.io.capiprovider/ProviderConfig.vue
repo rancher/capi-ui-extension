@@ -56,6 +56,7 @@ interface Hash {
 }
 
 export default defineComponent({
+    name: 'ProviderConfig',
   components: {
     CruResource,
     Loading,
@@ -68,6 +69,7 @@ export default defineComponent({
     Banner
   },
   mixins: [CreateEditView, FormValidation],
+  emits:['update:value'],
   props:      {
     mode: {
       type:     String,
@@ -209,6 +211,7 @@ export default defineComponent({
     },
 
     async saveOverride(btnCb: Function) {
+
       if ( this.errors ) {
         clear(this.errors);
       }
@@ -226,6 +229,9 @@ export default defineComponent({
       if ( this.$refs.providercruresource ) {
         this.$refs.providercruresource.emitOrRoute();
       }
+    },
+    nameNsChanged(event: any) {
+        this.$emit('update:value', {k: 'metadata', val: event.metadata })
     }
   }
 });
@@ -252,7 +258,7 @@ export default defineComponent({
     @error="e=>errors=e"
   >
     <NameNsDescription
-      v-model="value"
+      :value="value"
       :mode="mode"
       :namespaced="true"
       :namespace-options="allNamespaces"
@@ -262,6 +268,7 @@ export default defineComponent({
       description-label="capi.provider.description.label"
       description-placeholder="capi.provider.description.placeholder"
       :rules="{name:fvGetAndReportPathRules('metadata.name')}"
+      @update:value="nameNsChanged"
     />
     <div v-if="isCustom">
       <div class="row mb-20">
@@ -269,36 +276,39 @@ export default defineComponent({
           class="col span-3"
         >
           <LabeledInput
-            v-model="value.spec.name"
+            :value="value.spec.name"
             :mode="mode"
             label-key="capi.provider.label"
             placeholder-key="capi.provider.placeholder"
             required
             :rules="fvGetAndReportPathRules('spec.name')"
+            @update:value="$emit('update:value', {k: 'spec.name', val: $event})"
           />
         </div>
         <div
           class="col span-3"
         >
           <LabeledSelect
-            v-model="value.spec.type"
+            :value="value.spec.type"
             :mode="mode"
             :options="typeOptions"
             label-key="capi.provider.type.label"
             :disabled="isEdit"
             required
+            @update:value="$emit('update:value', {k: 'spec.type', val: $event})"
           />
         </div>
         <div
           class="col span-3"
         >
           <LabeledInput
-            v-model="value.spec.version"
+            :value="value.spec.version"
             :mode="mode"
             label-key="capi.provider.version.label"
             placeholder-key="capi.provider.version.placeholder"
             :rules="fvGetAndReportPathRules('spec.version')"
             required
+            @update:value="$emit('update:value', {k: 'spec.version', val: $event})"
           />
         </div>
       </div>
@@ -307,11 +317,12 @@ export default defineComponent({
           class="col span-6"
         >
           <LabeledInput
-            v-model="value.spec.fetchConfig.url"
+            :value="value.spec.fetchConfig.url"
             :mode="mode"
             label-key="capi.provider.fetchConfigURL.label"
             placeholder-key="capi.provider.fetchConfigURL.placeholder"
             :rules="fvGetAndReportPathRules('spec.fetchConfig.url')"
+            @update:value="$emit('update:value', {k: 'spec.fetchConfig.url', val: $event})"
           />
         </div>
       </div>
@@ -325,12 +336,13 @@ export default defineComponent({
         <t k="capi.provider.cloudCredential.title" />
       </h3>
       <SelectCredential
-        v-model="value.spec.credentials.rancherCloudCredentialNamespaceName"
+        v-model:value="value.spec.credentials.rancherCloudCredentialNamespaceName"
         :mode="mode"
         :provider="credentialComponent"
         :cancel="cancelCredential"
         :showing-form="showForm"
         class="mb-40"
+        @update:value="$emit('update:value', {k: 'spec.credentials.rancherCloudCredentialNamespaceName', val: $event})"
       />
     </div>
     <div v-if="!waitingForCredential">
@@ -345,19 +357,22 @@ export default defineComponent({
           <t k="capi.provider.features.title" />
         </h3>
         <Checkbox
-          v-model="value.spec.features.clusterResourceSet"
+          :value="value.spec.features.clusterResourceSet"
           :mode="mode"
           :label="t('capi.provider.features.clusterResourceSet')"
+          @update:value="$emit('update:value', {k: 'spec.features.clusterResourceSet', val: $event})"
         />
         <Checkbox
-          v-model="value.spec.features.clusterTopology"
+          v-model:value="value.spec.features.clusterTopology"
           :mode="mode"
           :label="t('capi.provider.features.clusterTopology')"
+          @update:value="$emit('update:value', {k: 'spec.features.clusterTopology', val: $event})"
         />
         <Checkbox
-          v-model="value.spec.features.machinePool"
+          v-model:value="value.spec.features.machinePool"
           :mode="mode"
           :label="t('capi.provider.features.machinePool')"
+          @update:value="$emit('update:value', {k: 'spec.features.machinePool', val: $event})"
         />
       </div>
       <div v-if="hasVariables">
@@ -365,7 +380,7 @@ export default defineComponent({
           <t k="capi.provider.variables.title" />
         </h3>
         <KeyValue
-          v-model="value.spec.variables"
+          :value="value.spec.variables"
           :add-label="t('capi.provider.variables.add')"
           :mode="mode"
           :value-can-be-empty="true"
@@ -374,6 +389,7 @@ export default defineComponent({
           :add-allowed="true"
           :read-allowed="true"
           :parse-lines-from-file="true"
+          @update:value="$emit('update:value', {k: 'spec.variables', val: $event})"
         />
       </div>
     </div>

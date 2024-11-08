@@ -9,7 +9,7 @@ import capiRouting from './routes/capi-routing';
 import toggleAutoImport from './util/auto-import';
 
 // Init the package
-export default function(plugin: IPlugin): void {
+export default function(plugin: any): void {
   // Auto-import model, detail, edit from the folders
   importTypes(plugin);
 
