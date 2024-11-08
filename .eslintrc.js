@@ -8,7 +8,7 @@ module.exports = {
   extends: [
     'standard',
     'eslint:recommended',
-    //'@nuxtjs/eslint-config-typescript',
+    '@nuxtjs/eslint-config-typescript',
     'plugin:cypress/recommended'
   ],
   // add your custom rules here
