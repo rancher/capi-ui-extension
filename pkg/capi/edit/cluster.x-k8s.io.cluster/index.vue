@@ -64,21 +64,7 @@ export default defineComponent({
     };
   },
   methods: {
-    handleValueChanged(newVal: {k: string, val: any}) {
-        const k = newVal.k;
-        const v = newVal.val;
-        const path = k.split('.');
-        let currentObj = this.value;
-
-        for (let j = 0; j < path.length - 1; j++) {
-            if(!currentObj[path[j]]){
-                currentObj[path[j]] = {};
-            }
-          currentObj = currentObj[path[j]];
-        }
-
-        currentObj[path[path.length - 1]] = v;
-    },
+    set,
     async getClusterClasses() {
       const allClusterClasses: ClusterClass[] = await this.$store.dispatch('management/findAll', { type: CAPI.CLUSTER_CLASS });
 
@@ -106,7 +92,7 @@ export default defineComponent({
         :mode="mode"
         :preselected-class="preselectedClass"
         :cluster-classes="clusterClasses"
-        @update:value="handleValueChanged"
+        @update:value="set(value, $event.k, $event.val)"
       />
       <CruResource
         v-else
@@ -127,7 +113,7 @@ export default defineComponent({
           :live-value="liveValue"
           :mode="mode"
           :cluster-classes="clusterClasses"
-          @update:value="handleValueChanged"
+          @update:value="set(value, $event.k, $event.val)"
         />
 
         <template

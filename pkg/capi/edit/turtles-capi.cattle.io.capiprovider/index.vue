@@ -6,6 +6,7 @@ import SelectIconGrid from '@shell/components/SelectIconGrid.vue';
 import { SUB_TYPE } from '@shell/config/query-params';
 import { PROVIDER_TYPES } from '../../types/capi';
 import ProviderConfig from './ProviderConfig.vue';
+import { set } from '@shell/utils/object';
 
 interface ProviderType {
   id: string,
@@ -99,6 +100,7 @@ export default defineComponent({
   },
 
   methods: {
+    set,
     clickedType(obj: ProviderType) {
       const id = obj.id;
 
@@ -110,21 +112,6 @@ export default defineComponent({
       this.subType = type;
       this.$emit('set-subtype', this.$store.getters['i18n/withFallback'](`cluster.provider."${ type }"`, null, type));
     },
-    handleValueChanged(newVal: {k: string, val: any}) {
-        const k = newVal.k;
-        const v = newVal.val;
-        const path = k.split('.');
-        let currentObj = this.value;
-
-        for (let j = 0; j < path.length - 1; j++) {
-            if(!currentObj[path[j]]){
-                currentObj[path[j]] = {};
-            }
-          currentObj = currentObj[path[j]];
-        }
-
-        currentObj[path[path.length - 1]] = v;
-    }
   },
 });
 </script>
@@ -164,7 +151,7 @@ export default defineComponent({
       :value="value"
       :mode="mode"
       :provider="subType"
-      @update:value="handleValueChanged"
+      @update:value="set(value, $event.k, $event.val)"
     />
 
     <template

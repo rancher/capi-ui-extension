@@ -45,7 +45,6 @@ export default defineComponent({
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.controlPlaneEndpoint.host')"
           :rules="rules.host"
-          type="number"
         />
       </div>
       <div

@@ -17,7 +17,7 @@ import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
 
 export default defineComponent({
   name: 'CCVariable',
-  emits: ['validation-passed', 'update:value', 'input'],
+  emits: ['validation-passed', 'update:value'],
   props: {
     variable: {
       type:     Object as PropType<ClusterClassVariable>,
@@ -162,7 +162,7 @@ export default defineComponent({
           out = JSON.parse(e);
         } catch {}
       }
-      this.$emit('input', out);
+      this.$emit('update:value', out);
     }
   },
 });

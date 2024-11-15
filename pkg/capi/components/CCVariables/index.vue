@@ -6,7 +6,6 @@ import type { PropType } from 'vue';
 import { randomStr } from '@shell/utils/string';
 import { ClusterClassVariable } from '../../types/clusterClass';
 import type { CapiClusterVariable } from '../../types/cluster.x-k8s.io.cluster';
-import { isDefined } from '../../util/validators';
 import Variable from './Variable.vue';
 
 export default defineComponent({
@@ -217,7 +216,7 @@ export default defineComponent({
           :variable="variableDef"
           :value="valueFor(variableDef)"
           :validate-required="!machineDeploymentClass && !machinePoolClass"
-          @input="e=>updateVariables(e, variableDef)"
+          @update:value="e=>updateVariables(e, variableDef)"
           @validation-passed="updateErrors"
         />
         <div v-if="newComponentType(variableDef, i)" :key="`${i}-${rerenderKey}`" class="force-newline" />

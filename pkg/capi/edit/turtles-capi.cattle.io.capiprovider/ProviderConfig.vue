@@ -265,7 +265,7 @@ export default defineComponent({
       description-label="capi.provider.description.label"
       description-placeholder="capi.provider.description.placeholder"
       :rules="{name:fvGetAndReportPathRules('metadata.name')}"
-      @update:value="$emit('update:value', {k: 'metadata', val: event.metadata })"
+      @update:value="$emit('update:value', {k: 'metadata', val: $event.metadata })"
     />
     <div v-if="isCustom">
       <div class="row mb-20">
