@@ -6,19 +6,20 @@ import { CAPI } from '../types/capi.ts';
 export default {
   name: 'CAPITurtlesDashboard',
 
-  async middleware({ redirect, route, store } ) {
+
+  async beforeCreate() {
     try {
-      const clusterClassSchema = await store.dispatch('management/find', {
+      const clusterClassSchema = await this.$store.dispatch('management/find', {
         type: SCHEMA,
         id:   CAPI.CLUSTER_CLASS,
         opt:  { force: true },
       });
 
       if (clusterClassSchema) {
-        return redirect({
+        this.$router.replace({
           name:   'c-cluster-product-resource',
           params: {
-            ...route.params,
+            ...this.$router.currentRoute.params,
             cluster:  '_',
             resource: RANCHER_CAPI.CAPI_CLUSTER,
             product:  'manager'

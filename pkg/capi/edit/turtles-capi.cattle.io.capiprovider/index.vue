@@ -4,9 +4,9 @@ import CreateEditView from '@shell/mixins/create-edit-view';
 import CruResource from '@shell/components/CruResource.vue';
 import SelectIconGrid from '@shell/components/SelectIconGrid.vue';
 import { SUB_TYPE } from '@shell/config/query-params';
-
 import { PROVIDER_TYPES } from '../../types/capi';
 import ProviderConfig from './ProviderConfig.vue';
+import { set } from '@shell/utils/object';
 
 interface ProviderType {
   id: string,
@@ -29,6 +29,7 @@ export default defineComponent({
   },
 
   mixins: [CreateEditView],
+  emits:['set-subtype', 'update:value'],
 
   props: {
 
@@ -99,11 +100,11 @@ export default defineComponent({
   },
 
   methods: {
-
+    set,
     clickedType(obj: ProviderType) {
       const id = obj.id;
 
-      this.$router.applyQuery({ [SUB_TYPE]: id });
+      this.$router?.applyQuery({ [SUB_TYPE]: id });
       this.selectType(id);
     },
 
@@ -116,7 +117,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <CruResource
+  <CruResource               
     :mode="mode"
     :validation-passed="true"
     :selected-subtype="subType"
@@ -147,11 +148,10 @@ export default defineComponent({
     </template>
     <ProviderConfig
       v-if="subType"
-      v-model="value"
-      :initial-value="initialValue"
-      :live-value="liveValue"
+      :value="value"
       :mode="mode"
       :provider="subType"
+      @update:value="set(value, $event.k, $event.val)"
     />
 
     <template

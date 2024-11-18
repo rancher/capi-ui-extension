@@ -13,13 +13,15 @@ import ClusterClassVariables from '../../components/CCVariables/index.vue';
 import {
   versionTest, versionValidator, hostValidator, portValidator, cidrValidator, cidrArrayValid
 } from '../../util/validators';
-import {
-  CAPIClusterTopology, CAPIClusterNetwork, CAPIClusterCPEndpoint, ClusterClass, Worker
-} from '../../types/capi';
+import { ClusterClass, Worker } from '../../types/capi';
 import CardGrid from '../../components/CardGrid.vue';
 import WorkerItem from './WorkerItem.vue';
 import NetworkSection from './NetworkSection.vue';
 import ControlPlaneEndpointSection from './ControlPlaneEndpointSection.vue';
+
+interface Step {
+  name: String
+}
 
 const defaultTopologyConfig: CAPIClusterTopology = {
   version: '',
@@ -38,10 +40,6 @@ const defaultCPEndpointConfig: CAPIClusterCPEndpoint = {
   port: 49152
 };
 
-interface Step {
-  name: String
-}
-
 export default defineComponent({
   name:       'ClusterConfig',
   components: {
@@ -56,6 +54,7 @@ export default defineComponent({
     CardGrid
   },
   mixins: [CreateEditView, FormValidation],
+  emits:['update:value'],
   props:      {
     mode: {
       type:     String,
@@ -144,33 +143,24 @@ export default defineComponent({
       const step = this.addSteps.find((s: Step) => s.name === 'stepClusterClass');
 
       if (step) {
-        this.$set(step, 'ready', !!neu);
+        step.ready = !!neu;
       }
     },
 
     stepConfigurationRequires(neu) {
       const step = this.addSteps.find((s: Step) => s.name === 'stepConfiguration');
 
-      this.$set(step, 'ready', neu);
+      step.ready = !!neu;
     },
 
     variablesReady(neu) {
       const step = this.addSteps.find((s: Step) => s.name === 'stepVariables');
 
-      this.$set(step, 'ready', neu);
+      step.ready = !!neu;
     }
   },
 
   computed: {
-    modeOptions() {
-      return [{
-        label: this.t('capi.cluster.secret.reuse'),
-        value: false,
-      }, {
-        label: this.t('capi.cluster.secret.create'),
-        value: true,
-      }];
-    },
     fvExtraRules() {
       return {
         version: versionValidator(this.$store.getters['i18n/t'], this.controlPlane),
@@ -198,6 +188,12 @@ export default defineComponent({
     },
     controlPlaneEndpoint() {
       return this.value?.spec?.controlPlaneEndpoint;
+    },
+    machineDeployments(){
+        return this.value.spec.topology.workers.machineDeployments;
+    },
+    machinePools(){
+        return this.value.spec.topology.workers.machinePools;
     },
     machineDeploymentOptions() {
       return this.clusterClassObj?.spec?.workers?.machineDeployments?.map( (w: Worker) => w.class);
@@ -247,13 +243,11 @@ export default defineComponent({
     },
     setClass() {
       const clusterClassName = this.clusterClassObj?.metadata?.name;
-
-      this.set(this.value.spec.topology, 'class', clusterClassName);
+      this.$emit('update:value', {k: 'spec.topology.class', val: clusterClassName});
     },
     setNamespace() {
       const clusterClassNs = this.clusterClassObj?.metadata?.namespace;
-
-      this.set(this.value.metadata, 'namespace', clusterClassNs);
+      this.$emit('update:value', {k: 'metadata.namespace', val: clusterClassNs});
     },
     async saveOverride() {
       if ( this.errors ) {
@@ -269,20 +263,23 @@ export default defineComponent({
     },
 
     initSpecs() {
-      if ( !this.value.spec ) {
-        set(this.value, 'spec', { });
+        const val = this.value;
+      if ( !val ) {
+        set(val, 'spec', { });
       }
-      if ( !this.value.spec.topology ) {
-        set(this.value.spec, 'topology', clone(defaultTopologyConfig));
-      }
-
-      if ( !this.value.spec.clusterNetwork ) {
-        set(this.value.spec, 'clusterNetwork', clone(defaultClusterNetwork));
+      if ( !val.spec.topology ) {
+        set(val.spec, 'topology', clone(defaultTopologyConfig));
       }
 
-      if ( !this.value.spec.controlPlaneEndpoint ) {
-        set(this.value.spec, 'controlPlaneEndpoint', clone(defaultCPEndpointConfig));
+      if ( !val.spec.clusterNetwork ) {
+        set(val.spec, 'clusterNetwork', clone(defaultClusterNetwork));
       }
+
+      if ( !val.spec.controlPlaneEndpoint ) {
+        set(val.spec, 'controlPlaneEndpoint', clone(defaultCPEndpointConfig));
+      }
+      this.$emit('update:value', {k: 'spec', val: val.spec});
+
       if ( this.preselectedClass) {
         this.setClassInfo(this.preselectedClass);
       }
@@ -308,26 +305,12 @@ export default defineComponent({
       this.clusterClassObj = this.clusterClasses.find((x: ClusterClass) => x.id === obj.id) || null;
       this.setClass();
       this.setNamespace();
-    },
-    podsCidrBlocksChanged(val: string[]) {
-      if ( !this.value.spec.clusterNetwork?.pods ) {
-        set(this.value.spec.clusterNetwork, 'pods', []);
-      }
-      set(this.value.spec.clusterNetwork.pods, 'cidrBlocks', val);
-    },
-    servicesCidrBlocksChanged(val: string[]) {
-      if ( !this.value.spec.clusterNetwork?.services ) {
-        set(this.value.spec.clusterNetwork, 'services', []);
-      }
-      set(this.value.spec.clusterNetwork.services, 'cidrBlocks', val);
     }
   }
 });
 </script>
 <template>
-  <Loading v-if="loading" />
   <CruResource
-    v-else
     :mode="mode"
     :show-as-form="true"
     :resource="value"
@@ -355,7 +338,7 @@ export default defineComponent({
     <template #stepConfiguration>
       <NameNsDescription
         v-if="!isView"
-        v-model="value"
+        :value="value"
         :mode="mode"
         :namespaced="false"
         name-label="cluster.name.label"
@@ -363,6 +346,7 @@ export default defineComponent({
         description-label="cluster.description.label"
         description-placeholder="cluster.description.placeholder"
         :rules="{name:fvGetAndReportPathRules('metadata.name')}"
+        @update:value="$emit('update:value', {k: 'metadata', val: $event.metadata})"
       />
       <div class="row mb-20 ">
         <div class="col span-3">
@@ -370,11 +354,12 @@ export default defineComponent({
             <t k="capi.cluster.version.title" />
           </h2>
           <LabeledInput
-            v-model="value.spec.topology.version"
+            :value="value.spec.topology.version"
             :mode="mode"
             label-key="cluster.kubernetesVersion.label"
             required
             :rules="fvGetAndReportPathRules('spec.topology.version')"
+            @update:value="$emit('update:value', {k: 'spec.topology.version', val: $event})"
           />
         </div>
         <div class="col ">
@@ -382,9 +367,10 @@ export default defineComponent({
             <t k="capi.cluster.controlPlaneEndpoint.title" />
           </h2>
           <ControlPlaneEndpointSection
-            v-model="controlPlaneEndpoint"
+            v-model:value="controlPlaneEndpoint"
             :mode="mode"
             :rules="{host:fvGetAndReportPathRules('spec.controlPlaneEndpoint.host'), port:fvGetAndReportPathRules('spec.controlPlaneEndpoint.port') }"
+            @update:value="$emit('update:value', {k: 'spec.controlPlaneEndpoint', val: $event})"
           />
         </div>
       </div>
@@ -393,7 +379,7 @@ export default defineComponent({
           <t k="capi.cluster.networking.title" />
         </h2>
         <NetworkSection
-          v-model="clusterNetwork"
+          v-model:value="clusterNetwork"
           :mode="mode"
           :rules="{
             serviceDomain:fvGetAndReportPathRules('spec.clusterNetwork.serviceDomain'),
@@ -401,10 +387,7 @@ export default defineComponent({
             pods: fvGetAndReportPathRules('spec.clusterNetwork.pods'),
             services: fvGetAndReportPathRules('spec.clusterNetwork.services')
           }"
-          @api-server-port-changed="(val) => $set(value.spec.clusterNetwork, 'apiServerPort', Number(val) || '')"
-          @service-domain-changed="(val) => $set(value.spec.clusterNetwork, 'serviceDomain', val)"
-          @pods-cidr-blocks-changed="podsCidrBlocksChanged"
-          @services-cidr-blocks-changed="servicesCidrBlocksChanged"
+          @update:value="$emit('update:value', {k: 'spec.clusterNetwork', val: $event})"
         />
       </div>
       <div class="mt-20 block">
@@ -418,12 +401,13 @@ export default defineComponent({
             class="col span-3"
           >
             <WorkerItem
-              v-model="value.spec.topology.workers.machineDeployments"
+              :value="machineDeployments"
               :mode="mode"
               :title="t('capi.cluster.workers.machineDeployments.title')"
               :default-add-value="defaultWorkerAddValue"
               :class-options="machineDeploymentOptions"
               :initial-empty-row="true"
+              @update:value="$emit('update:value', {k: 'spec.topology.workers.machineDeployments', val: $event})"
             />
           </div>
           <div
@@ -431,12 +415,13 @@ export default defineComponent({
             class="col span-3"
           >
             <WorkerItem
-              v-model="value.spec.topology.workers.machinePools"
+              :value="machinePools"
               :mode="mode"
               :title="t('capi.cluster.workers.machinePools.title')"
               :default-add-value="defaultWorkerAddValue"
               :class-options="machinePoolOptions"
               :initial-empty-row="true"
+              @update:value="$emit('update:value', {k: 'spec.topology.workers.machinePools', val: $event})"
             />
           </div>
         </div>
@@ -447,9 +432,10 @@ export default defineComponent({
         <t k="capi.cluster.variables.title" />
       </h2>
       <ClusterClassVariables
-        v-model="value.spec.topology.variables"
+        :value="value.spec.topology.variables"
         :cluster-class="clusterClassObj"
         @validation-passed="e=>variablesReady=e"
+        @update:value="$emit('update:value', {k: 'spec.topology.variables', val: $event})"
       />
     </template>
   </CruResource>

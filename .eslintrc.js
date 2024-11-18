@@ -32,7 +32,7 @@ module.exports = {
     'vue/no-unused-components': 'warn',
     'vue/no-v-html':            'off',
     'wrap-iife':                'off',
-
+    'vue/no-v-for-template-key': 'off',
     'array-bracket-spacing':             'warn',
     'arrow-parens':                      'warn',
     'arrow-spacing':                     ['warn', { before: true, after: true }],

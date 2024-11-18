@@ -1,5 +1,5 @@
 <script lang="ts">
-import Vue from 'vue';
+import { defineComponent } from 'vue';
 import type { PropType } from 'vue';
 import isEqual from 'lodash/isEqual';
 
@@ -14,9 +14,10 @@ import { mapGetters } from 'vuex';
 import { Translation } from '@rancher/shell/types/t';
 import type { ClusterClassVariable } from '../../types/clusterClass';
 import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
-export default Vue.extend({
-  name: 'CCVariable',
 
+export default defineComponent({
+  name: 'CCVariable',
+  emits: ['validation-passed', 'update:value'],
   props: {
     variable: {
       type:     Object as PropType<ClusterClassVariable>,
@@ -161,7 +162,7 @@ export default Vue.extend({
           out = JSON.parse(e);
         } catch {}
       }
-      this.$emit('input', out);
+      this.$emit('update:value', out);
     }
   },
 });
@@ -181,7 +182,7 @@ export default Vue.extend({
       :options="variableOptions"
       :rules="!listComponent ? validationRules : []"
       :type="schema.type === 'number' || schema.type === 'integer' ? 'number' : 'text'"
-      @input="setValue"
+      @update:value="setValue"
     >
       <template #title>
         <div class="input-label">

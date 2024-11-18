@@ -16,7 +16,7 @@ export default defineComponent({
     Loading,
     ClusterConfig
   },
-
+  emits: ['update:value'],
   mixins: [CreateEditView],
 
   props: {
@@ -64,6 +64,7 @@ export default defineComponent({
     };
   },
   methods: {
+    set,
     async getClusterClasses() {
       const allClusterClasses: ClusterClass[] = await this.$store.dispatch('management/findAll', { type: CAPI.CLUSTER_CLASS });
 
@@ -85,12 +86,13 @@ export default defineComponent({
     <div v-else>
       <ClusterConfig
         v-if="preselectedClass"
-        v-model="value"
+        :value="value"
         :initial-value="initialValue"
         :live-value="liveValue"
         :mode="mode"
         :preselected-class="preselectedClass"
         :cluster-classes="clusterClasses"
+        @update:value="set(value, $event.k, $event.val)"
       />
       <CruResource
         v-else
@@ -106,11 +108,12 @@ export default defineComponent({
         @error="e=>errors = e"
       >
         <ClusterConfig
-          v-model="value"
+          :value="value"
           :initial-value="initialValue"
           :live-value="liveValue"
           :mode="mode"
           :cluster-classes="clusterClasses"
+          @update:value="set(value, $event.k, $event.val)"
         />
 
         <template

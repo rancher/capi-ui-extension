@@ -1,9 +1,9 @@
 <script>
-import Vue from 'vue';
+import { defineComponent } from 'vue';
 import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
 import { LABELS } from '../types/capi';
 
-export default Vue.extend({
+export default defineComponent({
   name: 'CAPIAutoImportConfiguration',
 
   components: { Checkbox },

@@ -1,12 +1,13 @@
 <script lang="ts">
-import Vue from 'vue';
+import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
 import { _EDIT } from '@shell/config/query-params';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 
-export default Vue.extend({
+export default defineComponent({
   name:       'ControlPlaneEndpointSection',
   components: { LabeledInput },
+  emits: ['update:value'],
   props:      {
     value: {
       type:     Object,
@@ -39,7 +40,7 @@ export default Vue.extend({
         class="col"
       >
         <LabeledInput
-          v-model="value.host"
+          v-model:value="value.host"
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.controlPlaneEndpoint.host')"
@@ -50,13 +51,14 @@ export default Vue.extend({
         class="col"
       >
         <LabeledInput
-          v-model.number="value.port"
+          v-model:value="value.port"
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.controlPlaneEndpoint.port')"
           :rules="rules.port"
+          type="number"
         />
-      </div>
+    </div>
     </div>
   </div>
 </template>

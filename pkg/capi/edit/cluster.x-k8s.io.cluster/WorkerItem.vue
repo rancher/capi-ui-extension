@@ -1,5 +1,5 @@
 <script lang="ts">
-import Vue from 'vue';
+import { defineComponent } from 'vue';
 import debounce from 'lodash/debounce';
 import { removeAt } from '@shell/utils/array';
 import { clone } from '@shell/utils/object';
@@ -7,9 +7,10 @@ import { _EDIT, _VIEW } from '@shell/config/query-params';
 import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 
-export default Vue.extend({
+export default defineComponent({
   components: { LabeledSelect, LabeledInput },
-  props:      {
+  emits: ['add', 'remove', 'update:value'],
+  props: {
     value: {
       type:     Array,
       default:  null,
@@ -48,7 +49,7 @@ export default Vue.extend({
     },
   },
   data() {
-    const input = (this.value as any[] || []).slice();
+    const input = (this.value as any[] || [])?.slice();
     const rows = [];
 
     for ( const value of input ) {
@@ -75,9 +76,12 @@ export default Vue.extend({
     }
   },
   watch:    {
-    value() {
-      this.lastUpdateWasFromValue = true;
-      this.rows = (this.value || []).map(v => ({ value: v }));
+    value: {
+      deep: true,
+      handler() {
+        this.lastUpdateWasFromValue = true;
+        this.rows = (this.value || []).map(v => ({ value: v }));
+      }
     },
     rows: {
       deep: true,
@@ -130,8 +134,11 @@ export default Vue.extend({
           out.push(value);
         }
       }
-      this.$emit('input', out);
+      this.$emit('update:value', out);
     },
+    valUpdate(val, key){
+        key.value.name = val.data
+    }
   }
 });
 </script>
@@ -177,7 +184,7 @@ export default Vue.extend({
               >
                 <LabeledInput
                   ref="value"
-                  v-model="row.value.name"
+                  v-model:value="row.value.name"
                   :mode="mode"
                   :disabled="false"
                   :label="t('capi.cluster.workers.name')"
@@ -185,7 +192,7 @@ export default Vue.extend({
               </div>
               <div class="col mt-20">
                 <LabeledSelect
-                  v-model="row.value.class"
+                  v-model:value="row.value.class"
                   :mode="mode"
                   :options="classOptions"
                   label-key="capi.cluster.workers.class"
