@@ -1,13 +1,14 @@
 {
   "name": "capi",
   "description": "UI for CAPI cluster provisioning",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "private": false,
   "rancher": {
     "annotations": {
       "catalog.cattle.io/rancher-version": ">= 2.10.0-0",
       "catalog.cattle.io/display-name": "CAPI UI",
-      "catalog.cattle.io/experimental": "true"
+      "catalog.cattle.io/experimental": "true",
+      "catalog.cattle.io/ui-extensions-version": ">= 3.0.0"
     }
   },
   "scripts": {
