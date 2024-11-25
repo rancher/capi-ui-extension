@@ -16,7 +16,7 @@ import KeyValue from '@shell/components/form/KeyValue.vue';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
 import Banner from '@components/Banner/Banner.vue';
-import { _EDIT, _CREATE } from '@shell/config/query-params';
+import { _EDIT } from '@shell/config/query-params';
 import { allHash } from '@shell/utils/promise';
 import { PROVIDER_TYPES, RANCHER_TURTLES_SYSTEM_NAMESPACE, RANCHER_TURTLES_SYSTEM_NAME, Provider } from '../../types/capi';
 import { providerNameValidator, providerVersionValidator, urlValidator } from '../../util/validators';
@@ -129,9 +129,7 @@ export default defineComponent({
     showForm() {
       return !!this.value.spec.credentials.rancherCloudCredentialNamespaceName || !this.credentialComponent;
     },
-    isCreate() {
-      return this.mode === _CREATE;
-    },
+
     isEdit() {
       return this.mode === _EDIT;
     },
@@ -139,7 +137,7 @@ export default defineComponent({
       return !!this.value?.spec?.features;
     },
     hasVariables() {
-      return !!this.value?.spec?.features;
+      return !!this.value?.spec?.variables;
     },
     isCustom() {
       return this.provider === 'custom';
