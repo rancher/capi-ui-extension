@@ -1,5 +1,4 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import CruResource from '@shell/components/CruResource.vue';
 import SelectIconGrid from '@shell/components/SelectIconGrid.vue';
@@ -19,7 +18,7 @@ type Route = {
   query: {[index: string]:any},
 };
 
-export default defineComponent({
+export default {
   name: 'CreateProvider',
 
   components: {
@@ -113,7 +112,7 @@ export default defineComponent({
       this.$emit('set-subtype', this.$store.getters['i18n/withFallback'](`cluster.provider."${ type }"`, null, type));
     },
   },
-});
+};
 </script>
 
 <template>

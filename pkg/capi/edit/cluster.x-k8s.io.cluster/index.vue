@@ -1,15 +1,13 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
 import { SUB_TYPE } from '@shell/config/query-params';
 import { set } from '@shell/utils/object';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import Loading from '@shell/components/Loading.vue';
 import CruResource from '@shell/components/CruResource.vue';
-import type { Route } from 'vue-router';
 import { CAPI, QUERY_PARAMS, ClusterClass } from '../../types/capi';
 import ClusterConfig from './ClusterConfig.vue';
 
-export default defineComponent({
+export default {
   name:       'CreateCluster',
   components: {
     CruResource,
@@ -51,7 +49,7 @@ export default defineComponent({
     });
   },
   data() {
-    const route = this.$route as Route;
+    const route = this.$route;
     const subType = route.query[SUB_TYPE] || null;
     const classFromURL = route.query[QUERY_PARAMS.CLASS];
     const curClass = this.value?.spec?.topology?.class;
@@ -77,7 +75,7 @@ export default defineComponent({
       });
     }
   }
-});
+};
 </script>
 
 <template>

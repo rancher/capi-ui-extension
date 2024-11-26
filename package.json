@@ -19,7 +19,7 @@
   },
   "resolutions": {
     "**/webpack": "5",
-    "@types/node": "^20",
+    "@types/node": "16.4.3",
     "glob": "7.2.3"
   },
   "scripts": {
