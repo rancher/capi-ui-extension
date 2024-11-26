@@ -1,0 +1,19 @@
+{
+  "name": "capi",
+  "description": "UI for CAPI cluster provisioning",
+  "version": "0.8.2-rc1",
+  "private": false,
+  "rancher": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "5.0.8",
+    "@vue/cli-service": "5.0.8",
+    "@vue/cli-plugin-typescript": "5.0.8"
+  },
+  "files": [
+    "**/*"
+  ],
+  "main": "capi-0.8.2-rc1.umd.min.js"
+}
