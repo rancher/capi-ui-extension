@@ -1,10 +1,9 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
 import { _EDIT } from '@shell/config/query-params';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 
-export default defineComponent({
+export default {
   name:       'ControlPlaneEndpointSection',
   components: { LabeledInput },
   emits: ['update:value'],
@@ -31,7 +30,7 @@ export default defineComponent({
       return this.mode === _EDIT;
     }
   }
-});
+};
 </script>
 <template>
   <div>

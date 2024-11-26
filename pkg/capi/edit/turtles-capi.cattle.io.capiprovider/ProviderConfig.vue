@@ -1,5 +1,4 @@
 <script lang='ts'>
-import { defineComponent } from 'vue';
 import { mapGetters } from 'vuex';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import { clear } from '@shell/utils/array';
@@ -55,7 +54,7 @@ interface Hash {
   coreProviderSecret: Secret[]
 }
 
-export default defineComponent({
+export default {
     name: 'ProviderConfig',
   components: {
     CruResource,
@@ -229,7 +228,7 @@ export default defineComponent({
       }
     }
   }
-});
+};
 </script>
 
 <template>

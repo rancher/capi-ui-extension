@@ -1,5 +1,5 @@
 <script lang='ts'>
-import { defineComponent, PropType } from 'vue';
+import { PropType } from 'vue';
 import { set, clone } from '@shell/utils/object';
 import { clear } from '@shell/utils/array';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
@@ -13,7 +13,7 @@ import ClusterClassVariables from '../../components/CCVariables/index.vue';
 import {
   versionTest, versionValidator, hostValidator, portValidator, cidrValidator, cidrArrayValid
 } from '../../util/validators';
-import { ClusterClass, Worker } from '../../types/capi';
+import { ClusterClass, Worker, CAPIClusterTopology, CAPIClusterNetwork, CAPIClusterCPEndpoint } from '../../types/capi';
 import CardGrid from '../../components/CardGrid.vue';
 import WorkerItem from './WorkerItem.vue';
 import NetworkSection from './NetworkSection.vue';
@@ -40,7 +40,7 @@ const defaultCPEndpointConfig: CAPIClusterCPEndpoint = {
   port: 49152
 };
 
-export default defineComponent({
+export default {
   name:       'ClusterConfig',
   components: {
     CruResource,
@@ -307,7 +307,7 @@ export default defineComponent({
       this.setNamespace();
     }
   }
-});
+};
 </script>
 <template>
   <CruResource
