@@ -56,11 +56,12 @@ entries:
       catalog.cattle.io/rancher-version: '>= 2.10.0-0'
       catalog.cattle.io/scope: management
       catalog.cattle.io/ui-component: plugins
+      catalog.cattle.io/ui-extensions-version: '>= 3.0.0'
     apiVersion: v2
     appVersion: 0.8.0
-    created: "2024-11-25T20:14:22.099199637Z"
+    created: "2024-11-26T01:17:42.62718591Z"
     description: UI for CAPI cluster provisioning
-    digest: b1b2ac7bca9a15424e2d256b48d864f58415e142cd3cc332caf6e8b52cc58057
+    digest: bf2915863ed6c21887b5b94254c9d35b7cd9c51b6cee2088ed69ddab94ffc28d
     name: capi
     type: application
     urls:
@@ -292,4 +293,4 @@ entries:
     urls:
     - assets/capi/capi-0.1.0.tgz
     version: 0.1.0
-generated: "2024-11-26T00:49:33.180707687Z"
+generated: "2024-11-26T01:17:42.626141576Z"

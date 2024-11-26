@@ -9,6 +9,7 @@ annotations:
   catalog.cattle.io/ui-component: plugins
   catalog.cattle.io/display-name: CAPI UI
   catalog.cattle.io/experimental: 'true'
+  catalog.cattle.io/ui-extensions-version: '>= 3.0.0'
 apiVersion: v2
 appVersion: 0.8.0
 description: UI for CAPI cluster provisioning
