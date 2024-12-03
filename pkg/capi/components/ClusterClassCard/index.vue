@@ -1,10 +1,8 @@
-<script lang='ts'>
-import { defineComponent } from 'vue';
+<script>
 import { mapGetters } from 'vuex';
 import ClusterCardField from './ClusterCardField.vue';
-import { Worker } from './../../types/capi';
 
-export default defineComponent({
+export default {
   name:       'ClusterClassCard',
   components: { ClusterCardField },
 
@@ -48,16 +46,16 @@ export default defineComponent({
       return this.value?.spec?.workers?.machineDeployments?.length;
     },
     machineDeploymentsList() {
-      return this.value?.spec?.workers?.machineDeployments?.map((w: Worker) => w.class).join(', ') || '';
+      return this.value?.spec?.workers?.machineDeployments?.map((w) => w.class).join(', ') || '';
     },
     machinePoolsCount() {
       return this.value?.spec?.workers?.machinePools?.length;
     },
     machinePoolsList() {
-      return this.value?.spec?.workers?.machinePools?.map((w: Worker) => w.class).join(', ') || '';
+      return this.value?.spec?.workers?.machinePools?.map((w) => w.class).join(', ') || '';
     }
   },
-});
+};
 </script>
 
 <template>

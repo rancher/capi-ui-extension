@@ -1,18 +1,14 @@
-<script lang="ts">
+<script>
 import debounce from 'lodash/debounce';
-import { defineComponent } from 'vue';
 
-import type { PropType } from 'vue';
 import { randomStr } from '@shell/utils/string';
-import { ClusterClassVariable } from '../../types/clusterClass';
-import type { CapiClusterVariable } from '../../types/cluster.x-k8s.io.cluster';
 import Variable from './Variable.vue';
 
-export default defineComponent({
+export default {
   name: 'ClusterClassVariables',
 
   components: { Variable },
-  emits:['validation-passed', 'update:value'],
+  emits:      ['validation-passed', 'update:value'],
 
   props: {
     clusterClass: {
@@ -21,7 +17,7 @@ export default defineComponent({
     },
 
     value: {
-      type:    Array as PropType<Array<CapiClusterVariable>>,
+      type:    Array,
       default: () => {
         return [];
       }
@@ -47,7 +43,7 @@ export default defineComponent({
 
   watch: {
     errorCount: {
-      handler: debounce(function(this: any, neu) {
+      handler: debounce(( neu) => {
         this.$emit('validation-passed', !neu);
       }, 5),
     },
@@ -71,7 +67,7 @@ export default defineComponent({
       if (!this.machineDeploymentClass && !this.machinePoolClass) {
         return allVariableDefinitions;
       }
-      const variableNames = this.machineScopedJsonPatches.reduce((names: string[], patch: any) => {
+      const variableNames = this.machineScopedJsonPatches.reduce((names, patch) => {
         const valueFromVariable = patch?.valueFrom?.variable;
 
         if (!valueFromVariable) {
@@ -88,23 +84,23 @@ export default defineComponent({
         return names;
       }, []);
 
-      return allVariableDefinitions.filter((v: ClusterClassVariable) => variableNames.includes(v.name));
+      return allVariableDefinitions.filter((v) => variableNames.includes(v.name));
     },
 
     machineScopedJsonPatches() {
       if (!this.machineDeploymentClass && !this.machinePoolClass) {
         return [];
       }
-      const out = [] as any[];
+      const out = [];
       const matchName = this.machineDeploymentClass || this.machinePoolClass;
       const matchKey = this.machineDeploymentClass ? 'machineDeploymentClass' : 'machinePoolClass';
 
       const patches = this.clusterClass?.spec?.patches || [];
 
-      patches.forEach((p: any) => {
+      patches.forEach((p) => {
         const definitions = p?.definitions || [];
 
-        definitions.forEach((definition: any) => {
+        definitions.forEach((definition) => {
           const matchMachines = definition?.selector?.matchResources?.[matchKey]?.names || [];
 
           if (matchMachines.includes(matchName)) {
@@ -118,13 +114,13 @@ export default defineComponent({
   },
 
   methods: {
-    valueFor(variableDef: ClusterClassVariable) {
-      return (this.value.find((variable: any) => variable.name === variableDef.name) || {}).value;
+    valueFor(variableDef) {
+      return (this.value.find((variable) => variable.name === variableDef.name) || {}).value;
     },
 
-    updateVariables(val: any, variableDef: ClusterClassVariable) {
-      const out = [...this.value] as Array<any>;
-      const existingIdx = this.value.findIndex((variable: any) => variable.name === variableDef.name);
+    updateVariables(val, variableDef) {
+      const out = [...this.value];
+      const existingIdx = this.value.findIndex((variable) => variable.name === variableDef.name);
 
       if (existingIdx >= 0) {
         out[existingIdx].value = val;
@@ -135,16 +131,16 @@ export default defineComponent({
     },
 
     // update the cluster's variables when the cluster class changes
-    updateVariableDefaults(neu: ClusterClassVariable[], old: ClusterClassVariable[]) {
+    updateVariableDefaults(neu, old) {
       // remove or update variables from previous cc
-      const out = [...this.value].reduce((acc: CapiClusterVariable[], existingVar: CapiClusterVariable) => {
-        const neuDef = (neu || []).find(n => n.name === existingVar.name);
+      const out = [...this.value].reduce((acc, existingVar) => {
+        const neuDef = (neu || []).find((n) => n.name === existingVar.name);
 
         // do not include variables not defined in the new cluster class
         if (!neuDef) {
           return acc;
         }
-        const oldDefault = (old || []).find(d => d.name === existingVar.name)?.schema?.openAPIV3Schema?.default;
+        const oldDefault = (old || []).find((d) => d.name === existingVar.name)?.schema?.openAPIV3Schema?.default;
 
         // if a variable is set to the previous definition's default, clear it out
         if (oldDefault !== undefined && existingVar.value === oldDefault) {
@@ -174,7 +170,7 @@ export default defineComponent({
         if (def.schema?.openAPIV3Schema?.type === 'boolean' && !newDefault) {
           newDefault = false;
         }
-        if (newDefault !== undefined && !out.find(v => v.name === def.name)) {
+        if (newDefault !== undefined && !out.find((v) => v.name === def.name)) {
           out.push({ name: def.name, value: newDefault });
         }
       });
@@ -183,7 +179,7 @@ export default defineComponent({
       this.$emit('update:value', out);
     },
 
-    updateErrors(isValid: boolean) {
+    updateErrors(isValid) {
       if (!isValid) {
         this.errorCount++;
       } else {
@@ -191,8 +187,8 @@ export default defineComponent({
       }
     },
 
-    newComponentType(variableDef: ClusterClassVariable, i: number) {
-      const refs = this.$refs as {[key:string]: any[]};
+    newComponentType(variableDef, i) {
+      const refs = this.$refs;
       const inputEl = refs[`${ variableDef.name }-input`]?.[0]?.$el;
       const nextInputEl = refs[`${ this.variableDefinitions[i + 1]?.name }-input`]?.[0]?.$el;
 
@@ -204,13 +200,16 @@ export default defineComponent({
     }
   },
 
-});
+};
 </script>
 
 <template>
   <div class="variables">
     <template v-if="variableDefinitions && variableDefinitions.length">
-      <template v-for="(variableDef, i) in variableDefinitions" :key="`${variableDef.name}`">
+      <template
+        v-for="(variableDef, i) in variableDefinitions"
+        :key="`${variableDef.name}`"
+      >
         <Variable
           :ref="`${variableDef.name}-input`"
           :variable="variableDef"
@@ -219,7 +218,11 @@ export default defineComponent({
           @update:value="e=>updateVariables(e, variableDef)"
           @validation-passed="updateErrors"
         />
-        <div v-if="newComponentType(variableDef, i)" :key="`${i}-${rerenderKey}`" class="force-newline" />
+        <div
+          v-if="newComponentType(variableDef, i)"
+          :key="`${i}-${rerenderKey}`"
+          class="force-newline"
+        />
       </template>
     </template>
   </div>

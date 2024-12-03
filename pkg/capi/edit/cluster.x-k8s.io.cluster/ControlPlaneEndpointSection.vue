@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 import { mapGetters } from 'vuex';
 import { _EDIT } from '@shell/config/query-params';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
@@ -6,7 +6,7 @@ import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 export default {
   name:       'ControlPlaneEndpointSection',
   components: { LabeledInput },
-  emits: ['update:value'],
+  emits:      ['update:value'],
   props:      {
     value: {
       type:     Object,
@@ -57,7 +57,7 @@ export default {
           :rules="rules.port"
           type="number"
         />
-    </div>
+      </div>
     </div>
   </div>
 </template>

@@ -1,10 +1,12 @@
-<script lang="ts">
+<script>
 import { mapGetters } from 'vuex';
 import { _EDIT } from '@shell/config/query-params';
 import ArrayList from '@shell/components/form/ArrayList.vue';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 
 export default {
+  name: 'NetworkSelection',
+
   components: {
     LabeledInput,
     ArrayList
@@ -71,7 +73,6 @@ export default {
           :mode="mode"
           :title="t('capi.cluster.networking.pods')"
           :rules="rules.pods"
-          
         />
       </div>
       <div class="col span-3">
@@ -81,7 +82,6 @@ export default {
           :mode="mode"
           :title="t('capi.cluster.networking.services')"
           :rules="rules.services"
-          
         />
       </div>
     </div>

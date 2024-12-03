@@ -1,10 +1,10 @@
-<script lang="ts">
+<script>
 import { SUB_TYPE } from '@shell/config/query-params';
 import { set } from '@shell/utils/object';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import Loading from '@shell/components/Loading.vue';
 import CruResource from '@shell/components/CruResource.vue';
-import { CAPI, QUERY_PARAMS, ClusterClass } from '../../types/capi';
+import { CAPI, QUERY_PARAMS } from '../../types/capi';
 import ClusterConfig from './ClusterConfig.vue';
 
 export default {
@@ -14,7 +14,7 @@ export default {
     Loading,
     ClusterConfig
   },
-  emits: ['update:value'],
+  emits:  ['update:value'],
   mixins: [CreateEditView],
 
   props: {
@@ -40,10 +40,10 @@ export default {
         set(this.value, 'metadata', {});
       }
     }
-    this.getClusterClasses().then((cc: any[]) => {
+    this.getClusterClasses().then((cc) => {
       this.clusterClasses = cc;
       this.loading = false;
-    }).catch((err: Error) => {
+    }).catch((err) => {
       this.errors.push(err);
       this.loading = false;
     });
@@ -58,13 +58,13 @@ export default {
     const preselectedClass = classFromURL || classFromValue || null;
 
     return {
-      subType, preselectedClass, capiProviders: [], clusterClasses: [] as any[], loading: true
+      subType, preselectedClass, capiProviders: [], clusterClasses: [], loading: true
     };
   },
   methods: {
     set,
     async getClusterClasses() {
-      const allClusterClasses: ClusterClass[] = await this.$store.dispatch('management/findAll', { type: CAPI.CLUSTER_CLASS });
+      const allClusterClasses = await this.$store.dispatch('management/findAll', { type: CAPI.CLUSTER_CLASS });
 
       return allClusterClasses;
     },

@@ -1,24 +1,16 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
-import type { PropType } from 'vue';
+<script>
 import { get } from '@shell/utils/object';
 import capitalize from 'lodash/capitalize';
 import ClusterClassCard from './../components/ClusterClassCard/index.vue';
 
-interface Card {
-  id: String,
-  obj: Object,
-  selected: Boolean
-}
-
-export default defineComponent({
+export default {
   components: { ClusterClassCard },
   name:       'CardGrid',
-  emits: ['clicked'],
+  emits:      ['clicked'],
 
   props: {
     rows: {
-      type:     Array as PropType<Card[]>,
+      type:     Array,
       required: true,
     },
 
@@ -44,7 +36,7 @@ export default defineComponent({
 
   methods: {
     get,
-    select(row: Card[], idx: number) {
+    select(row, idx) {
       this.resetSelected();
       this.rows[idx].selected = true;
       this.$emit('clicked', row, idx);
@@ -56,7 +48,7 @@ export default defineComponent({
     },
     capitalize
   },
-});
+};
 </script>
 
 <template>

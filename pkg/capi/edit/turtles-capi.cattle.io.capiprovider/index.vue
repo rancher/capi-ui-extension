@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 import CreateEditView from '@shell/mixins/create-edit-view';
 import CruResource from '@shell/components/CruResource.vue';
 import SelectIconGrid from '@shell/components/SelectIconGrid.vue';
@@ -6,17 +6,6 @@ import { SUB_TYPE } from '@shell/config/query-params';
 import { PROVIDER_TYPES } from '../../types/capi';
 import ProviderConfig from './ProviderConfig.vue';
 import { set } from '@shell/utils/object';
-
-interface ProviderType {
-  id: string,
-  label: string,
-  description: string,
-  icon: HTMLImageElement
-  disabled: boolean,
-}
-type Route = {
-  query: {[index: string]:any},
-};
 
 export default {
   name: 'CreateProvider',
@@ -28,7 +17,7 @@ export default {
   },
 
   mixins: [CreateEditView],
-  emits:['set-subtype', 'update:value'],
+  emits:  ['set-subtype', 'update:value'],
 
   props: {
 
@@ -53,15 +42,15 @@ export default {
   },
 
   data() {
-    const route = this.$route as Route;
-    const subType: string | null = route?.query[SUB_TYPE] || null;
+    const route = this.$route;
+    const subType = route?.query[SUB_TYPE] || null;
 
     return { subType };
   },
 
   computed: {
     subTypes() {
-      const out: ProviderType[] = [];
+      const out = [];
       const getters = this.$store.getters;
 
       PROVIDER_TYPES?.forEach((provider) => {
@@ -70,7 +59,7 @@ export default {
 
       return out;
 
-      function addType(id: string, disabled = false) {
+      function addType(id, disabled = false) {
         const label = getters['i18n/withFallback'](`cluster.provider."${ id }"`, null, id);
         const description = getters['i18n/withFallback'](`cluster.providerDescription."${ id }"`, null, '');
         let icon;
@@ -85,7 +74,7 @@ export default {
           }
         }
 
-        const providerType: ProviderType = {
+        const providerType = {
           id,
           label,
           description,
@@ -100,14 +89,14 @@ export default {
 
   methods: {
     set,
-    clickedType(obj: ProviderType) {
+    clickedType(obj) {
       const id = obj.id;
 
       this.$router?.applyQuery({ [SUB_TYPE]: id });
       this.selectType(id);
     },
 
-    selectType(type: string) {
+    selectType(type) {
       this.subType = type;
       this.$emit('set-subtype', this.$store.getters['i18n/withFallback'](`cluster.provider."${ type }"`, null, type));
     },
@@ -116,7 +105,7 @@ export default {
 </script>
 
 <template>
-  <CruResource               
+  <CruResource
     :mode="mode"
     :validation-passed="true"
     :selected-subtype="subType"

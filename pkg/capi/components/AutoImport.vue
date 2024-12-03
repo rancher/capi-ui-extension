@@ -1,9 +1,8 @@
 <script>
-import { defineComponent } from 'vue';
 import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
 import { LABELS } from '../types/capi';
 
-export default defineComponent({
+export default {
   name: 'CAPIAutoImportConfiguration',
 
   components: { Checkbox },
@@ -40,7 +39,7 @@ export default defineComponent({
     }
   },
 
-});
+};
 </script>
 
 <template>

@@ -31,4 +31,10 @@ export default {
 };
 </script>
 
-<template><Banner v-if="showWarning" color="warning" label-key="capi.warnings.embeddedFeatureFlag" /></template>
+<template>
+  <Banner
+    v-if="showWarning"
+    color="warning"
+    label-key="capi.warnings.embeddedFeatureFlag"
+  />
+</template>

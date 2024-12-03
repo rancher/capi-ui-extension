@@ -1,41 +1,34 @@
-<script lang='ts'>
-import { PropType } from 'vue';
+<script>
 import { set, clone } from '@shell/utils/object';
 import { clear } from '@shell/utils/array';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 import NameNsDescription from '@shell/components/form/NameNsDescription.vue';
 import FormValidation from '@shell/mixins/form-validation';
-import Loading from '@shell/components/Loading.vue';
 import CruResource from '@shell/components/CruResource.vue';
 import CreateEditView from '@shell/mixins/create-edit-view';
-import { Translation } from '@rancher/shell/types/t';
 import ClusterClassVariables from '../../components/CCVariables/index.vue';
 import {
   versionTest, versionValidator, hostValidator, portValidator, cidrValidator, cidrArrayValid
 } from '../../util/validators';
-import { ClusterClass, Worker, CAPIClusterTopology, CAPIClusterNetwork, CAPIClusterCPEndpoint } from '../../types/capi';
+
 import CardGrid from '../../components/CardGrid.vue';
 import WorkerItem from './WorkerItem.vue';
 import NetworkSection from './NetworkSection.vue';
 import ControlPlaneEndpointSection from './ControlPlaneEndpointSection.vue';
 
-interface Step {
-  name: String
-}
-
-const defaultTopologyConfig: CAPIClusterTopology = {
+const defaultTopologyConfig = {
   version: '',
   class:   '',
   workers:           { machineDeployments: [], machinePools: [] }
 };
-const defaultClusterNetwork: CAPIClusterNetwork = {
+const defaultClusterNetwork = {
   apiServerPort: 6443,
   pods:          { cidrBlocks: [] },
   serviceDomain: '',
   services:      { cidrBlocks: [] }
 };
 
-const defaultCPEndpointConfig: CAPIClusterCPEndpoint = {
+const defaultCPEndpointConfig = {
   host: '',
   port: 49152
 };
@@ -44,7 +37,6 @@ export default {
   name:       'ClusterConfig',
   components: {
     CruResource,
-    Loading,
     NameNsDescription,
     LabeledInput,
     WorkerItem,
@@ -54,7 +46,7 @@ export default {
     CardGrid
   },
   mixins: [CreateEditView, FormValidation],
-  emits:['update:value'],
+  emits:  ['update:value'],
   props:      {
     mode: {
       type:     String,
@@ -70,7 +62,7 @@ export default {
       default:  ''
     },
     clusterClasses: {
-      type:     Array as PropType<ClusterClass[]>,
+      type:     Array,
       required: true
     }
   },
@@ -81,8 +73,8 @@ export default {
     });
   },
   data() {
-    const store = this.$store as {[key: string]: any};
-    const t = store.getters['i18n/t'] as Translation;
+    const store = this.$store;
+    const t = store.getters['i18n/t'];
     const stepClusterClass = {
       name:           'stepClusterClass',
       title:          t('capi.cluster.steps.clusterClass.title'),
@@ -133,14 +125,14 @@ export default {
         class: ''
       },
       variablesReady:  true,
-      clusterClassObj: null as ClusterClass | null,
+      clusterClassObj: null,
       loading:         true
     };
   },
 
   watch: {
     clusterClassObj(neu) {
-      const step = this.addSteps.find((s: Step) => s.name === 'stepClusterClass');
+      const step = this.addSteps.find((s) => s.name === 'stepClusterClass');
 
       if (step) {
         step.ready = !!neu;
@@ -148,13 +140,13 @@ export default {
     },
 
     stepConfigurationRequires(neu) {
-      const step = this.addSteps.find((s: Step) => s.name === 'stepConfiguration');
+      const step = this.addSteps.find((s) => s.name === 'stepConfiguration');
 
       step.ready = !!neu;
     },
 
     variablesReady(neu) {
-      const step = this.addSteps.find((s: Step) => s.name === 'stepVariables');
+      const step = this.addSteps.find((s) => s.name === 'stepVariables');
 
       step.ready = !!neu;
     }
@@ -170,16 +162,16 @@ export default {
       };
     },
     stepConfigurationRequires() {
-      const nameValid: boolean = !!this.value.metadata.name;
-      const versionTestString: RegExp = versionTest(this.$store.getters['i18n/t'], this.controlPlane);
-      const versionValid: boolean = this.value?.spec?.topology?.version && !!(this.value?.spec?.topology?.version.match(versionTestString));
-      const controlPlaneEndpointPortValid: boolean = !portValidator(this.$store.getters['i18n/t'])(this.value?.spec?.controlPlaneEndpoint?.port);
-      const controlPlaneEndpointHostValid: boolean = !hostValidator(this.$store.getters['i18n/t'])(this.value?.spec?.controlPlaneEndpoint?.host);
-      const machineDeploymentsValid: boolean = this.value?.spec?.topology?.workers?.machineDeployments?.length > 0 && !!this.value?.spec?.topology?.workers?.machineDeployments[0]?.name && !!this.value?.spec?.topology?.workers?.machineDeployments[0]?.class;
-      const machinePoolsValid: boolean = this.value?.spec?.topology?.workers?.machinePools?.length > 0 && !!this.value?.spec?.topology?.workers?.machinePools[0]?.name && !!this.value?.spec?.topology?.workers?.machinePools[0]?.class;
-      const networkPodsValid: boolean = !this.value?.spec?.clusterNetwork?.pods?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.pods.cidrBlocks);
-      const networkServicesValid: boolean = !this.value?.spec?.clusterNetwork?.services?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.services.cidrBlocks);
-      const networkValid:boolean = !!this.value?.spec?.clusterNetwork?.apiServerPort && !isNaN(this.value?.spec?.clusterNetwork?.apiServerPort) && networkPodsValid && networkServicesValid;
+      const nameValid = !!this.value.metadata.name;
+      const versionTestString = versionTest(this.$store.getters['i18n/t'], this.controlPlane);
+      const versionValid = this.value?.spec?.topology?.version && !!(this.value?.spec?.topology?.version.match(versionTestString));
+      const controlPlaneEndpointPortValid = !portValidator(this.$store.getters['i18n/t'])(this.value?.spec?.controlPlaneEndpoint?.port);
+      const controlPlaneEndpointHostValid = !hostValidator(this.$store.getters['i18n/t'])(this.value?.spec?.controlPlaneEndpoint?.host);
+      const machineDeploymentsValid = this.value?.spec?.topology?.workers?.machineDeployments?.length > 0 && !!this.value?.spec?.topology?.workers?.machineDeployments[0]?.name && !!this.value?.spec?.topology?.workers?.machineDeployments[0]?.class;
+      const machinePoolsValid = this.value?.spec?.topology?.workers?.machinePools?.length > 0 && !!this.value?.spec?.topology?.workers?.machinePools[0]?.name && !!this.value?.spec?.topology?.workers?.machinePools[0]?.class;
+      const networkPodsValid = !this.value?.spec?.clusterNetwork?.pods?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.pods.cidrBlocks);
+      const networkServicesValid = !this.value?.spec?.clusterNetwork?.services?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.services.cidrBlocks);
+      const networkValid = !!this.value?.spec?.clusterNetwork?.apiServerPort && !isNaN(this.value?.spec?.clusterNetwork?.apiServerPort) && networkPodsValid && networkServicesValid;
 
       return nameValid && versionValid && controlPlaneEndpointHostValid && controlPlaneEndpointPortValid && networkValid && (machineDeploymentsValid || machinePoolsValid);
     },
@@ -189,32 +181,32 @@ export default {
     controlPlaneEndpoint() {
       return this.value?.spec?.controlPlaneEndpoint;
     },
-    machineDeployments(){
-        return this.value.spec.topology.workers.machineDeployments;
+    machineDeployments() {
+      return this.value.spec.topology.workers.machineDeployments;
     },
-    machinePools(){
-        return this.value.spec.topology.workers.machinePools;
+    machinePools() {
+      return this.value.spec.topology.workers.machinePools;
     },
     machineDeploymentOptions() {
-      return this.clusterClassObj?.spec?.workers?.machineDeployments?.map( (w: Worker) => w.class);
+      return this.clusterClassObj?.spec?.workers?.machineDeployments?.map( (w) => w.class);
     },
     machinePoolOptions() {
-      return this.clusterClassObj?.spec?.workers?.machinePools?.map( (w: Worker) => w.class);
+      return this.clusterClassObj?.spec?.workers?.machinePools?.map( (w) => w.class);
     },
     controlPlane() {
       return this.clusterClassObj?.spec?.controlPlane?.ref?.name;
     },
     clusterClassOptions() {
-      const out: any[] = [];
+      const out = [];
       const currentObject = this.clusterClassObj;
 
-      this.clusterClasses.forEach((obj: ClusterClass) => {
+      this.clusterClasses.forEach((obj) => {
         addType(obj);
       });
 
       return out;
 
-      function addType(obj: {[key: string]: any}) {
+      function addType(obj) {
         const id = obj?.id;
         const subtype = {
           id,
@@ -228,8 +220,8 @@ export default {
   },
   methods: {
     set,
-    setClassInfo(name: string) {
-      this.clusterClassObj = this.clusterClasses.find((x: ClusterClass) => {
+    setClassInfo(name) {
+      this.clusterClassObj = this.clusterClasses.find((x) => {
         const split = unescape(name).split('/');
 
         return x.metadata.namespace === split[0] && x.metadata.name === split[1];
@@ -243,11 +235,13 @@ export default {
     },
     setClass() {
       const clusterClassName = this.clusterClassObj?.metadata?.name;
-      this.$emit('update:value', {k: 'spec.topology.class', val: clusterClassName});
+
+      this.$emit('update:value', { k: 'spec.topology.class', val: clusterClassName });
     },
     setNamespace() {
       const clusterClassNs = this.clusterClassObj?.metadata?.namespace;
-      this.$emit('update:value', {k: 'metadata.namespace', val: clusterClassNs});
+
+      this.$emit('update:value', { k: 'metadata.namespace', val: clusterClassNs });
     },
     async saveOverride() {
       if ( this.errors ) {
@@ -263,7 +257,8 @@ export default {
     },
 
     initSpecs() {
-        const val = this.value;
+      const val = this.value;
+
       if ( !val ) {
         set(val, 'spec', { });
       }
@@ -278,7 +273,7 @@ export default {
       if ( !val.spec.controlPlaneEndpoint ) {
         set(val.spec, 'controlPlaneEndpoint', clone(defaultCPEndpointConfig));
       }
-      this.$emit('update:value', {k: 'spec', val: val.spec});
+      this.$emit('update:value', { k: 'spec', val: val.spec });
 
       if ( this.preselectedClass) {
         this.setClassInfo(this.preselectedClass);
@@ -301,8 +296,8 @@ export default {
         params: {},
       });
     },
-    clickedType(obj: {[key:string]: any}) {
-      this.clusterClassObj = this.clusterClasses.find((x: ClusterClass) => x.id === obj.id) || null;
+    clickedType(obj) {
+      this.clusterClassObj = this.clusterClasses.find((x) => x.id === obj.id) || null;
       this.setClass();
       this.setNamespace();
     }

@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 import debounce from 'lodash/debounce';
 import { removeAt } from '@shell/utils/array';
 import { clone } from '@shell/utils/object';
@@ -8,8 +8,8 @@ import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 
 export default {
   components: { LabeledSelect, LabeledInput },
-  emits: ['add', 'remove', 'update:value'],
-  props: {
+  emits:      ['add', 'remove', 'update:value'],
+  props:      {
     value: {
       type:     Array,
       default:  null,
@@ -48,7 +48,7 @@ export default {
     },
   },
   data() {
-    const input = (this.value as any[] || [])?.slice();
+    const input = (this.value || [])?.slice();
     const rows = [];
 
     for ( const value of input ) {
@@ -79,7 +79,7 @@ export default {
       deep: true,
       handler() {
         this.lastUpdateWasFromValue = true;
-        this.rows = (this.value || []).map(v => ({ value: v }));
+        this.rows = (this.value || []).map((v) => ({ value: v }));
       }
     },
     rows: {
@@ -115,7 +115,7 @@ export default {
     /**
      * Remove item and emits removed row and its own index value
      */
-    remove(row: {[key: string]: any}, index: number) {
+    remove(row, index) {
       this.$emit('remove', { row, index });
       removeAt(this.rows, index);
       this.queueUpdate();
@@ -135,8 +135,8 @@ export default {
       }
       this.$emit('update:value', out);
     },
-    valUpdate(val, key){
-        key.value.name = val.data
+    valUpdate(val, key) {
+      key.value.name = val.data;
     }
   }
 };

@@ -10,12 +10,12 @@
     "@rancher/components": "^0.3.0-alpha.1",
     "@rancher/shell": "3.0.0",
     "@types/lodash": "4.14.196",
-    "core-js": "3.21.1",
-    "css-loader": "6.7.3",
-    "node-polyfill-webpack-plugin": "^3.0.0",
     "cache-loader": "^4.1.0",
     "color": "4.2.3",
-    "ip": "2.0.1"
+    "core-js": "3.21.1",
+    "css-loader": "6.7.3",
+    "ip": "2.0.1",
+    "node-polyfill-webpack-plugin": "^3.0.0"
   },
   "resolutions": {
     "**/webpack": "5",
@@ -31,5 +31,13 @@
     "publish-pkgs": "./node_modules/@rancher/shell/scripts/extension/publish",
     "parse-tag-name": "./node_modules/@rancher/shell/scripts/extension/parse-tag-name",
     "migrate": "node ./scrips/vue-migrate.js"
+  },
+  "devDependencies": {
+    "eslint-plugin-cypress": "2.12.1",
+    "eslint-plugin-import": "2.23.4",
+    "eslint-plugin-jest": "24.4.0",
+    "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-promise": "7.2.1",
+    "eslint-plugin-vue": "9.10.0"
   }
 }

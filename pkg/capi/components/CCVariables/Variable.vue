@@ -1,6 +1,4 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
-import type { PropType } from 'vue';
+<script>
 import isEqual from 'lodash/isEqual';
 
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
@@ -8,19 +6,16 @@ import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
 import KeyValue from '@shell/components/form/KeyValue.vue';
 import ArrayList from '@shell/components/form/ArrayList.vue';
 import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
-import { Validator } from '@shell/utils/validators/formRules';
 
 import { mapGetters } from 'vuex';
-import { Translation } from '@rancher/shell/types/t';
-import type { ClusterClassVariable } from '../../types/clusterClass';
 import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
 
-export default defineComponent({
-  name: 'CCVariable',
+export default {
+  name:  'CCVariable',
   emits: ['validation-passed', 'update:value'],
   props: {
     variable: {
-      type:     Object as PropType<ClusterClassVariable>,
+      type:     Object,
       required: true
     },
 
@@ -50,9 +45,9 @@ export default defineComponent({
   computed: {
     ...mapGetters({ t: 'i18n/t' }),
 
-    componentForType(): {component: any, name: string} | undefined {
+    componentForType() {
       const { type } = this.schema;
-      let out: any;
+      let out;
 
       if (this.variableOptions) {
         out = { component: LabeledSelect, name: 'text-var' };
@@ -99,7 +94,7 @@ export default defineComponent({
         return null;
       }
 
-      return opts.map((opt: any) => {
+      return opts.map((opt) => {
         return typeof opt === 'object' ? JSON.stringify(opt) : opt;
       });
     },
@@ -108,13 +103,13 @@ export default defineComponent({
       if (this.isDefaultValue) {
         return [];
       }
-      const t = this.t as Translation;
+      const t = this.t;
       const out = openAPIV3SchemaValidators(t, { key: this.variable.name }, this.schema);
 
       const required = this.variable?.required;
 
       if (required && this.validateRequired) {
-        out.push((val: any) => !isDefined(val) ? t('validation.required', { key: this.variable.name }) : undefined);
+        out.push((val) => !isDefined(val) ? t('validation.required', { key: this.variable.name }) : undefined);
       }
 
       return out;
@@ -135,7 +130,7 @@ export default defineComponent({
     },
 
     validationErrors() {
-      return this.validationRules.reduce((errs: string[], rule: Validator) => {
+      return this.validationRules.reduce((errs, rule) => {
         const message = rule(this.value);
 
         if (message) {
@@ -152,7 +147,7 @@ export default defineComponent({
   },
 
   methods: {
-    setValue(e: any) {
+    setValue(e) {
       let out = e;
 
       const { type } = this.schema;
@@ -165,11 +160,14 @@ export default defineComponent({
       this.$emit('update:value', out);
     }
   },
-});
+};
 </script>
 
 <template>
-  <div v-if="componentForType" :class="{'wider': listComponent, 'align-center': componentForType?.name==='checkbox-var', [`${componentForType.name}`]: true}">
+  <div
+    v-if="componentForType"
+    :class="{'wider': listComponent, 'align-center': componentForType?.name==='checkbox-var', [`${componentForType.name}`]: true}"
+  >
     <component
       :is="componentForType.component"
       v-if="componentForType"
@@ -187,8 +185,16 @@ export default defineComponent({
       <template #title>
         <div class="input-label">
           <span>{{ variable.name }}
-            <i v-if="schema.description" v-clean-tooltip="schema.description" class="icon icon-sm icon-info" />
-            <i v-if="!isValid" v-clean-tooltip="validationErrors.join(' ')" class="icon icon-warning" />
+            <i
+              v-if="schema.description"
+              v-clean-tooltip="schema.description"
+              class="icon icon-sm icon-info"
+            />
+            <i
+              v-if="!isValid"
+              v-clean-tooltip="validationErrors.join(' ')"
+              class="icon icon-warning"
+            />
           </span>
         </div>
       </template>
