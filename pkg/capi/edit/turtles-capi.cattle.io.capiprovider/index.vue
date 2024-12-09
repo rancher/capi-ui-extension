@@ -100,7 +100,7 @@ export default {
       return this.capiProviders.reduce((types, p) => {
         const { name } = p?.spec || {};
 
-        if (!types.includes(name)) {
+        if (!types.includes(name) && name !== 'custom') {
           types.push(name);
         }
 

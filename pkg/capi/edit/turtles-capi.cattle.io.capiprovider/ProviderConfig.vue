@@ -38,7 +38,6 @@ const customProviderSpec = {
   configSecret: { name: '' },
   credentials:  { rancherCloudCredentialNamespaceName: '' },
   fetchConfig:  { url: '' },
-  version:      ''
 };
 
 const providerTypes = ['infrastructure', 'bootstrap', 'controlPlane', 'addon', 'ipam', 'runtimeextension', 'core'];
@@ -203,6 +202,9 @@ export default {
       if ( !this.credentialComponent && !this.value.spec?.credentials?.rancherCloudCredentialNamespaceName ) {
         this.value.spec.credentials = null;
       }
+      if (this.value?.spec?.version === '') {
+        delete this.value.spec.version;
+      }
       try {
         await this.save(btnCb, null);
       } catch (err) {
@@ -325,7 +327,7 @@ export default {
       </h3>
       <SelectCredential
         v-model:value="value.spec.credentials.rancherCloudCredentialNamespaceName"
-        :mode="isEdit? 'view' : mode"
+        :mode="mode"
         :provider="credentialComponent"
         :cancel="cancelCredential"
         :showing-form="showForm"
