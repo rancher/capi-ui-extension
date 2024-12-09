@@ -105,7 +105,7 @@ export default {
     fvExtraRules() {
       return {
         name:    providerNameValidator(this.$store.getters['i18n/t']),
-        version: providerVersionValidator(this.$store.getters['i18n/t'], this.isCustom),
+        version: providerVersionValidator(this.$store.getters['i18n/t']),
         url:     urlValidator(this.$store.getters['i18n/t'])
       };
     },
@@ -288,8 +288,8 @@ export default {
             :mode="mode"
             label-key="capi.provider.version.label"
             placeholder-key="capi.provider.version.placeholder"
+            :tooltip="t('capi.provider.version.tooltip')"
             :rules="fvGetAndReportPathRules('spec.version')"
-            required
             @update:value="$emit('update:value', {k: 'spec.version', val: $event})"
           />
         </div>
@@ -325,7 +325,7 @@ export default {
       </h3>
       <SelectCredential
         v-model:value="value.spec.credentials.rancherCloudCredentialNamespaceName"
-        :mode="mode"
+        :mode="isEdit? 'view' : mode"
         :provider="credentialComponent"
         :cancel="cancelCredential"
         :showing-form="showForm"

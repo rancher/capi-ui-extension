@@ -159,8 +159,8 @@ export const urlValidator = function(t: Translation): Validator {
   return (val: string) => val && !val.match(/^https?:\/\/(.*)$/) ? t('validation.url') : undefined;
 };
 
-export const providerVersionValidator = function(t: Translation, required: boolean): Validator {
-  return (val: string) => (required && !val) || (val && !val.match(/^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/)) ? t('validation.version') : undefined;
+export const providerVersionValidator = function(t: Translation): Validator {
+  return (val: string) => (val && !val.match(/^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/)) ? t('validation.version') : undefined;
 };
 
 export const providerNameValidator = function(t: Translation): Validator {

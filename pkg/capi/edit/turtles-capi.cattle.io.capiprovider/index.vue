@@ -3,7 +3,7 @@ import CreateEditView from '@shell/mixins/create-edit-view';
 import CruResource from '@shell/components/CruResource.vue';
 import SelectIconGrid from '@shell/components/SelectIconGrid.vue';
 import { SUB_TYPE } from '@shell/config/query-params';
-import { PROVIDER_TYPES } from '../../types/capi';
+import { CAPI, PROVIDER_TYPES } from '../../types/capi';
 import ProviderConfig from './ProviderConfig.vue';
 import { set } from '@shell/utils/object';
 
@@ -35,9 +35,17 @@ export default {
       default: 'capi-provider-create'
     }
   },
-  beforeMount() {
-    if ( this.value?.spec?.name) {
-      this.selectType(this.value.spec.name);
+  async beforeMount() {
+    this.capiProviders = await this.$store.dispatch('management/findAll', { type: CAPI.PROVIDER });
+    const name = this.value.spec?.name;
+
+    if (!name) {
+      return;
+    }
+    if (this.value.spec?.fetchConfig && !this.subTypes.find(({ id }) => id === name)) {
+      this.selectType('custom');
+    } else {
+      this.selectType(name);
     }
   },
 
@@ -45,7 +53,7 @@ export default {
     const route = this.$route;
     const subType = route?.query[SUB_TYPE] || null;
 
-    return { subType };
+    return { subType, capiProviders: [] };
   },
 
   computed: {
@@ -54,7 +62,9 @@ export default {
       const getters = this.$store.getters;
 
       PROVIDER_TYPES?.forEach((provider) => {
-        addType(provider.id, provider.disabled);
+        const disabled = provider.disabled || this.enabledProviderTypes.includes(provider.id);
+
+        addType(provider.id, disabled);
       });
 
       return out;
@@ -84,6 +94,18 @@ export default {
 
         out.push(providerType);
       }
+    },
+
+    enabledProviderTypes() {
+      return this.capiProviders.reduce((types, p) => {
+        const { name } = p?.spec || {};
+
+        if (!types.includes(name)) {
+          types.push(name);
+        }
+
+        return types;
+      }, []);
     }
   },
 
@@ -137,6 +159,8 @@ export default {
     <ProviderConfig
       v-if="subType"
       :value="value"
+      :initial-value="initialValue"
+      :live-value="liveValue"
       :mode="mode"
       :provider="subType"
       @update:value="set(value, $event.k, $event.val)"
