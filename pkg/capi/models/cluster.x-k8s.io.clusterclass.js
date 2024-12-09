@@ -33,6 +33,7 @@ export default class ClusterClass extends SteveModel {
 
   saveYaml(yaml) {
     const localCluster = this.$rootGetters['management/byId'](MANAGEMENT.CLUSTER, LOCAL_CLUSTER);
+
     return localCluster.doAction('apply', { yaml });
   }
 }

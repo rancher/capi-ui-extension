@@ -8,7 +8,6 @@ module.exports = {
   extends: [
     'standard',
     'eslint:recommended',
-    // '@nuxtjs/eslint-config-typescript',
     'plugin:cypress/recommended',
     'plugin:vue/vue3-recommended',
   ],
