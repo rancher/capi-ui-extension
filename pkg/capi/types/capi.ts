@@ -21,58 +21,8 @@ export const CP_VERSIONS = {
 
 export const CREDENTIALS_UPDATE_REQUIRED = ['aks'];
 export const CREDENTIALS_NOT_REQUIRED = ['docker'];
-export interface Worker {
-  name: String,
-  class: String
-}
 
-export interface CAPIClusterTopology {
-    version: String,
-    class: String,
-    workers: {
-      machineDeployments: Worker[],
-      machinePools: Worker[]
-    }
-}
-export interface CAPIClusterCPEndpoint {
-  host: String,
-  port: Number
-}
-
-export interface CAPIClusterNetwork {
-  apiServerPort?: Number,
-  pods?: {
-    cidrBlocks: String[]
-  },
-  serviceDomain?: String,
-  services?: {
-    cidrBlocks: String[]
-  },
-}
-
-export interface ClusterClass {
-  id: string,
-  metadata: {
-    name: string,
-    namespace: string,
-    annotations?: {[key: string]: string}
-  },
-  spec: {
-    infrastructure: Object,
-    workers: {
-      machinePools: [],
-      machineDeployments: []
-    },
-    controlPlane: {ref: {name: string}}
-  }
-}
-export interface Provider {
-  id: string,
-  disabled: boolean,
-  credential?: string
-}
-
-export const PROVIDER_TYPES: Provider[] = [
+export const PROVIDER_TYPES = [
   {
     id: 'aws', disabled: false, credential: 'aws'
   },

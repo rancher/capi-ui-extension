@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 import Banner from '@components/Banner/Banner.vue';
 
 export default {
@@ -9,4 +9,9 @@ export default {
 };
 </script>
 
-<template><Banner color="warning" label-key="capi.experimental" /></template>
+<template>
+  <Banner
+    color="warning"
+    label-key="capi.experimental"
+  />
+</template>

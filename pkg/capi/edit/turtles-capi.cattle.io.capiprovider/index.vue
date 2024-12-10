@@ -1,22 +1,11 @@
-<script lang="ts">
+<script>
 import CreateEditView from '@shell/mixins/create-edit-view';
 import CruResource from '@shell/components/CruResource.vue';
 import SelectIconGrid from '@shell/components/SelectIconGrid.vue';
 import { SUB_TYPE } from '@shell/config/query-params';
-import { PROVIDER_TYPES } from '../../types/capi';
+import { CAPI, PROVIDER_TYPES } from '../../types/capi';
 import ProviderConfig from './ProviderConfig.vue';
 import { set } from '@shell/utils/object';
-
-interface ProviderType {
-  id: string,
-  label: string,
-  description: string,
-  icon: HTMLImageElement
-  disabled: boolean,
-}
-type Route = {
-  query: {[index: string]:any},
-};
 
 export default {
   name: 'CreateProvider',
@@ -28,7 +17,7 @@ export default {
   },
 
   mixins: [CreateEditView],
-  emits:['set-subtype', 'update:value'],
+  emits:  ['set-subtype', 'update:value'],
 
   props: {
 
@@ -46,31 +35,41 @@ export default {
       default: 'capi-provider-create'
     }
   },
-  beforeMount() {
-    if ( this.value?.spec?.name) {
-      this.selectType(this.value.spec.name);
+  async beforeMount() {
+    this.capiProviders = await this.$store.dispatch('management/findAll', { type: CAPI.PROVIDER });
+    const name = this.value.spec?.name;
+
+    if (!name) {
+      return;
+    }
+    if (this.value.spec?.fetchConfig && !this.subTypes.find(({ id }) => id === name)) {
+      this.selectType('custom');
+    } else {
+      this.selectType(name);
     }
   },
 
   data() {
-    const route = this.$route as Route;
-    const subType: string | null = route?.query[SUB_TYPE] || null;
+    const route = this.$route;
+    const subType = route?.query[SUB_TYPE] || null;
 
-    return { subType };
+    return { subType, capiProviders: [] };
   },
 
   computed: {
     subTypes() {
-      const out: ProviderType[] = [];
+      const out = [];
       const getters = this.$store.getters;
 
       PROVIDER_TYPES?.forEach((provider) => {
-        addType(provider.id, provider.disabled);
+        const disabled = provider.disabled || this.enabledProviderTypes.includes(provider.id);
+
+        addType(provider.id, disabled);
       });
 
       return out;
 
-      function addType(id: string, disabled = false) {
+      function addType(id, disabled = false) {
         const label = getters['i18n/withFallback'](`cluster.provider."${ id }"`, null, id);
         const description = getters['i18n/withFallback'](`cluster.providerDescription."${ id }"`, null, '');
         let icon;
@@ -85,7 +84,7 @@ export default {
           }
         }
 
-        const providerType: ProviderType = {
+        const providerType = {
           id,
           label,
           description,
@@ -95,19 +94,31 @@ export default {
 
         out.push(providerType);
       }
+    },
+
+    enabledProviderTypes() {
+      return this.capiProviders.reduce((types, p) => {
+        const { name } = p?.spec || {};
+
+        if (!types.includes(name) && name !== 'custom') {
+          types.push(name);
+        }
+
+        return types;
+      }, []);
     }
   },
 
   methods: {
     set,
-    clickedType(obj: ProviderType) {
+    clickedType(obj) {
       const id = obj.id;
 
       this.$router?.applyQuery({ [SUB_TYPE]: id });
       this.selectType(id);
     },
 
-    selectType(type: string) {
+    selectType(type) {
       this.subType = type;
       this.$emit('set-subtype', this.$store.getters['i18n/withFallback'](`cluster.provider."${ type }"`, null, type));
     },
@@ -116,7 +127,7 @@ export default {
 </script>
 
 <template>
-  <CruResource               
+  <CruResource
     :mode="mode"
     :validation-passed="true"
     :selected-subtype="subType"
@@ -148,6 +159,8 @@ export default {
     <ProviderConfig
       v-if="subType"
       :value="value"
+      :initial-value="initialValue"
+      :live-value="liveValue"
       :mode="mode"
       :provider="subType"
       @update:value="set(value, $event.k, $event.val)"

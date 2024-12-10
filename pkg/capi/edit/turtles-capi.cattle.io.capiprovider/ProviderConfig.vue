@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script>
 import { mapGetters } from 'vuex';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import { clear } from '@shell/utils/array';
@@ -17,7 +17,7 @@ import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
 import Banner from '@components/Banner/Banner.vue';
 import { _EDIT } from '@shell/config/query-params';
 import { allHash } from '@shell/utils/promise';
-import { PROVIDER_TYPES, RANCHER_TURTLES_SYSTEM_NAMESPACE, RANCHER_TURTLES_SYSTEM_NAME, Provider } from '../../types/capi';
+import { PROVIDER_TYPES, RANCHER_TURTLES_SYSTEM_NAMESPACE, RANCHER_TURTLES_SYSTEM_NAME } from '../../types/capi';
 import { providerNameValidator, providerVersionValidator, urlValidator } from '../../util/validators';
 
 const defaultFeatures = {
@@ -38,24 +38,12 @@ const customProviderSpec = {
   configSecret: { name: '' },
   credentials:  { rancherCloudCredentialNamespaceName: '' },
   fetchConfig:  { url: '' },
-  version:      ''
 };
 
 const providerTypes = ['infrastructure', 'bootstrap', 'controlPlane', 'addon', 'ipam', 'runtimeextension', 'core'];
 
-interface Secret {
-  metadata: {
-    name: string,
-    namespace: string
-  }
-}
-interface Hash {
-  namespaces: [],
-  coreProviderSecret: Secret[]
-}
-
 export default {
-    name: 'ProviderConfig',
+  name:       'ProviderConfig',
   components: {
     CruResource,
     Loading,
@@ -68,7 +56,7 @@ export default {
     Banner
   },
   mixins: [CreateEditView, FormValidation],
-  emits:['update:value'],
+  emits:  ['update:value'],
   props:      {
     mode: {
       type:     String,
@@ -84,19 +72,19 @@ export default {
     }
   },
   beforeMount() {
-    this.getDependencies().then((hash: Hash) => {
+    this.getDependencies().then((hash) => {
       this.allNamespaces = hash.namespaces || [];
       this.coreProviderSecret = hash.coreProviderSecret || {};
       this.initSpecs();
       this.loading = false;
-    }).catch((err: Error) => {
+    }).catch((err) => {
       this.errors.push(err);
       this.initSpecs();
       this.loading = false;
     });
   },
   data() {
-    const providerDetails: Provider = PROVIDER_TYPES.find(p => p.id === this.provider) || { disabled: false, id: '0' };
+    const providerDetails = PROVIDER_TYPES.find((p) => p.id === this.provider) || { disabled: false, id: '0' };
 
     return {
       loading:            true,
@@ -116,7 +104,7 @@ export default {
     fvExtraRules() {
       return {
         name:    providerNameValidator(this.$store.getters['i18n/t']),
-        version: providerVersionValidator(this.$store.getters['i18n/t'], this.isCustom),
+        version: providerVersionValidator(this.$store.getters['i18n/t']),
         url:     urlValidator(this.$store.getters['i18n/t'])
       };
     },
@@ -191,7 +179,7 @@ export default {
         variables: clone(defaultVariables)
       };
     },
-    generateName(name: string) {
+    generateName(name) {
       return name ? `${ name }-credentials-${ randomStr(5).toLowerCase() }` : undefined;
     },
     async getDependencies() {
@@ -207,13 +195,15 @@ export default {
       return await allHash(hashPromises);
     },
 
-    async saveOverride(btnCb: Function) {
-
+    async saveOverride(btnCb) {
       if ( this.errors ) {
         clear(this.errors);
       }
       if ( !this.credentialComponent && !this.value.spec?.credentials?.rancherCloudCredentialNamespaceName ) {
         this.value.spec.credentials = null;
+      }
+      if (this.value?.spec?.version === '') {
+        delete this.value.spec.version;
       }
       try {
         await this.save(btnCb, null);
@@ -300,8 +290,8 @@ export default {
             :mode="mode"
             label-key="capi.provider.version.label"
             placeholder-key="capi.provider.version.placeholder"
+            :tooltip="t('capi.provider.version.tooltip')"
             :rules="fvGetAndReportPathRules('spec.version')"
-            required
             @update:value="$emit('update:value', {k: 'spec.version', val: $event})"
           />
         </div>
@@ -321,8 +311,14 @@ export default {
         </div>
       </div>
     </div>
-    <div v-if="credentialComponent" class="mb-40" />
-    <h2 v-if="hasFeatures || hasVariables" class="mb-20">
+    <div
+      v-if="credentialComponent"
+      class="mb-40"
+    />
+    <h2
+      v-if="hasFeatures || hasVariables"
+      class="mb-20"
+    >
       <t k="capi.provider.secret.title" />
     </h2>
     <div v-if="credentialComponent">
@@ -346,7 +342,10 @@ export default {
       >
         {{ t('capi.provider.banner') }}
       </Banner>
-      <div v-if="hasFeatures" class="mb-40">
+      <div
+        v-if="hasFeatures"
+        class="mb-40"
+      >
         <h3 class="mb-20">
           <t k="capi.provider.features.title" />
         </h3>
