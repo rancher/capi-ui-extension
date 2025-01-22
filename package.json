@@ -20,7 +20,8 @@
   "resolutions": {
     "**/webpack": "5",
     "@types/node": "16.4.3",
-    "glob": "7.2.3"
+    "glob": "7.2.3",
+    "entities": "4.5.0"
   },
   "scripts": {
     "dev": "NODE_ENV=dev ./node_modules/.bin/vue-cli-service serve",
