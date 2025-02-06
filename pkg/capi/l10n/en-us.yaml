@@ -4,8 +4,7 @@ capi:
   installation:
     title: Rancher Turtles
     description: The Rancher Turtles operator allows users to import CAPI-provisioned clusters into Rancher.
-    disableFeatureFlag: The <code>embedded-cluster-api</code> feature flag must be disabled before installing the CAPI Turtles extension. Follow instructions in the documentation <a aria-label="Read how to disable the embedded CAPI feature flag" target="_blank" rel="noopener noreferrer nofollow" href="https://docs.rancher-turtles.com/docs/getting-started/rancher#setting-up-rancher-for-rancher-turtles">here</a> to do so.
-    turtlesNeeded: Either the user doesn't have permission to run the Turtles extension or the Turtles operator isn't installed. To learn how to install the Rancher Turtles extension, read the <a aria-label="Read how to install the Rancher Turtles operator" href="https://turtles.docs.rancher.com/turtles/v0.13/en/index.html" target="_blank" rel="noopener noreferrer nofollow">documentation.</a>
+    turtlesNeeded: Either the user doesn't have permission to run the Turtles extension or the Turtles operator isn't installed. To learn how to install the Rancher Turtles extension, read the <a aria-label="Read how to install the Rancher Turtles operator" href="https://turtles.docs.rancher.com/turtles/next/en/getting-started/install-rancher-turtles/using_rancher_dashboard.html" target="_blank" rel="noopener noreferrer nofollow">documentation.</a>
   autoImport:
     label: CAPI Auto-Import
     checkbox:
@@ -80,7 +79,7 @@ capi:
         one {{count} Machine Pool }
         other {{count} Machine Pools }
       }
-  experimental: "The Rancher CAPI UI extension is experimental and is not currently supported."
+  experimental: "The Rancher CAPI UI extension is currently in tech preview."
   provider:
     title: Provider
     label: Provider
