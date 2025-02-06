@@ -1,11 +1,10 @@
 <script>
-import { MANAGEMENT, CAPI as RANCHER_CAPI, SCHEMA } from '@shell/config/types';
+import { CAPI as RANCHER_CAPI, SCHEMA } from '@shell/config/types';
 import Banner from '@components/Banner/Banner.vue';
 import { CAPI } from '../types/capi.ts';
 
 export default {
   name: 'CAPITurtlesDashboard',
-
 
   async beforeCreate() {
     try {
@@ -31,23 +30,7 @@ export default {
 
   components: { Banner },
 
-  async fetch() {
-    if (this.$store.getters['management/canList'](MANAGEMENT.FEATURE)) {
-      this.features = await this.$store.dispatch('management/findAll', { type: MANAGEMENT.FEATURE });
-    }
-  },
-  data() {
-    return { features: [] };
-  },
-
   computed: {
-    // if the flag is undefined that is equivalent to this feature being enabled
-    embeddedCapiEnabled() {
-      const embeddedCapiFeature = this.features.find(f => f.id === 'embedded-cluster-api');
-
-      return embeddedCapiFeature?.spec?.value || !embeddedCapiFeature;
-    },
-
     hasClusterClassSchema() {
       return !!this.$store.getters['management/schemaFor'](CAPI.CLUSTER_CLASS);
     },
@@ -58,7 +41,10 @@ export default {
 
 <template>
   <div>
-    <div v-if="embeddedCapiEnabled || !hasClusterClassSchema" class="centered">
+    <div
+      v-if="!hasClusterClassSchema"
+      class="centered"
+    >
       <h1 class="mb-20">
         {{ t("capi.installation.title") }}
       </h1>
@@ -68,8 +54,11 @@ export default {
       />
       <Banner color="warning">
         <div>
-          <t v-if="embeddedCapiEnabled" k="capi.installation.disableFeatureFlag" raw /><br />
-          <t v-if="!hasClusterClassSchema" k="capi.installation.turtlesNeeded" raw />
+          <t
+            v-if="!hasClusterClassSchema"
+            k="capi.installation.turtlesNeeded"
+            raw
+          />
         </div>
       </Banner>
     </div>
