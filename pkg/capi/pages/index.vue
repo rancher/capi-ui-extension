@@ -78,5 +78,9 @@ export default {
   .description {
     line-height: 20px;
   }
+
+  .banner {
+    width: auto;
+  }
 }
 </style>
