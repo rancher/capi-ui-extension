@@ -15,8 +15,8 @@ export const CAPI = {
 };
 
 export const CP_VERSIONS = {
-  'kubekey-k3s':        ['k3s1', 'k3s2'],
-  'rke2-control-plane':          ['rke2r1', 'rke2r2']
+  KThreesControlPlaneTemplate:        ['k3s1', 'k3s2'],
+  RKE2ControlPlaneTemplate:          ['rke2r1', 'rke2r2']
 };
 
 export const CREDENTIALS_UPDATE_REQUIRED = ['aks'];

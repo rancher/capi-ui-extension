@@ -201,33 +201,25 @@ const stringFormatValidators = function (
 
 export const isDefined = (val: any) => val || val === false || !isEmpty(val);
 
-// export const versionTest = function(t: Translation, type: string): RegExp {
-//   let ending = '';
-
-//   if (CP_VERSIONS[type as keyof typeof CP_VERSIONS]) {
-//     ending = `${ CP_VERSIONS[type as keyof typeof CP_VERSIONS].join('|') }`;
-//   }
-
-//   const out = new RegExp(`^v\d+\d+\+(${ ending }$)`);
-// console.log('*** new regex', out)
-// console.log('*** type', type)
-
-//   return out
-// };
-
 export const versionValidator = function (
   t: Translation,
   type: string
 ): Validator {
   return (version: string) => {
-    const validBuilds = CP_VERSIONS[type as keyof typeof CP_VERSIONS];
-
     try {
-      const verObj = semver.parse(version);
-      if(validBuilds){
-        return validBuilds.includes(verObj?.build?.[0]) ? '' : t("validation.version")
+      if (!version || !version.startsWith("v")) {
+        return t("validation.version");
       }
-      
+
+      const validBuilds = CP_VERSIONS[type as keyof typeof CP_VERSIONS];
+
+      const parsedVersion = semver.parse(version);
+      if (validBuilds) {
+        return validBuilds.includes(parsedVersion?.build?.[0])
+          ? ""
+          : t("validation.version");
+      }
+      return parsedVersion ? "" : t("validation.version");
     } catch {
       return t("validation.version");
     }

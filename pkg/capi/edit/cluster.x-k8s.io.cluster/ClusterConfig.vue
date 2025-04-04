@@ -195,7 +195,7 @@ export default {
       return this.clusterClassObj?.spec?.workers?.machinePools?.map( (w) => w.class);
     },
     controlPlane() {
-      return this.clusterClassObj?.spec?.controlPlane?.ref?.name;
+      return this.clusterClassObj?.spec?.controlPlane?.ref?.kind;
     },
     clusterClassOptions() {
       const out = [];
