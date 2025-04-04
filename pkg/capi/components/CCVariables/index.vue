@@ -11,11 +11,13 @@ export default {
   emits:      ['validation-passed', 'update:value'],
 
   props: {
+    // cluster.x-k8s.io.clusterclass
     clusterClass: {
       type:    Object,
       default: () => {}
     },
 
+    // cluster.x-k8s.io.cluster   .spec.variables
     value: {
       type:    Array,
       default: () => {
@@ -23,17 +25,18 @@ export default {
       }
     },
 
-    // if this and machinePoolClass are empty, ALL variables will be shown
-    // only 1 of machinePoolClass and machineDeploymentClass should be set
-    machineDeploymentClass: {
+    // pool or deployment
+    machineClassType: {
       type:    String,
       default: null
     },
 
-    machinePoolClass: {
+    // if this and class type are provided, only variables associated with a jsonPatch that lists matchResources.<machineClassType>.<this class> will be shown
+    machineClassName: {
       type:    String,
       default: null
     }
+
   },
 
   data() {
@@ -63,7 +66,8 @@ export default {
     variableDefinitions() {
       const allVariableDefinitions = this.clusterClass?.spec?.variables || [];
 
-      if (!this.machineDeploymentClass && !this.machinePoolClass) {
+      // TODO nb what if these are already set per pool? Do they need to be set globally? Should they not be set globally?
+      if (!this.machineClassType && !this.machineClassName) {
         return allVariableDefinitions;
       }
       const variableNames = this.machineScopedJsonPatches.reduce((names, patch) => {
@@ -109,12 +113,13 @@ export default {
     },
 
     machineScopedJsonPatches() {
-      if (!this.machineDeploymentClass && !this.machinePoolClass) {
+      if (!this.machineClassName && !this.machineClassType) {
         return [];
       }
       const out = [];
-      const matchName = this.machineDeploymentClass || this.machinePoolClass;
-      const matchKey = this.machineDeploymentClass ? 'machineDeploymentClass' : 'machinePoolClass';
+      const matchName = this.machineClassName;
+
+      const matchKey = this.machineClassType;
 
       const patches = this.clusterClass?.spec?.patches || [];
 

@@ -394,7 +394,7 @@ export default {
         <div class="row mb-20">
           <div
             v-if="!!machineDeploymentOptions"
-            class="col span-3"
+            class="col span-12"
           >
             <WorkerItem
               :value="machineDeployments"
@@ -403,12 +403,15 @@ export default {
               :default-add-value="defaultWorkerAddValue"
               :class-options="machineDeploymentOptions"
               :initial-empty-row="true"
+              :cluster-class="clusterClassObj"
               @update:value="$emit('update:value', {k: 'spec.topology.workers.machineDeployments', val: $event})"
             />
           </div>
+        </div>
+        <div class="row mb-20">
           <div
             v-if="!!machinePoolOptions"
-            class="col span-3"
+            class="col span-12"
           >
             <WorkerItem
               :value="machinePools"
@@ -417,6 +420,7 @@ export default {
               :default-add-value="defaultWorkerAddValue"
               :class-options="machinePoolOptions"
               :initial-empty-row="true"
+              :cluster-class="clusterClassObj"
               @update:value="$emit('update:value', {k: 'spec.topology.workers.machinePools', val: $event})"
             />
           </div>
