@@ -8,7 +8,7 @@ import CruResource from '@shell/components/CruResource.vue';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import ClusterClassVariables from '../../components/CCVariables/index.vue';
 import {
-  versionTest, versionValidator, hostValidator, portValidator, cidrValidator, cidrArrayValid
+  versionValidator, hostValidator, portValidator, cidrValidator, cidrArrayValid
 } from '../../util/validators';
 
 import CardGrid from '../../components/CardGrid.vue';
@@ -163,10 +163,11 @@ export default {
     },
     stepConfigurationRequires() {
       const nameValid = !!this.value.metadata.name;
-      const versionTestString = versionTest(this.$store.getters['i18n/t'], this.controlPlane);
-      const versionValid = this.value?.spec?.topology?.version && !!(this.value?.spec?.topology?.version.match(versionTestString));
-      const controlPlaneEndpointPortValid = !portValidator(this.$store.getters['i18n/t'])(this.value?.spec?.controlPlaneEndpoint?.port);
-      const controlPlaneEndpointHostValid = !hostValidator(this.$store.getters['i18n/t'])(this.value?.spec?.controlPlaneEndpoint?.host);
+      const t = this.$store.getters['i18n/t'];
+
+      const versionValid = this.value?.spec?.topology?.version && !versionValidator(t, this.controlPlane)(this.value?.spec?.topology?.version);
+      const controlPlaneEndpointPortValid = !portValidator(t)(this.value?.spec?.controlPlaneEndpoint?.port);
+      const controlPlaneEndpointHostValid = !hostValidator(t)(this.value?.spec?.controlPlaneEndpoint?.host);
       const machineDeploymentsValid = this.value?.spec?.topology?.workers?.machineDeployments?.length > 0 && !!this.value?.spec?.topology?.workers?.machineDeployments[0]?.name && !!this.value?.spec?.topology?.workers?.machineDeployments[0]?.class;
       const machinePoolsValid = this.value?.spec?.topology?.workers?.machinePools?.length > 0 && !!this.value?.spec?.topology?.workers?.machinePools[0]?.name && !!this.value?.spec?.topology?.workers?.machinePools[0]?.class;
       const networkPodsValid = !this.value?.spec?.clusterNetwork?.pods?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.pods.cidrBlocks);
