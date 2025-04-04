@@ -5,6 +5,7 @@ import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 import NameNsDescription from '@shell/components/form/NameNsDescription.vue';
 import FormValidation from '@shell/mixins/form-validation';
 import CruResource from '@shell/components/CruResource.vue';
+import LabeledSelect from '@shell/components/form/LabeledSelect';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import Labels from '@shell/components/form/Labels.vue';
 import { _EDIT } from '@shell/config/query-params';
@@ -41,7 +42,8 @@ export default {
     Labels,
     ControlPlaneSection,
     Checkbox,
-    Loading
+    Loading,
+    LabeledSelect
   },
   mixins: [CreateEditView, FormValidation],
   emits:  ['update:value'],
@@ -64,6 +66,7 @@ export default {
       required: true
     }
   },
+
   beforeMount() {
     this.initSpecs().then(() => {
     }).catch((err) => {
@@ -71,10 +74,18 @@ export default {
       this.loading = false;
     });
 
+    this.$store.dispatch('management/request', { url: '/v1-k3s-release/releases' }).then((res) => {
+      this.k3sVersions = res;
+    });
+
+    this.$store.dispatch('management/request', { url: '/v1-rke2-release/releases' }).then((res) => {
+      this.rke2Versions = res;
+    });
     this.$nextTick(() => {
       this.loading = false;
     });
   },
+
   data() {
     const store = this.$store;
     const t = store.getters['i18n/t'];
@@ -133,6 +144,8 @@ export default {
       autoImport:              !!this.value?.metadata?.labels && !!this.value?.metadata?.labels[LABELS.AUTO_IMPORT],
       classNamespaceSupported: false,
       allNamespaces:           [],
+      k3sVersions:     [],
+      rke2Versions:    []
     };
   },
 
@@ -246,18 +259,22 @@ export default {
     machineDeployments() {
       return this.value.spec.topology.workers.machineDeployments;
     },
+
     machinePools() {
       return this.value.spec.topology.workers.machinePools;
     },
+
     machineDeploymentOptions() {
       return this.clusterClassObj?.spec?.workers?.machineDeployments?.map((w) => w.class);
     },
+
     machinePoolOptions() {
       return this.clusterClassObj?.spec?.workers?.machinePools?.map((w) => w.class);
     },
     clusterClassControlPlane() {
       return this.clusterClassObj?.spec?.controlPlane?.ref?.kind;
     },
+
     clusterClassOptions() {
       const out = [];
       const currentObject = this.clusterClassObj;
@@ -283,10 +300,34 @@ export default {
     // TODO nb not this
     canCreateGitRepos() {
       return true;
+    },
+
+    isk3s() {
+      return this.controlPlane === 'KThreesControlPlaneTemplate';
+    },
+
+    isRke2() {
+      return this.controlPlane === 'RKE2ControlPlaneTemplate';
+    },
+
+    // if k3s or rke2 use release channel endpoint to get a list of version choices
+    // if this property is [] show a plain text input for cp version
+    versionOptions() {
+      if (this.isK3s) {
+        return (this.k3sVersions?.data || []).map((d) => d.version).reverse();
+      }
+
+      if (this.isRke2) {
+        return (this.rke2Versions?.data || []).map((d) => d.version).reverse();
+      }
+
+      return [];
     }
   },
+
   methods: {
     set,
+
     setClassInfo(name) {
       this.clusterClassObj = this.clusterClasses.find((x) => {
         const split = unescape(name).split('/');
@@ -300,6 +341,7 @@ export default {
         this.errors.push(this.t('error.clusterClassNotFound'));
       }
     },
+
     setClass() {
       const clusterClassName = this.clusterClassObj?.metadata?.name;
 
@@ -313,6 +355,7 @@ export default {
         this.value.spec.topology.classNamespace = clusterClassNs;
       }
     },
+
     async saveOverride() {
       if (this.errors) {
         clear(this.errors);
@@ -356,23 +399,27 @@ export default {
 
       this.allNamespaces = namespaces || [];
     },
+
     cancelCredential() {
       if (this.$refs.cruresource) {
         this.$refs.cruresource.emitOrRoute();
       }
     },
+
     cancel() {
       this.$router.push({
         name:   'c-cluster-manager-capi',
         params: {},
       });
     },
+
     done() {
       this.$router.push({
         name:   'c-cluster-manager-capi',
         params: {},
       });
     },
+
     clickedType(obj) {
       this.clusterClassObj = this.clusterClasses.find((x) => x.id === obj.id) || null;
       this.setClass();
@@ -457,17 +504,25 @@ export default {
           <h2>
             <t k="capi.cluster.version.title" />
           </h2>
-          <div class="mr-10">
-            <LabeledInput
-              v-model:value="value.spec.topology.version"
-              :mode="mode"
-              label-key="cluster.kubernetesVersion.label"
-              required
-              :rules="fvGetAndReportPathRules('spec.topology.version')"
-              class="version"
-              @update:value="$emit('update:value', { k: 'spec.topology.version', val: $event })"
-            />
-          </div>
+          <LabeledSelect
+            v-if="versionOptions.length"
+            :mode="mode"
+            :value="value.spec.topology.version"
+            label-key="cluster.kubernetesVersion.label"
+            required
+            :rules="fvGetAndReportPathRules('spec.topology.version')"
+            :options="versionOptions"
+            @selecting="$emit('update:value', {k: 'spec.topology.version', val: $event})"
+          />
+          <LabeledInput
+            v-else
+            v-model:value="value.spec.topology.version"
+            :mode="mode"
+            label-key="cluster.kubernetesVersion.label"
+            required
+            :rules="fvGetAndReportPathRules('spec.topology.version')"
+            @update:value="$emit('update:value', { k: 'spec.topology.version', val: $event })"
+          />
         </div>
       </div>
       <div class="row span-12 row-config">
