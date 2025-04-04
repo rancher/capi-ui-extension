@@ -1,13 +1,13 @@
 <script>
-import debounce from 'lodash/debounce';
-
+import { LABELS } from '../../types/capi';
 import { randomStr } from '@shell/utils/string';
 import Variable from './Variable.vue';
+import GroupPanel from '@shell/components/GroupPanel';
 
 export default {
   name: 'ClusterClassVariables',
 
-  components: { Variable },
+  components: { Variable, GroupPanel },
   emits:      ['validation-passed', 'update:value'],
 
   props: {
@@ -42,10 +42,9 @@ export default {
   },
 
   watch: {
-    errorCount: {
-      handler: debounce(( neu) => {
-        this.$emit('validation-passed', !neu);
-      }, 5),
+    // TODO nb is lack of debounce all that bad
+    errorCount(neu) {
+      this.$emit('validation-passed', !neu);
     },
 
     variableDefinitions(neu, old) {
@@ -85,6 +84,28 @@ export default {
       }, []);
 
       return allVariableDefinitions.filter((v) => variableNames.includes(v.name));
+    },
+
+    // use variable metadata to add vars to groups
+    // TODO nb perhaps a less silly way of keeping ungrouped at the end
+    groupedVariableDefinitions() {
+      const out = { zzzungrouped: [] };
+
+      this.variableDefinitions.forEach((spec) => {
+        const group = spec?.metadata?.labels?.[LABELS.GROUP];
+
+        if (group) {
+          if (!out[group]) {
+            out[group] = [spec];
+          } else {
+            out[group].push(spec);
+          }
+        } else {
+          out.zzzungrouped.push(spec);
+        }
+      });
+
+      return out;
     },
 
     machineScopedJsonPatches() {
@@ -204,35 +225,72 @@ export default {
 </script>
 
 <template>
-  <div class="variables">
-    <template v-if="variableDefinitions && variableDefinitions.length">
-      <template
-        v-for="(variableDef, i) in variableDefinitions"
-        :key="`${variableDef.name}`"
+  <template v-if="groupedVariableDefinitions">
+    <div
+      v-for="group in Object.keys(groupedVariableDefinitions).sort()"
+      :key="group"
+      class="mb-40"
+    >
+      <GroupPanel
+        v-if="group !== 'zzzungrouped'"
+        :label="group"
       >
-        <Variable
-          :ref="`${variableDef.name}-input`"
-          :variable="variableDef"
-          :value="valueFor(variableDef)"
-          :validate-required="!machineDeploymentClass && !machinePoolClass"
-          @update:value="e=>updateVariables(e, variableDef)"
-          @validation-passed="updateErrors"
-        />
-        <div
-          v-if="newComponentType(variableDef, i)"
-          :key="`${i}-${rerenderKey}`"
-          class="force-newline"
-        />
-      </template>
-    </template>
-  </div>
+        <div class="variables-group">
+          <template
+            v-for="(variableDef, i) in groupedVariableDefinitions[group]"
+
+            :key="`${variableDef.name}`"
+          >
+            <Variable
+              :ref="`${variableDef.name}-input`"
+              :variable="variableDef"
+              :value="valueFor(variableDef)"
+              :validate-required="!machineDeploymentClass && !machinePoolClass"
+              @update:value="e=>updateVariables(e, variableDef)"
+              @validation-passed="updateErrors"
+            />
+            <div
+              v-if="newComponentType(variableDef, i)"
+              :key="`${i}-${rerenderKey}`"
+              class="force-newline"
+            />
+          </template>
+        </div>
+      </GroupPanel>
+      <div
+        v-else
+        class="variables-group"
+      >
+        <template
+          v-for="(variableDef, i) in groupedVariableDefinitions.zzzungrouped"
+
+          :key="`${variableDef.name}`"
+        >
+          <Variable
+            :ref="`${variableDef.name}-input`"
+            :variable="variableDef"
+            :value="valueFor(variableDef)"
+            :validate-required="!machineDeploymentClass && !machinePoolClass"
+            @update:value="e=>updateVariables(e, variableDef)"
+            @validation-passed="updateErrors"
+          />
+          <div
+            v-if="newComponentType(variableDef, i)"
+            :key="`${i}-${rerenderKey}`"
+            class="force-newline"
+          />
+        </template>
+      </div>
+    </div>
+  </template>
 </template>
 
 <style lang="scss" scoped>
 $standard-input: 23.25%;
 $wider-input: 48.25%;
 
-.variables {
+.variables-group {
+  margin-top: 5px;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
