@@ -5,10 +5,11 @@ import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 import NameNsDescription from '@shell/components/form/NameNsDescription.vue';
 import FormValidation from '@shell/mixins/form-validation';
 import CruResource from '@shell/components/CruResource.vue';
+import LabeledSelect from '@shell/components/form/LabeledSelect';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import ClusterClassVariables from '../../components/CCVariables/index.vue';
 import {
-  versionTest, versionValidator, hostValidator, portValidator, cidrValidator, cidrArrayValid
+  versionValidator, hostValidator, portValidator, cidrValidator, cidrArrayValid
 } from '../../util/validators';
 
 import CardGrid from '../../components/CardGrid.vue';
@@ -43,7 +44,8 @@ export default {
     NetworkSection,
     ControlPlaneEndpointSection,
     ClusterClassVariables,
-    CardGrid
+    CardGrid,
+    LabeledSelect
   },
   mixins: [CreateEditView, FormValidation],
   emits:  ['update:value'],
@@ -66,12 +68,21 @@ export default {
       required: true
     }
   },
+
   beforeMount() {
     this.initSpecs();
+    this.$store.dispatch('management/request', { url: '/v1-k3s-release/releases' }).then((res) => {
+      this.k3sVersions = res;
+    });
+
+    this.$store.dispatch('management/request', { url: '/v1-rke2-release/releases' }).then((res) => {
+      this.rke2Versions = res;
+    });
     this.$nextTick(() => {
       this.loading = false;
     });
   },
+
   data() {
     const store = this.$store;
     const t = store.getters['i18n/t'];
@@ -126,7 +137,9 @@ export default {
       },
       variablesReady:  true,
       clusterClassObj: null,
-      loading:         true
+      loading:         true,
+      k3sVersions:     [],
+      rke2Versions:    []
     };
   },
 
@@ -161,12 +174,14 @@ export default {
         cidr:    cidrValidator(this.$store.getters['i18n/t'])
       };
     },
+
     stepConfigurationRequires() {
       const nameValid = !!this.value.metadata.name;
-      const versionTestString = versionTest(this.$store.getters['i18n/t'], this.controlPlane);
-      const versionValid = this.value?.spec?.topology?.version && !!(this.value?.spec?.topology?.version.match(versionTestString));
-      const controlPlaneEndpointPortValid = !portValidator(this.$store.getters['i18n/t'])(this.value?.spec?.controlPlaneEndpoint?.port);
-      const controlPlaneEndpointHostValid = !hostValidator(this.$store.getters['i18n/t'])(this.value?.spec?.controlPlaneEndpoint?.host);
+      const t = this.$store.getters['i18n/t'];
+
+      const versionValid = this.value?.spec?.topology?.version && !versionValidator(t, this.controlPlane)(this.value?.spec?.topology?.version);
+      const controlPlaneEndpointPortValid = !portValidator(t)(this.value?.spec?.controlPlaneEndpoint?.port);
+      const controlPlaneEndpointHostValid = !hostValidator(t)(this.value?.spec?.controlPlaneEndpoint?.host);
       const machineDeploymentsValid = this.value?.spec?.topology?.workers?.machineDeployments?.length > 0 && !!this.value?.spec?.topology?.workers?.machineDeployments[0]?.name && !!this.value?.spec?.topology?.workers?.machineDeployments[0]?.class;
       const machinePoolsValid = this.value?.spec?.topology?.workers?.machinePools?.length > 0 && !!this.value?.spec?.topology?.workers?.machinePools[0]?.name && !!this.value?.spec?.topology?.workers?.machinePools[0]?.class;
       const networkPodsValid = !this.value?.spec?.clusterNetwork?.pods?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.pods.cidrBlocks);
@@ -175,27 +190,35 @@ export default {
 
       return nameValid && versionValid && controlPlaneEndpointHostValid && controlPlaneEndpointPortValid && networkValid && (machineDeploymentsValid || machinePoolsValid);
     },
+
     clusterNetwork() {
       return this.value?.spec?.clusterNetwork;
     },
+
     controlPlaneEndpoint() {
       return this.value?.spec?.controlPlaneEndpoint;
     },
+
     machineDeployments() {
       return this.value.spec.topology.workers.machineDeployments;
     },
+
     machinePools() {
       return this.value.spec.topology.workers.machinePools;
     },
+
     machineDeploymentOptions() {
       return this.clusterClassObj?.spec?.workers?.machineDeployments?.map( (w) => w.class);
     },
+
     machinePoolOptions() {
       return this.clusterClassObj?.spec?.workers?.machinePools?.map( (w) => w.class);
     },
+
     controlPlane() {
-      return this.clusterClassObj?.spec?.controlPlane?.ref?.name;
+      return this.clusterClassObj?.spec?.controlPlane?.ref?.kind;
     },
+
     clusterClassOptions() {
       const out = [];
       const currentObject = this.clusterClassObj;
@@ -217,9 +240,33 @@ export default {
         out.push(subtype);
       }
     },
+
+    isk3s() {
+      return this.controlPlane === 'KThreesControlPlaneTemplate';
+    },
+
+    isRke2() {
+      return this.controlPlane === 'RKE2ControlPlaneTemplate';
+    },
+
+    // if k3s or rke2 use release channel endpoint to get a list of version choices
+    // if this property is [] show a plain text input for cp version
+    versionOptions() {
+      if (this.isK3s) {
+        return (this.k3sVersions?.data || []).map((d) => d.version).reverse();
+      }
+
+      if (this.isRke2) {
+        return (this.rke2Versions?.data || []).map((d) => d.version).reverse();
+      }
+
+      return [];
+    }
   },
+
   methods: {
     set,
+
     setClassInfo(name) {
       this.clusterClassObj = this.clusterClasses.find((x) => {
         const split = unescape(name).split('/');
@@ -233,16 +280,19 @@ export default {
         this.errors.push(this.t('error.clusterClassNotFound'));
       }
     },
+
     setClass() {
       const clusterClassName = this.clusterClassObj?.metadata?.name;
 
       this.$emit('update:value', { k: 'spec.topology.class', val: clusterClassName });
     },
+
     setNamespace() {
       const clusterClassNs = this.clusterClassObj?.metadata?.namespace;
 
       this.$emit('update:value', { k: 'metadata.namespace', val: clusterClassNs });
     },
+
     async saveOverride() {
       if ( this.errors ) {
         clear(this.errors);
@@ -256,7 +306,7 @@ export default {
       }
     },
 
-    initSpecs() {
+    async initSpecs() {
       const val = this.value;
 
       if ( !val ) {
@@ -279,23 +329,27 @@ export default {
         this.setClassInfo(this.preselectedClass);
       }
     },
+
     cancelCredential() {
       if ( this.$refs.cruresource ) {
         this.$refs.cruresource.emitOrRoute();
       }
     },
+
     cancel() {
       this.$router.push({
         name:   'c-cluster-manager-capi',
         params: {},
       });
     },
+
     done() {
       this.$router.push({
         name:   'c-cluster-manager-capi',
         params: {},
       });
     },
+
     clickedType(obj) {
       this.clusterClassObj = this.clusterClasses.find((x) => x.id === obj.id) || null;
       this.setClass();
@@ -348,7 +402,18 @@ export default {
           <h2>
             <t k="capi.cluster.version.title" />
           </h2>
+          <LabeledSelect
+            v-if="versionOptions.length"
+            :mode="mode"
+            :value="value.spec.topology.version"
+            label-key="cluster.kubernetesVersion.label"
+            required
+            :rules="fvGetAndReportPathRules('spec.topology.version')"
+            :options="versionOptions"
+            @selecting="$emit('update:value', {k: 'spec.topology.version', val: $event})"
+          />
           <LabeledInput
+            v-else
             :value="value.spec.topology.version"
             :mode="mode"
             label-key="cluster.kubernetesVersion.label"
@@ -393,7 +458,7 @@ export default {
         <div class="row mb-20">
           <div
             v-if="!!machineDeploymentOptions"
-            class="col span-3"
+            class="col span-12"
           >
             <WorkerItem
               :value="machineDeployments"
@@ -402,12 +467,15 @@ export default {
               :default-add-value="defaultWorkerAddValue"
               :class-options="machineDeploymentOptions"
               :initial-empty-row="true"
+              :cluster-class="clusterClassObj"
               @update:value="$emit('update:value', {k: 'spec.topology.workers.machineDeployments', val: $event})"
             />
           </div>
+        </div>
+        <div class="row mb-20">
           <div
             v-if="!!machinePoolOptions"
-            class="col span-3"
+            class="col span-12"
           >
             <WorkerItem
               :value="machinePools"
@@ -416,6 +484,7 @@ export default {
               :default-add-value="defaultWorkerAddValue"
               :class-options="machinePoolOptions"
               :initial-empty-row="true"
+              :cluster-class="clusterClassObj"
               @update:value="$emit('update:value', {k: 'spec.topology.workers.machinePools', val: $event})"
             />
           </div>

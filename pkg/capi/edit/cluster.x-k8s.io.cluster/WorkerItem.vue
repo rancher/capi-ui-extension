@@ -5,47 +5,60 @@ import { clone } from '@shell/utils/object';
 import { _EDIT, _VIEW } from '@shell/config/query-params';
 import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
+import CCVariables from '../../components/CCVariables/index.vue';
 
 export default {
-  components: { LabeledSelect, LabeledInput },
+  components: {
+    LabeledSelect, LabeledInput, CCVariables
+  },
   emits:      ['add', 'remove', 'update:value'],
   props:      {
     value: {
       type:     Array,
       default:  null,
     },
+
     mode: {
       type:    String,
       default: _EDIT,
     },
+
     title: {
       type:     String,
       required: true
     },
+
     classOptions: {
       type:     Array,
       default:  null,
     },
+
     addAllowed: {
       type:    Boolean,
       default: true,
     },
-    removeAllowed: {
-      type:    Boolean,
-      default: true,
-    },
+
     defaultAddValue: {
       type:    [String, Number, Object, Array],
       default: ''
     },
+
     loading: {
       type:    Boolean,
       default: false
     },
+
     disabled: {
       type:    Boolean,
       default: false,
     },
+
+    clusterClass: {
+      type:    Object,
+      default: () => {
+        return {};
+      }
+    }
   },
   data() {
     const input = (this.value || [])?.slice();
@@ -63,17 +76,6 @@ export default {
     return { rows, lastUpdateWasFromValue: false };
   },
 
-  computed: {
-    isView() {
-      return this.mode === _VIEW;
-    },
-    removeLabel() {
-      return this.$store.getters['i18n/t']('generic.remove');
-    },
-    addLabel() {
-      return this.$store.getters['i18n/t']('generic.add');
-    }
-  },
   watch:    {
     value: {
       deep: true,
@@ -94,9 +96,11 @@ export default {
       }
     }
   },
+
   created() {
     this.queueUpdate = debounce(this.update, 50);
   },
+
   methods: {
     add() {
       this.rows.push({ value: clone(this.defaultAddValue) });
@@ -138,7 +142,26 @@ export default {
     valUpdate(val, key) {
       key.value.name = val.data;
     }
-  }
+  },
+
+  computed: {
+    isView() {
+      return this.mode === _VIEW;
+    },
+
+    removeLabel() {
+      return this.$store.getters['i18n/t']('generic.remove');
+    },
+
+    addLabel() {
+      // return this.$store.getters['i18n/t']('generic.add');
+      return 'Add Worker';
+    },
+
+    machineClassType() {
+      return this.title.includes('Deployments') ? 'machineDeploymentClass' : 'machinePoolClass';
+    }
+  },
 };
 </script>
 <template>
@@ -159,68 +182,55 @@ export default {
         v-for="(row, idx) in rows"
         :key="idx"
         :data-testid="`array-list-box${ idx }`"
-        class="box"
+        class="box mb-40"
       >
-        <slot
-          name="columns"
-          :queue-update="queueUpdate"
-          :i="idx"
-          :rows="rows"
-          :row="row"
-          :mode="mode"
-          :is-view="isView"
+        <div
+          class="remove"
         >
-          <div class="value">
-            <slot
-              name="value"
-              :row="row"
+          <button
+            type="button"
+            :disabled="isView"
+            class="btn role-link"
+            :data-testid="`remove-item-${idx}`"
+            @click="remove(row, idx)"
+          >
+            {{ removeLabel }}
+          </button>
+        </div>
+        <div class="value row mt-40">
+          <div
+            class="col span-6"
+          >
+            <LabeledInput
+              ref="value"
+              v-model:value="row.value.name"
               :mode="mode"
-              :is-view="isView"
-              :queue-update="queueUpdate"
-            >
-              <div
-                class="col mt-20"
-              >
-                <LabeledInput
-                  ref="value"
-                  v-model:value="row.value.name"
-                  :mode="mode"
-                  :disabled="false"
-                  :label="t('capi.cluster.workers.name')"
-                />
-              </div>
-              <div class="col mt-20">
-                <LabeledSelect
-                  v-model:value="row.value.class"
-                  :mode="mode"
-                  :options="classOptions"
-                  label-key="capi.cluster.workers.class"
-                />
-              </div>
-            </slot>
-            <div
-              v-if="removeAllowed"
-              class="remove"
-            >
-              <slot
-                name="remove-button"
-                :remove="() => remove(row, idx)"
-                :i="idx"
-                :row="row"
-              >
-                <button
-                  type="button"
-                  :disabled="isView"
-                  class="btn role-link"
-                  :data-testid="`remove-item-${idx}`"
-                  @click="remove(row, idx)"
-                >
-                  {{ removeLabel }}
-                </button>
-              </slot>
-            </div>
+              :disabled="false"
+              :label="t('capi.cluster.workers.name')"
+            />
           </div>
-        </slot>
+          <div class="col span-6">
+            <LabeledSelect
+              v-model:value="row.value.class"
+              :mode="mode"
+              :options="classOptions"
+              label-key="capi.cluster.workers.class"
+            />
+          </div>
+        </div>
+
+        <div
+          v-if="row.value.class"
+          class="machine-variables"
+        >
+          <CCVariables
+            v-model:value="row.value.variables"
+            :cluster-class="clusterClass"
+            :mode="mode"
+            :machine-class-name="row.value.class"
+            :machine-class-type="machineClassType"
+          />
+        </div>
       </div>
     </template>
     <div
@@ -229,9 +239,7 @@ export default {
     >
       &mdash;
     </div>
-    <div v-else>
-      <slot name="empty" />
-    </div>
+
     <div
       v-if="addAllowed && !isView"
       class="footer"
@@ -258,3 +266,15 @@ export default {
     </div>
   </div>
 </template>
+
+<style lang='scss' scoped>
+.box {
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  padding: 0px 20px 20px 20px;
+
+  .remove {
+    float: right;
+  }
+}
+</style>

@@ -72,6 +72,7 @@ export default {
           :protip="false"
           :mode="mode"
           :title="t('capi.cluster.networking.pods')"
+          :value-placeholder="t('capi.cluster.networking.cidrplaceholder')"
           :rules="rules.pods"
         />
       </div>
@@ -81,6 +82,7 @@ export default {
           :protip="false"
           :mode="mode"
           :title="t('capi.cluster.networking.services')"
+          :value-placeholder="t('capi.cluster.networking.cidrplaceholder')"
           :rules="rules.services"
         />
       </div>

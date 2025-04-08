@@ -4,7 +4,12 @@ export const QUERY_PARAMS = { CLASS: 'class' };
 
 export const BLANK_CLUSTER = '_';
 
-export const LABELS = { AUTO_IMPORT: 'cluster-api.cattle.io/rancher-auto-import' };
+export const LABELS = {
+  AUTO_IMPORT: 'cluster-api.cattle.io/rancher-auto-import',
+
+  // clusterclass variable labels
+  GROUP: 'turtles-capi.cattle.io/group'
+};
 
 export const RANCHER_TURTLES_SYSTEM_NAMESPACE = 'capi-system';
 export const RANCHER_TURTLES_SYSTEM_NAME = 'capi-env-variables';
@@ -15,8 +20,8 @@ export const CAPI = {
 };
 
 export const CP_VERSIONS = {
-  'kubekey-k3s': ['k3s1', 'k3s2'],
-  rke2:          ['rke2r1', 'rke2r2']
+  KThreesControlPlaneTemplate:        ['k3s1', 'k3s2'],
+  RKE2ControlPlaneTemplate:          ['rke2r1', 'rke2r2']
 };
 
 export const CREDENTIALS_UPDATE_REQUIRED = ['aks'];

@@ -52,6 +52,7 @@ capi:
       serviceDomain: Service Domain
       pods: Pod CIDR Blocks
       services: Service VIP CIDR Blocks
+      cidrplaceholder: e.g. 192.168.0.0/16
     controlPlaneEndpoint:
       title: Control Plane Endpoint
       host: Host
