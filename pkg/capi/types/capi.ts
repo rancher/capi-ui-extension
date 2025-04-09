@@ -24,20 +24,20 @@ export const CREDENTIALS_NOT_REQUIRED = ['docker'];
 
 export const PROVIDER_TYPES = [
   {
-    id: 'aws', disabled: false, credential: 'aws'
+    id: 'aws', disabled: false, credential: 'aws', credentialRequired: true
   },
   {
-    id: 'azure', disabled: false, credential: 'azure'
+    id: 'azure', disabled: false, credential: 'azure', credentialRequired: false
   },
   {
-    id: 'digitalocean', disabled: false, credential: 'digitalocean'
+    id: 'digitalocean', disabled: false, credential: 'digitalocean', credentialRequired: true
   },
   { id: 'docker', disabled: false },
   {
-    id: 'gcp', disabled: false, credential: 'gcp'
+    id: 'gcp', disabled: false, credential: 'gcp', credentialRequired: true
   },
   {
-    id: 'vsphere', disabled: false, credential: 'vmwarevsphere'
+    id: 'vsphere', disabled: false, credential: 'vmwarevsphere', credentialRequired: true
   },
   { id: 'custom', disabled: false },
 ];

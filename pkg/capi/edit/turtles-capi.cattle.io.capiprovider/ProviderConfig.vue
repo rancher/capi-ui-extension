@@ -107,7 +107,8 @@ export default {
       ],
       allNamespaces:         [],
       credentialComponent:     providerDetails?.credential,
-      showCredential:      false,
+      useCredential:       !!providerDetails?.credentialRequired,
+      credentialRequired:  providerDetails?.credentialRequired
     };
   },
 
@@ -153,7 +154,11 @@ export default {
     },
 
     waitingForCredential() {
-      return this.credentialComponent && !this.value.spec.credentials.rancherCloudCredentialNamespaceName;
+      return this.useCredential && this.credentialComponent && !this.value.spec.credentials.rancherCloudCredentialNamespaceName;
+    },
+
+    providerDisplayName() {
+      return this.t(`capi.provider.providers.${ this.provider }`) || this.provider;
     }
   },
 
@@ -223,7 +228,7 @@ export default {
       if ( this.errors ) {
         clear(this.errors);
       }
-      if ( !this.credentialComponent && !this.value.spec?.credentials?.rancherCloudCredentialNamespaceName ) {
+      if ( !this.useCredential && !this.value.spec?.credentials?.rancherCloudCredentialNamespaceName ) {
         this.value.spec.credentials = null;
       }
       if (this.value?.spec?.version === '') {
@@ -241,10 +246,6 @@ export default {
       if ( this.$refs.providercruresource ) {
         this.$refs.providercruresource.emitOrRoute();
       }
-    },
-
-    toggleCredentialVisibility() {
-      this.showCredential = !this.showCredential;
     }
   }
 };
@@ -346,28 +347,9 @@ export default {
     >
       <t k="capi.provider.secret.title" />
     </h2>
-    <div v-if="credentialComponent">
-      <ToggleSwitch
-        v-model:value="useCredentials"
-        name="credential-toggle"
-        :on-label="t('capi.provider.cloudCredential.toggle', {provider})"
-      />
-      <div v-if="useCredentials">
-        <h3 class="mb-20">
-          <t k="capi.provider.cloudCredential.title" />
-        </h3>
-        <SelectCredential
-          v-model:value="value.spec.credentials.rancherCloudCredentialNamespaceName"
-          :mode="mode"
-          :provider="credentialComponent"
-          :cancel="cancelCredential"
-          :showing-form="showForm"
-          class="mb-40"
-          @update:value="$emit('update:value', {k: 'spec.credentials.rancherCloudCredentialNamespaceName', val: $event})"
-        />
-      </div>
-    </div>
-    <div v-if="!waitingForCredential">
+
+    <!-- <div v-if="!waitingForCredential"> -->
+    <div>
       <Banner
         v-if="shouldShowBanner"
         color="info"
@@ -418,6 +400,36 @@ export default {
         />
       </div>
     </div>
+    <div
+      v-if="credentialComponent"
+      class="credential-container"
+    >
+      <div
+        v-if="!credentialRequired"
+        class="row mt-20"
+      >
+        <ToggleSwitch
+          v-model:value="useCredential"
+          name="credential-toggle"
+          :on-label="t('capi.provider.cloudCredential.toggle', {provider: providerDisplayName})"
+        />
+      </div>
+
+      <template v-if="useCredential">
+        <h3 class="mt-20 mb-20">
+          <t k="capi.provider.cloudCredential.title" />
+        </h3>
+        <SelectCredential
+          v-model:value="value.spec.credentials.rancherCloudCredentialNamespaceName"
+          :mode="mode"
+          :provider="credentialComponent"
+          :cancel="cancelCredential"
+          :showing-form="showForm"
+          class="credential"
+          @update:value="$emit('update:value', {k: 'spec.credentials.rancherCloudCredentialNamespaceName', val: $event})"
+        />
+      </template>
+    </div>
     <template
       v-if="waitingForCredential"
       #form-footer
@@ -426,3 +438,11 @@ export default {
     </template>
   </CruResource>
 </template>
+
+<style lang="scss" scoped>
+.credential-container {
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+}
+</style>
