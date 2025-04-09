@@ -129,7 +129,7 @@ capi:
       placeholder: https://github.com/example/releases/latest/client.yaml
     cloudCredential:
       title: Cloud Credential
-      toggle: Configure {provider} access globally using a Rancher Cloud Credential
+      toggle: Use a Rancher cloud credential to configure access for all {provider} CAPI clusters
     features:
       title: Features
       clusterResourceSet: Enable cluster resource set
@@ -144,9 +144,20 @@ capi:
       reuse: Use core provider secret
       data: Data
       label: Secret Name
+<<<<<<< HEAD
 cluster:
   provider:
     kubeadm: Kubeadm
+=======
+    providers:
+      digitalocean: Digital Ocean
+      aws: Amazon
+      azure: Azure
+      docker: Docker
+      gcp: Google Cloud Platform
+      vsphere: vSphere
+
+>>>>>>> a3ded77b0 (make credentials mandatory for all but azure)
 nav:
   group:
     CAPITurtles: CAPI
