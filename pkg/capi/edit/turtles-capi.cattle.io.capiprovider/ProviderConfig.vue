@@ -16,6 +16,8 @@ import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
 import Banner from '@components/Banner/Banner.vue';
 import { _EDIT, _CREATE } from '@shell/config/query-params';
+import { ToggleSwitch } from '@components/Form/ToggleSwitch';
+
 import { allHash } from '@shell/utils/promise';
 import { PROVIDER_TYPES, RANCHER_TURTLES_SYSTEM_NAMESPACE, RANCHER_TURTLES_SYSTEM_NAME } from '../../types/capi';
 import { providerNameValidator, providerVersionValidator, urlValidator } from '../../util/validators';
@@ -43,7 +45,8 @@ const customProviderSpec = {
 const CATEGORIES = ['infrastructure', 'bootstrap', 'controlPlane', 'addon', 'ipam', 'runtimeextension', 'core'];
 
 export default {
-  name:       'ProviderConfig',
+  name: 'ProviderConfig',
+
   components: {
     CruResource,
     Loading,
@@ -53,19 +56,25 @@ export default {
     KeyValue,
     LabeledInput,
     LabeledSelect,
-    Banner
+    Banner,
+    ToggleSwitch
   },
+
   mixins: [CreateEditView, FormValidation],
-  emits:  ['update:value'],
+
+  emits: ['update:value'],
+
   props:      {
     mode: {
       type:     String,
       required: true,
     },
+
     value: {
       type:     Object,
       required: true,
     },
+
     provider: {
       type:     String,
       required: true,
@@ -75,6 +84,7 @@ export default {
       default: 'infrastructure',
     }
   },
+
   beforeMount() {
     this.getDependencies().then((hash) => {
       this.allNamespaces = hash.namespaces || [];
@@ -87,6 +97,7 @@ export default {
       this.loading = false;
     });
   },
+
   data() {
     const name = this.provider;
     const providerDetails = PROVIDER_TYPES.find((p) => p.name === name) || { disabled: false, id: '0' };
@@ -101,11 +112,13 @@ export default {
       ],
       allNamespaces:         [],
       credentialComponent:     providerDetails?.credential,
-
+      showCredential:      false,
     };
   },
+
   computed: {
     ...mapGetters(['namespaces']),
+
     fvExtraRules() {
       return {
         name:    providerNameValidator(this.$store.getters['i18n/t']),
@@ -113,11 +126,13 @@ export default {
         url:     urlValidator(this.$store.getters['i18n/t'])
       };
     },
+
     typeOptions() {
       return CATEGORIES.map((type) => {
         return { label: this.t(`capi.provider.type.${ type }.label`), value: type };
       });
     },
+
     showForm() {
       return !!this.value?.spec?.credentials?.rancherCloudCredentialNamespaceName || !this.credentialComponent;
     },
@@ -131,15 +146,19 @@ export default {
     hasFeatures() {
       return !!this.value?.spec?.features;
     },
+
     hasVariables() {
       return !!this.value?.spec?.variables;
     },
+
     isCustom() {
       return this.provider === 'custom';
     },
+
     shouldShowBanner() {
       return this.isEdit && (this.hasFeatures || this.hasVariables);
     },
+
     waitingForCredential() {
       return this.credentialComponent && !this.value.spec.credentials?.rancherCloudCredentialNamespaceName;
     },
@@ -147,6 +166,7 @@ export default {
       return this.value.spec?.credentials?.rancherCloudCredentialNamespaceName || '';
     }
   },
+
   methods:  {
     initSpecs() {
       if ( !this.value.spec ) {
@@ -164,6 +184,7 @@ export default {
         set(this.value.spec.configSecret, 'name', this.generateName(this.provider)); // Defines the name of the secret that will be created or adjusted based on the content of the spec.features and spec.variables.
       }
     },
+
     getSpecFromCoreSecret() {
       const coreProviderSecretData = this.coreProviderSecret?.data;
 
@@ -191,9 +212,11 @@ export default {
         variables: clone(defaultVariables)
       };
     },
+
     generateName(name) {
       return name ? `${ name }-credentials-${ randomStr(5).toLowerCase() }` : undefined;
     },
+
     async getDependencies() {
       const inStore = this.$store.getters['currentStore'](NAMESPACE);
       const { $store } = this;
@@ -224,10 +247,15 @@ export default {
         btnCb(false);
       }
     },
+
     cancelCredential() {
       if ( this.$refs.providercruresource ) {
         this.$refs.providercruresource.emitOrRoute();
       }
+    },
+
+    toggleCredentialVisibility() {
+      this.showCredential = !this.showCredential;
     }
   }
 };
@@ -324,10 +352,6 @@ export default {
         </div>
       </div>
     </div>
-    <div
-      v-if="credentialComponent"
-      class="mb-40"
-    />
     <h2
       v-if="hasFeatures || hasVariables"
       class="mb-20"
@@ -335,18 +359,25 @@ export default {
       <t k="capi.provider.secret.title" />
     </h2>
     <div v-if="credentialComponent">
-      <h3 class="mb-20">
-        <t k="capi.provider.cloudCredential.title" />
-      </h3>
-      <SelectCredential
-        v-model:value="rancherCloudCredentialNamespaceName"
-        :mode="mode"
-        :provider="credentialComponent"
-        :cancel="cancelCredential"
-        :showing-form="showForm"
-        class="mb-40"
-        @update:value="$emit('update:value', {k: 'spec.credentials.rancherCloudCredentialNamespaceName', val: $event})"
+      <ToggleSwitch
+        v-model:value="useCredentials"
+        name="credential-toggle"
+        :on-label="t('capi.provider.cloudCredential.toggle', {provider})"
       />
+      <div v-if="useCredentials">
+        <h3 class="mb-20">
+          <t k="capi.provider.cloudCredential.title" />
+        </h3>
+        <SelectCredential
+          v-model:value="value.spec.credentials.rancherCloudCredentialNamespaceName"
+          :mode="mode"
+          :provider="credentialComponent"
+          :cancel="cancelCredential"
+          :showing-form="showForm"
+          class="mb-40"
+          @update:value="$emit('update:value', {k: 'spec.credentials.rancherCloudCredentialNamespaceName', val: $event})"
+        />
+      </div>
     </div>
     <div v-if="!waitingForCredential">
       <Banner

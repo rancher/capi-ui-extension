@@ -129,6 +129,7 @@ capi:
       placeholder: https://github.com/example/releases/latest/client.yaml
     cloudCredential:
       title: Cloud Credential
+      toggle: Configure {provider} access globally using a Rancher Cloud Credential
     features:
       title: Features
       clusterResourceSet: Enable cluster resource set
