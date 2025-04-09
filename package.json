@@ -10,12 +10,12 @@
     "@rancher/components": "^0.3.0-alpha.1",
     "@rancher/shell": "3.0.2-rc.2",
     "@types/lodash": "4.14.196",
-    "cache-loader": "^4.1.0",
+    "cache-loader": "4.1.0",
     "color": "4.2.3",
     "core-js": "3.21.1",
     "css-loader": "6.7.3",
     "ip": "2.0.1",
-    "node-polyfill-webpack-plugin": "^3.0.0",
+    "node-polyfill-webpack-plugin": "3.0.0",
     "semver": "7.5.4"
   },
   "resolutions": {
