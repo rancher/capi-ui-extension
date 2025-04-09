@@ -4,6 +4,26 @@ entries:
   - annotations:
       catalog.cattle.io/certified: rancher
       catalog.cattle.io/display-name: CAPI UI
+      catalog.cattle.io/namespace: cattle-ui-plugin-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/permits-os: linux, windows
+      catalog.cattle.io/rancher-version: '>= 2.10.0-0'
+      catalog.cattle.io/scope: management
+      catalog.cattle.io/ui-component: plugins
+      catalog.cattle.io/ui-extensions-version: '>= 3.0.0 < 4.0.0'
+    apiVersion: v2
+    appVersion: 0.8.3-rc1
+    created: "2025-04-09T19:47:58.938727413Z"
+    description: UI for CAPI cluster provisioning
+    digest: 91f7787fd0db58a0ac49222a4ba9f2b31e796d0c31789c7716ff9dcded5f4b22
+    name: capi
+    type: application
+    urls:
+    - assets/capi/capi-0.8.3-rc1.tgz
+    version: 0.8.3-rc1
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: CAPI UI
       catalog.cattle.io/experimental: "true"
       catalog.cattle.io/namespace: cattle-ui-plugin-system
       catalog.cattle.io/os: linux
@@ -313,4 +333,4 @@ entries:
     urls:
     - assets/capi/capi-0.1.0.tgz
     version: 0.1.0
-generated: "2025-02-06T23:29:53.326796538Z"
+generated: "2025-04-09T19:47:58.938374724Z"
