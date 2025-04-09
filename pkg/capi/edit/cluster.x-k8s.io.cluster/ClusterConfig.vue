@@ -132,8 +132,9 @@ export default {
       credential:              null,
       versionInfo:             {},
       defaultWorkerAddValue:   {
-        name:  '',
-        class: ''
+        name:      '',
+        class:     '',
+        variables: { overrides: [] }
       },
       variablesReady:  true,
       clusterClassObj: null,

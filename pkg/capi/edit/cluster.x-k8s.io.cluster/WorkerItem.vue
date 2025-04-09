@@ -224,7 +224,7 @@ export default {
           class="machine-variables"
         >
           <CCVariables
-            v-model:value="row.value.variables"
+            v-model:value="row.value.variables.overrides"
             :cluster-class="clusterClass"
             :mode="mode"
             :machine-class-name="row.value.class"
