@@ -43,7 +43,7 @@ export default {
 
   watch: {
     errorCount: {
-      handler: debounce(( neu) => {
+      handler: debounce(function(neu) {
         this.$emit('validation-passed', !neu);
       }, 5),
     },
