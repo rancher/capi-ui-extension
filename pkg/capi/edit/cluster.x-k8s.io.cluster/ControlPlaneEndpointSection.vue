@@ -36,7 +36,7 @@ export default {
   <div>
     <div class="row row-cp ">
       <div
-        class="col col-host span-5 mb-20"
+        class="col col-host span-4 mb-20"
       >
         <LabeledInput
           v-model:value="value.host"
@@ -47,7 +47,7 @@ export default {
         />
       </div>
       <div
-        class="col col-port span-4 mb-20"
+        class="col col-port span-2 mb-20"
       >
         <LabeledInput
           v-model:value="value.port"
@@ -63,29 +63,29 @@ export default {
 </template>
 <style lang="scss" scoped>
 
-@media screen and (min-width: 900px) {
-    // .row-cp {
-    //     flex-direction: column;
-    //     width: 100%
+@media screen and (min-width: 1000px) {
+    .row-cp {
+        //flex-direction: column;
+        width: 100%
+    }
+    // .col-port {
+    //     width: 30%
     // }
-    .col-port {
-        width: 30%
-    }
-    .col-host {
-        width: 70%
-    }
+    // .col-host {
+    //     width: 70%
+    // }
 }
 
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 1000px) {
     .row-cp {
         flex-direction: column;
         width: 100%
     }
     .col-port {
-        width: 75%
+        width: 50%
     }
     .col-host {
-        width: 75%
+        width: 100%
     }
 }
 </style>

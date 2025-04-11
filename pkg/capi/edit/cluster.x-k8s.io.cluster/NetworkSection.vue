@@ -42,7 +42,7 @@ export default {
   <div>
     <div class="row row-networking">
       <div
-        class="col col-networking span-5 mb-20"
+        class="col col-host span-4 mb-20"
       >
         <LabeledInput
           v-model:value="value.serviceDomain"
@@ -53,7 +53,7 @@ export default {
         />
       </div>
       <div
-        class="col col-port span-4 mb-20"
+        class="col col-port span-2 mb-20"
       >
         <LabeledInput
           v-model:value="value.apiServerPort"
@@ -91,32 +91,35 @@ export default {
 </template>
 <style lang="scss" scoped>
 
-@media screen and (min-width: 900px) {
-    // .row-cp {
-    //     flex-direction: column;
-    //     width: 100%
+@media screen and (min-width: 1000px) {
+    .row-networking {
+        //flex-direction: column;
+        width: 100%
+    }
+    // .col-port {
+    //     width: 10%
     // }
-    .col-port {
-        width: 10%
-    }
-    .col-host {
-        width: 70%
-    }
+    // .col-host {
+    //     width: 70%
+    // }
 }
 
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 1000px) {
     .row-networking {
         flex-direction: column;
         width: 100%
     }
     .col-port{
-        width: 75%
+        width: 50%
     }
-    .col-networking {
-        width: 75%
-    }
-    .col-networking-full {
+    .col-host {
         width: 100%
     }
+    .col-networking {
+        width: 100%
+    }
+    // .col-networking-full {
+    //     width: 100%
+    // }
   }
 </style>
