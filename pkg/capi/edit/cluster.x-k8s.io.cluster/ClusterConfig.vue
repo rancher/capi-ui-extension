@@ -396,7 +396,7 @@ export default {
         <div class="row mb-20">
           <div
             v-if="!!machineDeploymentOptions"
-            class="col span-4"
+            class="col span-4 col-config"
           >
             <WorkerItem
               :value="machineDeployments"
@@ -410,7 +410,7 @@ export default {
           </div>
           <div
             v-if="!!machinePoolOptions"
-            class="col span-4"
+            class="col span-4 col-config"
           >
             <WorkerItem
               :value="machinePools"
@@ -442,9 +442,6 @@ export default {
 .required {
   color: var(--error);
 }
-.test{
-    width: 75%
-}
 
 @media screen and (max-width: 1000px) {
     .row-config {
@@ -453,21 +450,6 @@ export default {
     }
     .col-config {
         width: 100%
-    }
-    .col-config-full {
-        width: 100%
-    }
-}
-@media screen and (min-width: 1000px) {
-    // .row-config {
-    //     flex-direction: column;
-    //     width: 100%
-    // }
-    // .col-config {
-    //     width: 100%
-    // }
-    .col-config-full {
-        width: 52%
     }
 }
 </style>

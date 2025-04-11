@@ -93,15 +93,8 @@ export default {
 
 @media screen and (min-width: 1000px) {
     .row-networking {
-        //flex-direction: column;
         width: 100%
     }
-    // .col-port {
-    //     width: 10%
-    // }
-    // .col-host {
-    //     width: 70%
-    // }
 }
 
 @media screen and (max-width: 1000px) {
@@ -118,8 +111,5 @@ export default {
     .col-networking {
         width: 100%
     }
-    // .col-networking-full {
-    //     width: 100%
-    // }
   }
 </style>

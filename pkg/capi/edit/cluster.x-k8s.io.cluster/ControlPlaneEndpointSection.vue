@@ -65,15 +65,8 @@ export default {
 
 @media screen and (min-width: 1000px) {
     .row-cp {
-        //flex-direction: column;
         width: 100%
     }
-    // .col-port {
-    //     width: 30%
-    // }
-    // .col-host {
-    //     width: 70%
-    // }
 }
 
 @media screen and (max-width: 1000px) {
