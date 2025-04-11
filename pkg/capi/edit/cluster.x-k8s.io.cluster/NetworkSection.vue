@@ -40,9 +40,20 @@ export default {
 </script>
 <template>
   <div>
-    <div class="row mb-20">
+    <div class="row row-networking">
       <div
-        class="col span-3"
+        class="col col-networking span-5 mb-20"
+      >
+        <LabeledInput
+          v-model:value="value.serviceDomain"
+          :mode="mode"
+          :disabled="clusterIsAlreadyCreated"
+          :label="t('capi.cluster.networking.serviceDomain')"
+          :rules="rules.serviceDomain"
+        />
+      </div>
+      <div
+        class="col col-port span-4 mb-20"
       >
         <LabeledInput
           v-model:value="value.apiServerPort"
@@ -53,20 +64,9 @@ export default {
           required
         />
       </div>
-      <div
-        class="col span-3"
-      >
-        <LabeledInput
-          v-model:value="value.serviceDomain"
-          :mode="mode"
-          :disabled="clusterIsAlreadyCreated"
-          :label="t('capi.cluster.networking.serviceDomain')"
-          :rules="rules.serviceDomain"
-        />
-      </div>
     </div>
-    <div class="row mb-20">
-      <div class="col span-3">
+    <div class="row row-networking">
+      <div class="col col-networking span-5 mb-20">
         <ArrayList
           v-model:value="value.pods.cidrBlocks"
           :protip="false"
@@ -76,7 +76,7 @@ export default {
           :rules="rules.pods"
         />
       </div>
-      <div class="col span-3">
+      <div class="col col-networking span-5 mb-20">
         <ArrayList
           v-model:value="value.services.cidrBlocks"
           :protip="false"
@@ -89,3 +89,34 @@ export default {
     </div>
   </div>
 </template>
+<style lang="scss" scoped>
+
+@media screen and (min-width: 900px) {
+    // .row-cp {
+    //     flex-direction: column;
+    //     width: 100%
+    // }
+    .col-port {
+        width: 10%
+    }
+    .col-host {
+        width: 70%
+    }
+}
+
+@media screen and (max-width: 900px) {
+    .row-networking {
+        flex-direction: column;
+        width: 100%
+    }
+    .col-port{
+        width: 75%
+    }
+    .col-networking {
+        width: 75%
+    }
+    .col-networking-full {
+        width: 100%
+    }
+  }
+</style>

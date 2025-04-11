@@ -344,8 +344,8 @@ export default {
         :rules="{name:fvGetAndReportPathRules('metadata.name')}"
         @update:value="$emit('update:value', {k: 'metadata', val: $event.metadata})"
       />
-      <div class="row mb-20 ">
-        <div class="col span-3">
+      <div class="row row-config">
+        <div class="col col-config span-5 mt-20">
           <h2>
             <t k="capi.cluster.version.title" />
           </h2>
@@ -358,7 +358,7 @@ export default {
             @update:value="$emit('update:value', {k: 'spec.topology.version', val: $event})"
           />
         </div>
-        <div class="col ">
+        <div class="col col-config-full mt-20">
           <h2>
             <t k="capi.cluster.controlPlaneEndpoint.title" />
           </h2>
@@ -440,4 +440,20 @@ export default {
 .required {
   color: var(--error);
 }
+.test{
+    width: 75%
+}
+
+@media screen and (max-width: 1144px) {
+    .row-config {
+        flex-direction: column;
+        width: 100%
+    }
+    .col-config {
+        width: 75%
+    }
+    .col-config-full {
+        width: 100%
+    }
+  }
 </style>
