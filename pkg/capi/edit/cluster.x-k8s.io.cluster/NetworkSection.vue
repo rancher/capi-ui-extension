@@ -45,12 +45,14 @@ export default {
         class="col span-3"
       >
         <LabeledInput
-          v-model:value="value.apiServerPort"
+          :value="value.apiServerPort"
+          type="number"
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.networking.apiServerPort')"
           :rules="rules.apiServerPort"
           required
+          @update:value="(val) => value.apiServerPort = parseInt(val)"
         />
       </div>
       <div
