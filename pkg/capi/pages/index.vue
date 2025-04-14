@@ -2,19 +2,20 @@
 import { CAPI as RANCHER_CAPI, SCHEMA } from '@shell/config/types';
 import Banner from '@components/Banner/Banner.vue';
 import { CAPI } from '../types/capi.ts';
+import InstallChart from '../components/InstallChart/index.vue';
 
 export default {
   name: 'CAPITurtlesDashboard',
 
   async beforeCreate() {
     try {
-      const clusterClassSchema = await this.$store.dispatch('management/find', {
+      const turtlesProviderSchema = await this.$store.dispatch('management/find', {
         type: SCHEMA,
-        id:   CAPI.CLUSTER_CLASS,
+        id:   CAPI.PROVIDER,
         opt:  { force: true },
       });
 
-      if (clusterClassSchema) {
+      if (turtlesProviderSchema) {
         this.$router.replace({
           name:   'c-cluster-product-resource',
           params: {
@@ -28,7 +29,11 @@ export default {
     } catch {}
   },
 
-  components: { Banner },
+  data() {
+    return { willInstall: false };
+  },
+
+  components: { Banner, InstallChart },
 
   computed: {
     hasClusterClassSchema() {
@@ -40,7 +45,7 @@ export default {
 </script>
 
 <template>
-  <div>
+  <div v-if="!willInstall">
     <div
       v-if="!hasClusterClassSchema"
       class="centered"
@@ -62,6 +67,22 @@ export default {
         </div>
       </Banner>
     </div>
+    <div>
+      <button
+        type="button"
+        class="btn role-primary"
+        @click="()=>willInstall=true"
+      >
+        install turts
+      </button>
+    </div>
+  </div>
+  <div v-else>
+    <InstallChart
+      chart-name="rancher-turtles"
+      repo-name="turtles"
+      repo-url="https://rancher.github.io/turtles"
+    />
   </div>
 </template>
 
