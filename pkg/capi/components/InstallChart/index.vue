@@ -30,12 +30,6 @@ export function getLatestVersion(store, versions) {
   return semver.rsort(versionMap)[0];
 }
 
-// TODO nb not this
-const refreshCharts = () => {};
-
-// const getLatestVersion = () => {};
-const handleGrowl = () => {};
-
 export default {
   props: {
     hasSchema: {
@@ -81,7 +75,7 @@ export default {
         //     chartName: this.chartName,
         //     init
         //   });
-        this.$store.dispatch('catalog/load');
+        this.$store.dispatch('catalog/load', { force: true });
       } catch (e) {
         this.$store.dispatch('growl/fromError', { err: e });
       }
@@ -173,7 +167,6 @@ export default {
        * then come back, the controllerChart will be null, but so will
        * the targetRepo. This is because the repo is not saved to the store?
        */
-    // TODO nb what this do
     controllerChart() {
       if (this.targetRepo) {
         // return this.$store.getters['catalog/chart']({
@@ -181,6 +174,7 @@ export default {
         //   repoType:  'cluster',
         //   chartName: this.chartName
         // });
+        // TODO nb why search b y chartName not working?
         return this.charts.find((chart) => chart.repoName === this.repoName && chart.repoType === 'cluster');
       }
 
@@ -188,9 +182,10 @@ export default {
     },
 
     targetRepo() {
-      const chart = this.charts?.find((chart) => chart.chartName === this.chartName);
+      this.charts.forEach((chart) => console.dir(chart));
+      //   const chart = this.charts?.find((chart) => chart.chartName === this.chartName);
       // TODO nb why doesn't chart name work
-      //   const chart = this.charts?.find((chart) => chart.repoName === this.repoName);
+      const chart = this.charts?.find((chart) => chart.repoName === this.repoName);
 
       return this.repos?.find((repo) => repo.id === chart?.repoName);
     },
@@ -254,41 +249,42 @@ export default {
         }
       }
 
-      const {
-        repoType, repoName, chartName, versions
-      } = this.controllerChart;
+      this.controllerChart.goToInstall(null, this.currentCluster?.id || 'local');
+      // // TODO nb use chart model goToInstall
+      // const {
+      //   repoType, repoName, chartName, versions
+      // } = this.controllerChart;
 
-      // TODO nb get latest version of a chart
-      const latestChartVersion = getLatestVersion(this.$store, versions);
+      // const latestChartVersion = getLatestVersion(this.$store, versions);
 
-      if (latestChartVersion) {
-        const query = {
-          [REPO_TYPE]: repoType,
-          [REPO]:      repoName,
-          [CHART]:     chartName,
-          [VERSION]:   latestChartVersion
-        };
+      // if (latestChartVersion) {
+      //   const query = {
+      //     [REPO_TYPE]: repoType,
+      //     [REPO]:      repoName,
+      //     [CHART]:     chartName,
+      //     [VERSION]:   latestChartVersion
+      //   };
 
-        // TODO nb hardcode local?
-        // pass as prop?
-        // TODO nb one-button install with default configuration?
-        this.$router.push({
-          name:   'c-cluster-apps-charts-install',
-          params: { cluster: 'local' },
-          query,
-        });
-      } else {
-        const error = {
-          _statusText: this.t('kubewarden.dashboard.appInstall.versionError.title'),
-          message:     this.t('kubewarden.dashboard.appInstall.versionError.message')
-        };
+      //   // TODO nb hardcode local?
+      //   // pass as prop?
+      //   // TODO nb one-button install with default configuration?
+      //   this.$router.push({
+      //     name:   'c-cluster-apps-charts-install',
+      //     params: { cluster: 'local' },
+      //     query,
+      //   });
+      // } else {
+      //   const error = {
+      //     _statusText: this.t('kubewarden.dashboard.appInstall.versionError.title'),
+      //     message:     this.t('kubewarden.dashboard.appInstall.versionError.message')
+      //   };
 
-        // handleGrowl({
-        //   error,
-        //   store: this.$store
-        // });
-        this.$store.dispatch('growl/fromError', { err: error });
-      }
+      //   // handleGrowl({
+      //   //   error,
+      //   //   store: this.$store
+      //   // });
+      //   this.$store.dispatch('growl/fromError', { err: error });
+      // }
     },
 
     reload() {

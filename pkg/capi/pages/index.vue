@@ -9,23 +9,24 @@ export default {
 
   async beforeCreate() {
     try {
-      const turtlesProviderSchema = await this.$store.dispatch('management/find', {
-        type: SCHEMA,
-        id:   CAPI.PROVIDER,
-        opt:  { force: true },
-      });
+      // // TODO nb turn back on
+      // const turtlesProviderSchema = await this.$store.dispatch('management/find', {
+      //   type: SCHEMA,
+      //   id:   CAPI.PROVIDER,
+      //   opt:  { force: true },
+      // });
 
-      if (turtlesProviderSchema) {
-        this.$router.replace({
-          name:   'c-cluster-product-resource',
-          params: {
-            ...this.$router.currentRoute.params,
-            cluster:  '_',
-            resource: RANCHER_CAPI.CAPI_CLUSTER,
-            product:  'manager'
-          }
-        });
-      }
+      // if (turtlesProviderSchema) {
+      // this.$router.replace({
+      //   name:   'c-cluster-product-resource',
+      //   params: {
+      //     ...this.$router.currentRoute.params,
+      //     cluster:  '_',
+      //     resource: RANCHER_CAPI.CAPI_CLUSTER,
+      //     product:  'manager'
+      //   }
+      // });
+      // }
     } catch {}
   },
 
