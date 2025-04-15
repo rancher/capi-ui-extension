@@ -50,12 +50,13 @@ export default {
         class="col"
       >
         <LabeledInput
-          v-model:value="value.port"
+          :value="value.port"
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.controlPlaneEndpoint.port')"
           :rules="rules.port"
           type="number"
+          @update:value="(val) => value.port = parseInt(val)"
         />
       </div>
     </div>
