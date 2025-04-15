@@ -344,8 +344,8 @@ export default {
         :rules="{name:fvGetAndReportPathRules('metadata.name')}"
         @update:value="$emit('update:value', {k: 'metadata', val: $event.metadata})"
       />
-      <div class="row mb-20 ">
-        <div class="col span-3">
+      <div class="row mb-20">
+        <div class="col col-config span-4 mt-20">
           <h2>
             <t k="capi.cluster.version.title" />
           </h2>
@@ -358,7 +358,9 @@ export default {
             @update:value="$emit('update:value', {k: 'spec.topology.version', val: $event})"
           />
         </div>
-        <div class="col ">
+      </div>
+      <div class="row row-config">
+        <div class="col span-12 mt-20">
           <h2>
             <t k="capi.cluster.controlPlaneEndpoint.title" />
           </h2>
@@ -370,7 +372,7 @@ export default {
           />
         </div>
       </div>
-      <div class="mt-20 block">
+      <div class="col span-12 mt-20">
         <h2>
           <t k="capi.cluster.networking.title" />
         </h2>
@@ -386,7 +388,7 @@ export default {
           @update:value="$emit('update:value', {k: 'spec.clusterNetwork', val: $event})"
         />
       </div>
-      <div class="mt-20 block">
+      <div class="mt-20">
         <h2>
           <t k="capi.cluster.workers.title" />
           <span class="required">*</span>
@@ -394,7 +396,7 @@ export default {
         <div class="row mb-20">
           <div
             v-if="!!machineDeploymentOptions"
-            class="col span-3"
+            class="col span-4 col-config"
           >
             <WorkerItem
               :value="machineDeployments"
@@ -408,7 +410,7 @@ export default {
           </div>
           <div
             v-if="!!machinePoolOptions"
-            class="col span-3"
+            class="col span-4 col-config"
           >
             <WorkerItem
               :value="machinePools"
@@ -439,5 +441,15 @@ export default {
 <style lang="scss" scoped>
 .required {
   color: var(--error);
+}
+
+@media screen and (max-width: 1000px) {
+    .row-config {
+        flex-direction: column;
+        width: 100%
+    }
+    .col-config {
+        width: 100%
+    }
 }
 </style>

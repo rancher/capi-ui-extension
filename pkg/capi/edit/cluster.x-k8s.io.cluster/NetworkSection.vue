@@ -40,9 +40,20 @@ export default {
 </script>
 <template>
   <div>
-    <div class="row mb-20">
+    <div class="row row-networking">
       <div
-        class="col span-3"
+        class="col col-host span-4 mb-20"
+      >
+        <LabeledInput
+          v-model:value="value.serviceDomain"
+          :mode="mode"
+          :disabled="clusterIsAlreadyCreated"
+          :label="t('capi.cluster.networking.serviceDomain')"
+          :rules="rules.serviceDomain"
+        />
+      </div>
+      <div
+        class="col col-port span-2 mb-20"
       >
         <LabeledInput
           :value="value.apiServerPort"
@@ -55,20 +66,9 @@ export default {
           @update:value="(val) => value.apiServerPort = parseInt(val)"
         />
       </div>
-      <div
-        class="col span-3"
-      >
-        <LabeledInput
-          v-model:value="value.serviceDomain"
-          :mode="mode"
-          :disabled="clusterIsAlreadyCreated"
-          :label="t('capi.cluster.networking.serviceDomain')"
-          :rules="rules.serviceDomain"
-        />
-      </div>
     </div>
-    <div class="row mb-20">
-      <div class="col span-3">
+    <div class="row row-networking">
+      <div class="col col-networking span-5 mb-20">
         <ArrayList
           v-model:value="value.pods.cidrBlocks"
           :protip="false"
@@ -78,7 +78,7 @@ export default {
           :rules="rules.pods"
         />
       </div>
-      <div class="col span-3">
+      <div class="col col-networking span-5 mb-20">
         <ArrayList
           v-model:value="value.services.cidrBlocks"
           :protip="false"
@@ -91,3 +91,27 @@ export default {
     </div>
   </div>
 </template>
+<style lang="scss" scoped>
+
+@media screen and (min-width: 1000px) {
+    .row-networking {
+        width: 100%
+    }
+}
+
+@media screen and (max-width: 1000px) {
+    .row-networking {
+        flex-direction: column;
+        width: 100%
+    }
+    .col-port{
+        width: 50%
+    }
+    .col-host {
+        width: 100%
+    }
+    .col-networking {
+        width: 100%
+    }
+  }
+</style>
