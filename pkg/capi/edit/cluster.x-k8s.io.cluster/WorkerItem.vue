@@ -197,6 +197,16 @@ export default {
                   label-key="capi.cluster.workers.class"
                 />
               </div>
+              <div
+                class="col mt-20"
+              >
+                <LabeledInput
+                  v-model:value="row.value.replicas"
+                  :mode="mode"
+                  :disabled="false"
+                  :label="t('capi.cluster.workers.replicas')"
+                />
+              </div>
             </slot>
             <div
               v-if="removeAllowed"

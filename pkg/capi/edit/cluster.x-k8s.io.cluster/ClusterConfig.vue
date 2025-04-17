@@ -17,10 +17,12 @@ import CardGrid from '../../components/CardGrid.vue';
 import WorkerItem from './WorkerItem.vue';
 import NetworkSection from './NetworkSection.vue';
 import ControlPlaneEndpointSection from './ControlPlaneEndpointSection.vue';
+import ControlPlaneSection from './ControlPlaneSection.vue';
 
 const defaultTopologyConfig = {
   version: '',
   class:   '',
+  controlPlane: {},
   workers:           { machineDeployments: [], machinePools: [] }
 };
 const defaultClusterNetwork = {
@@ -46,7 +48,8 @@ export default {
     ControlPlaneEndpointSection,
     ClusterClassVariables,
     CardGrid,
-    Labels
+    Labels,
+    ControlPlaneSection
   },
   mixins: [CreateEditView, FormValidation],
   emits:  ['update:value'],
@@ -113,10 +116,11 @@ export default {
       fvFormRuleSets:          [
         { path: 'metadata.name', rules: ['required'] },
         { path: 'spec.topology.version', rules: ['required', 'version'] },
+        { path: 'spec.topology.controlPlane.replicas', rules: ['number'] },
         { path: 'spec.controlPlaneEndpoint.host', rules: ['host'] },
         { path: 'spec.controlPlaneEndpoint.port', rules: ['port'] },
         { path: 'spec.clusterNetwork.serviceDomain', rules: ['host'] },
-        { path: 'spec.clusterNetwork.apiServerPort', rules: ['required', 'port'] },
+        { path: 'spec.clusterNetwork.apiServerPort', rules: ['port'] },
         { path: 'spec.clusterNetwork.pods', rules: ['cidr'] },
         { path: 'spec.clusterNetwork.services', rules: ['cidr'] }
       ],
@@ -158,7 +162,7 @@ export default {
   computed: {
     fvExtraRules() {
       return {
-        version: versionValidator(this.$store.getters['i18n/t'], this.controlPlane),
+        version: versionValidator(this.$store.getters['i18n/t'], this.clusterClassControlPlane),
         host:    hostValidator(this.$store.getters['i18n/t']),
         port:    portValidator(this.$store.getters['i18n/t']),
         cidr:    cidrValidator(this.$store.getters['i18n/t'])
@@ -168,7 +172,7 @@ export default {
       const nameValid = !!this.value.metadata.name;
       const t = this.$store.getters['i18n/t'];
 
-      const versionValid = this.value?.spec?.topology?.version && !versionValidator(t, this.controlPlane)(this.value?.spec?.topology?.version);
+      const versionValid = this.value?.spec?.topology?.version && !versionValidator(t, this.clusterClassControlPlane)(this.value?.spec?.topology?.version);
       const controlPlaneEndpointPortValid = !portValidator(t)(this.value?.spec?.controlPlaneEndpoint?.port);
       const controlPlaneEndpointHostValid = !hostValidator(t)(this.value?.spec?.controlPlaneEndpoint?.host);
       const machineDeploymentsValid = this.value?.spec?.topology?.workers?.machineDeployments?.length > 0 && !!this.value?.spec?.topology?.workers?.machineDeployments[0]?.name && !!this.value?.spec?.topology?.workers?.machineDeployments[0]?.class;
@@ -181,6 +185,9 @@ export default {
     },
     clusterNetwork() {
       return this.value?.spec?.clusterNetwork;
+    },
+    controlPlane() {
+      return this.value?.spec?.topology?.controlPlane;
     },
     controlPlaneEndpoint() {
       return this.value?.spec?.controlPlaneEndpoint;
@@ -197,7 +204,7 @@ export default {
     machinePoolOptions() {
       return this.clusterClassObj?.spec?.workers?.machinePools?.map( (w) => w.class);
     },
-    controlPlane() {
+    clusterClassControlPlane() {
       return this.clusterClassObj?.spec?.controlPlane?.ref?.kind;
     },
     clusterClassOptions() {
@@ -362,8 +369,8 @@ export default {
           />
         </div>
       </div>
-      <div class="row row-config">
-        <div class="col span-12 mt-20">
+      <div class="row span-12 row-config">
+        <div class="col span-6 mt-20">
           <h2>
             <t k="capi.cluster.controlPlaneEndpoint.title" />
           </h2>
@@ -374,8 +381,19 @@ export default {
             @update:value="$emit('update:value', {k: 'spec.controlPlaneEndpoint', val: $event})"
           />
         </div>
+        <div class="col span-6 mt-20">
+          <h2>
+            <t k="capi.cluster.controlPlane.title" />
+          </h2>
+          <ControlPlaneSection
+            v-model:value="controlPlane"
+            :mode="mode"
+            :rules="{replicas:fvGetAndReportPathRules('spec.topology.controlPlane.replicas') }"
+            @update:value="$emit('update:value', {k: 'spec.topology.controlPlane', val: $event})"
+          />
+        </div>
       </div>
-      <div class="col span-12 mt-20">
+      <div class="col span-6 mt-20">
         <h2>
           <t k="capi.cluster.networking.title" />
         </h2>

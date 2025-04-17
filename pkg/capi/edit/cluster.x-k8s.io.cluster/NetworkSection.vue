@@ -62,7 +62,6 @@ export default {
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.networking.apiServerPort')"
           :rules="rules.apiServerPort"
-          required
           @update:value="(val) => value.apiServerPort = parseInt(val)"
         />
       </div>
@@ -95,14 +94,14 @@ export default {
 
 @media screen and (min-width: 1000px) {
     .row-networking {
-        width: 100%
+        width: 200%
     }
 }
 
 @media screen and (max-width: 1000px) {
     .row-networking {
         flex-direction: column;
-        width: 100%
+        width: 200%
     }
     .col-port{
         width: 50%

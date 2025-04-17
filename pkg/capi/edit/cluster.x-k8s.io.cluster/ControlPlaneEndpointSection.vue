@@ -66,7 +66,7 @@ export default {
 
 @media screen and (min-width: 1000px) {
     .row-cp {
-        width: 100%
+        width: 200%
     }
 }
 
@@ -76,10 +76,10 @@ export default {
         width: 100%
     }
     .col-port {
-        width: 50%
+        width: 100%
     }
     .col-host {
-        width: 100%
+        width: 200%
     }
 }
 </style>
