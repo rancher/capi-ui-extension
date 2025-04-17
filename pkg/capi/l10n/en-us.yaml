@@ -117,6 +117,7 @@ capi:
       placeholder: https://github.com/example/releases/latest/client.yaml
     cloudCredential:
       title: Cloud Credential
+      toggle: Use a Rancher cloud credential to configure access for all {provider} CAPI clusters
     features:
       title: Features
       clusterResourceSet: Enable cluster resource set
@@ -131,6 +132,13 @@ capi:
       reuse: Use core provider secret
       data: Data
       label: Secret Name
+    providers:
+      digitalocean: Digital Ocean
+      aws: Amazon
+      azure: Azure
+      docker: Docker
+      gcp: Google Cloud Platform
+      vsphere: vSphere
 
 nav:
   group:
