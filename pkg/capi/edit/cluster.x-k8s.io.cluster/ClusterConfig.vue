@@ -6,6 +6,8 @@ import NameNsDescription from '@shell/components/form/NameNsDescription.vue';
 import FormValidation from '@shell/mixins/form-validation';
 import CruResource from '@shell/components/CruResource.vue';
 import CreateEditView from '@shell/mixins/create-edit-view';
+import Labels from '@shell/components/form/Labels.vue';
+
 import ClusterClassVariables from '../../components/CCVariables/index.vue';
 import {
   versionValidator, hostValidator, portValidator, cidrValidator, cidrArrayValid
@@ -43,7 +45,8 @@ export default {
     NetworkSection,
     ControlPlaneEndpointSection,
     ClusterClassVariables,
-    CardGrid
+    CardGrid,
+    Labels
   },
   mixins: [CreateEditView, FormValidation],
   emits:  ['update:value'],
@@ -423,6 +426,12 @@ export default {
             />
           </div>
         </div>
+      </div>
+      <div class="mt-20">
+        <Labels
+          :value="value"
+          :mode="mode"
+        />
       </div>
     </template>
     <template #stepVariables>
