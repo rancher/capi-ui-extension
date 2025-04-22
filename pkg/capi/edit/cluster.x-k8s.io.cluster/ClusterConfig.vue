@@ -341,14 +341,16 @@ export default {
       >
         <template #no-rows>
           <div v-if="canCreateGitRepos">
-            There are no clusterclasses available.
-            <button
-              type="button"
-              class="btn role-secondary"
-              @click="openRepoModal"
-            >
-              add examples
-            </button>
+            It looks like you don't have any cluster classes. Rancher Turtles has a curated collection of sample classes to get you started.
+            <div class="mt-20">
+              <button
+                type="button"
+                class="btn role-secondary"
+                @click="openRepoModal"
+              >
+                Add Example Classes
+              </button>
+            </div>
           </div>
         </template>
         <CardGrid>

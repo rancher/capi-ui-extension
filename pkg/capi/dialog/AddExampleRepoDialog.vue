@@ -152,8 +152,17 @@ export default {
 <template>
   <div class="dialog-container">
     <h2>Add Example Clusterclasses</h2>
-    <div class="text-label mb-20">
-      This will create a new namespace in the local cluster called turtles-clusterclasses which the example cluster classes will be deployed in. Note that in order for the cluster class resources to be created, you must have already installed the relevant CAPI provider(s).
+    <div
+      v-if="!gitRepo?.id"
+      class="text-label mb-20"
+    >
+      This will create a fleet git repo resource, <code>turtles-clusterclass-examples</code>, and new namespace in the local cluster,  <code>turtles-clusterclasses</code>, which the example cluster classes will be deployed in. Note that in order for the cluster class resources to be created, you must have already installed the relevant CAPI provider(s).
+    </div>
+    <div
+      v-else
+      class="text-label mb-20"
+    >
+      This dialog may be safely closed. Cluster classes will automatically appear on the page when they become available.
     </div>
     <div v-if="gitRepo && !gitRepo.id">
       <div
@@ -179,23 +188,29 @@ export default {
         />
       </div>
     </div>
-    <div class="footer-buttons">
+    <div class="footer-buttons mt-20">
       <AsyncButton
         v-if="!gitRepo.id"
         class="btn role-primary"
         type="button"
+        mode="saveGitRepo"
         @click="saveGitRepo"
-      >
-        Create Git Repo
-      </AsyncButton>
-      <div v-else>
+      />
+      <template v-else>
         <a
           href="#"
           @click="goToDetail"
         >
           View GitRepo deployment details
         </a>
-      </div>
+        <button
+          class="btn role-primary"
+          type="button"
+          @click="$emit('close')"
+        >
+          Continue
+        </button>
+      </template>
     </div>
   </div>
 </template>
@@ -209,5 +224,10 @@ export default {
 .footer-buttons {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+
+  &>*{
+    margin-left: 10px;
+  }
 }
 </style>

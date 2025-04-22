@@ -132,9 +132,17 @@ capi:
       data: Data
       label: Secret Name
 
+asyncButton:
+  saveGitRepo:
+    action: Save GitRepo
+    waiting: Saving...
+    success: Saved
+
 nav:
   group:
     CAPITurtles: CAPI
+
+
 
 typeLabel:
   cluster.x-k8s.io.cluster: |-
@@ -162,6 +170,7 @@ typeLabel:
       one { Cluster Class}
       other { Cluster Classes}
     }
+
 validation:
   exclusiveMaxValue: '"{key}" must be less than {maximum}.'
   exclusiveMinValue: '"{key}" must be greater than {minimum}.'
