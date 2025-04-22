@@ -5,9 +5,11 @@ import { clone } from '@shell/utils/object';
 import { _EDIT, _VIEW } from '@shell/config/query-params';
 import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
-
+import CCVariables from '../../components/CCVariables/index.vue';
 export default {
-  components: { LabeledSelect, LabeledInput },
+  components: {
+    LabeledSelect, LabeledInput, CCVariables
+  },
   emits:      ['add', 'remove', 'update:value'],
   props:      {
     value: {
@@ -34,12 +36,8 @@ export default {
       type:    Boolean,
       default: true,
     },
-    removeAllowed: {
-      type:    Boolean,
-      default: true,
-    },
     defaultAddValue: {
-      type:    [String, Number, Object, Array],
+      type:    Object,
       default: ''
     },
     loading: {
@@ -53,6 +51,18 @@ export default {
     componentTestid: {
       type:    String,
       default: 'worker-item',
+    },
+
+    globalVariables: {
+      type:    Array,
+      default: () => []
+    },
+
+    clusterClass: {
+      type:    Object,
+      default: () => {
+        return {};
+      }
     }
   },
   data() {
@@ -97,23 +107,44 @@ export default {
         }
         this.lastUpdateWasFromValue = false;
       }
-    }
+    },
+
   },
   created() {
     this.queueUpdate = debounce(this.update, 50);
   },
+
+  computed: {
+    isView() {
+      return this.mode === _VIEW;
+    },
+
+    isDeployments() {
+      return this.title.includes('Deployments');
+    },
+
+    removeLabel() {
+      return this.$store.getters['i18n/t']('generic.remove');
+    },
+
+    addLabel() {
+      return this.isDeployments ? this.t('capi.cluster.workers.machineDeployments.add') : this.t('capi.cluster.workers.machinePools.add');
+    },
+
+    machineClassType() {
+      return this.isDeployments ? 'machineDeploymentClass' : 'machinePoolClass';
+    },
+
+  },
+
   methods: {
     add() {
       this.rows.push({ value: clone(this.defaultAddValue) });
       if (this.defaultAddValue) {
         this.queueUpdate();
       }
-      this.$nextTick(() => {
-        const inputs = this.$refs.value;
 
-        if ( inputs && inputs.length > 0 ) {
-          inputs[inputs.length - 1].focus();
-        }
+      return this.$nextTick(() => {
         this.$emit('add');
       });
     },
@@ -125,6 +156,7 @@ export default {
       removeAt(this.rows, index);
       this.queueUpdate();
     },
+
     update() {
       if ( this.isView ) {
         return;
@@ -140,23 +172,38 @@ export default {
       }
       this.$emit('update:value', out);
     },
+
     valUpdate(val, key) {
       key.value.name = val.data;
-    }
+    },
+
   }
 };
 </script>
 <template>
-  <div class="span-9">
+  <div class="span-12">
     <div
       v-if="title"
       class="clearfix"
     >
-      <slot name="title">
-        <h3>
-          {{ title }}
-        </h3>
-      </slot>
+      <div
+        v-if=" !isView"
+        class="footer mt-20"
+      >
+        <button
+          type="button"
+          class="btn role-tertiary add"
+          :disabled="loading"
+          data-testid="array-list-button"
+          @click="add()"
+        >
+          <i
+            v-if="loading"
+            class="mr-5 icon icon-spinner icon-spin icon-lg"
+          />
+          {{ addLabel }}
+        </button>
+      </div>
     </div>
 
     <template v-if="rows.length">
@@ -167,7 +214,19 @@ export default {
         class="box"
       >
         <div class="value row row-wi">
-          <div class="col-long mr-20 span-4 mt-10">
+          <div class="col-long span-5">
+            <LabeledSelect
+              v-model:value="row.value.class"
+              :mode="mode"
+              :options="classOptions"
+              label-key="capi.cluster.workers.class"
+              required
+            />
+          </div>
+          <div
+            v-if="row.value.class"
+            class="col-long  span-5"
+          >
             <LabeledInput
               ref="value"
               v-model:value="row.value.name"
@@ -177,40 +236,43 @@ export default {
               required
             />
           </div>
-          <div class="col-long mr-20 span-4 mt-10">
-            <LabeledSelect
-              v-model:value="row.value.class"
-              :mode="mode"
-              :options="classOptions"
-              label-key="capi.cluster.workers.class"
-              required
-            />
-          </div>
-          <div class="col-short mr-10 mt-10">
+          <div class="col-short mr-10    span-2">
             <LabeledInput
               :value="row.value.replicas"
               :mode="mode"
               :disabled="false"
               :label="t('capi.cluster.workers.replicas')"
-              type="number"
               placeholder="1"
               @update:value="(val) => !!val ? row.value.replicas = parseInt(val) : row.value.replicas = null"
             />
           </div>
           <div
-            v-if="removeAllowed"
-            class="remove mt-20"
+            class="remove"
           >
             <button
               type="button"
               :disabled="isView"
               class="btn role-link"
-              :data-testid="`${componentTestid}-remove-item-${idx}`"
+              :data-testid="`remove-item-${idx}`"
               @click="remove(row, idx)"
             >
               {{ removeLabel }}
             </button>
           </div>
+        </div>
+
+        <div
+          v-if="row.value.class"
+          class="machine-variables"
+        >
+          <CCVariables
+            v-model:value="row.value.variables.overrides"
+            :global-variables="globalVariables"
+            :cluster-class="clusterClass"
+            :mode="mode"
+            :machine-class-name="row.value.class"
+            :machine-class-type="machineClassType"
+          />
         </div>
       </div>
     </template>
@@ -221,45 +283,49 @@ export default {
       &mdash;
     </div>
     <div v-else>
-      <slot name="empty" />
-    </div>
-    <div
-      v-if="addAllowed && !isView"
-      class="footer mt-30"
-    >
-      <slot
-        v-if="addAllowed"
-        name="add"
-        :add="add"
-      >
-        <button
-          type="button"
-          class="btn role-tertiary add"
-          :disabled="loading"
-          :data-testid="`${componentTestid}-button`"
-          @click="add()"
-        >
-          <i
-            v-if="loading"
-            class="mr-5 icon icon-spinner icon-spin icon-lg"
-          />
-          {{ addBtnTitle }}
-        </button>
-      </slot>
     </div>
   </div>
 </template>
 <style lang="scss" scoped>
-@media screen and (max-width: 1100px) {
-    .row-wi {
-        flex-direction: column;
-        width: 100%
+@media screen and (max-width: 1000px) {
+  .row-wi {
+      flex-direction: column;
+      width: 100%;
+  }
+  .box .row-wi.value.row>.col-long {
+      width: 100%;
+      margin-top: 20px;
+  }
+  .box .row-wi.value.row>.col-short {
+      width: 100%;
+      margin-top: 20px;
+  }
+}
+
+.machine-variables {
+  // margin: 1em  0px 1em 1em;
+}
+
+.box {
+    margin: 40px 0px 40px 0px;
+
+    &>.value.row .col-long{
+      width: 25%;
+      margin-right: 1.12%;
     }
-    .col-long {
-        width: 130%
+
+    & .remove{
+
     }
-    .col-short {
-        width: 50%
-    }
+
+  // &>.remove {
+  //   position: relative;
+
+  //   & button{
+  //     position: absolute;
+  //     right: 80px;
+  //     top: 2em;
+  //   }
+  // }
 }
 </style>

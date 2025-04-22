@@ -2,33 +2,41 @@
 import { CAPI as RANCHER_CAPI, SCHEMA } from '@shell/config/types';
 import Banner from '@components/Banner/Banner.vue';
 import { CAPI } from '../types/capi.ts';
+import { Checkbox } from '@rancher/components';
 
 export default {
   name: 'CAPITurtlesDashboard',
 
   async beforeCreate() {
     try {
-      const clusterClassSchema = await this.$store.dispatch('management/find', {
+      const turtlesProviderSchema = await this.$store.dispatch('management/find', {
         type: SCHEMA,
-        id:   CAPI.CLUSTER_CLASS,
+        id:   CAPI.PROVIDER,
         opt:  { force: true },
       });
 
-      if (clusterClassSchema) {
-        this.$router.replace({
-          name:   'c-cluster-product-resource',
-          params: {
-            ...this.$router.currentRoute.params,
-            cluster:  '_',
-            resource: RANCHER_CAPI.CAPI_CLUSTER,
-            product:  'manager'
-          }
-        });
+      if (turtlesProviderSchema) {
+      this.$router.replace({
+        name:   'c-cluster-product-resource',
+        params: {
+          ...this.$router.currentRoute.params,
+          cluster:  '_',
+          resource: RANCHER_CAPI.CAPI_CLUSTER,
+          product:  'manager'
+        }
+      });
       }
     } catch {}
   },
 
-  components: { Banner },
+  data() {
+    return { willInstall: false };
+  },
+
+  components: {
+    Banner,
+    Checkbox
+  },
 
   computed: {
     hasClusterClassSchema() {
@@ -52,8 +60,9 @@ export default {
         class="description"
         v-html="t('capi.installation.description', {}, true)"
       />
-      <Banner color="warning">
-        <div>
+
+      <Banner color="info">
+        <div class="row">
           <t
             v-if="!hasClusterClassSchema"
             k="capi.installation.turtlesNeeded"
@@ -61,6 +70,14 @@ export default {
           />
         </div>
       </Banner>
+      <div class="row mt-5">
+        <t
+          raw
+          k="capi.installation.docs"
+        />
+      </div>
+    </div>
+    <div>
     </div>
   </div>
 </template>
@@ -81,6 +98,8 @@ export default {
 
   .banner {
     width: auto;
+    display: flex;
+    flex-direction: column;
   }
 }
 </style>

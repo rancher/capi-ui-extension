@@ -2,9 +2,10 @@ action:
   createCluster: Create Cluster
 capi:
   installation:
+    docs: <a aria-label="Read how to install the Rancher Turtles operator" href="https://turtles.docs.rancher.com/turtles/next/en/getting-started/install-rancher-turtles/using_rancher_dashboard.html" target="_blank" rel="noopener noreferrer nofollow">Rancher Turtles Installation documentation</a>
     title: Rancher Turtles
     description: The Rancher Turtles operator allows users to import CAPI-provisioned clusters into Rancher.
-    turtlesNeeded: Either the user doesn't have permission to run the Turtles extension or the Turtles operator isn't installed. To learn how to install the Rancher Turtles extension, read the <a aria-label="Read how to install the Rancher Turtles operator" href="https://turtles.docs.rancher.com/turtles/stable/en/tutorials/quickstart.html#_install_rancher_turtles_using_rancher_dashboard" target="_blank" rel="noopener noreferrer nofollow">documentation.</a>
+    turtlesNeeded: Either the user doesn't have permission to run the Turtles extension or the Turtles operator isn't installed.
   autoImport:
     label: CAPI Auto-Import
     checkbox:
@@ -14,6 +15,12 @@ capi:
   warnings:
     embeddedFeatureFlag: "It looks like the Rancher-managed cluster API feature is disabled. To provision and manage RKE2 clusters you must either enable the embedded-cluster-api feature flag or install the Rancher Turtles extension."
   cluster:
+    section:
+      general: General
+      controlplane: Control Plane
+      networking: Networking
+      workers: Workers
+      labels: Labels
     steps:
       clusterClass:
         title: Cluster Class
@@ -42,6 +49,7 @@ capi:
       description: Cluster Class Description
     variables:
       title: Variables
+      emptyStringOption: None
     version:
       title: Kubernetes Version
     networking:
@@ -61,6 +69,7 @@ capi:
       host: Host
       port: Port
     workers:
+      add: Add Worker
       title: Workers
       class: Class
       name: Name
@@ -153,13 +162,56 @@ capi:
       vsphere: vSphere
       kubeadm: Kubeadm
       rke2: RKE2
+  # used in cluster creation when a variable name exactly matches one of these keys   
+  variables:
+    # azure variables
+    azureClusterIdentityName: Azure Cluster Identity Name
+    azureClusterIdentity: Azure Cluster Identity
+    imageGallery: Image Gallery
+    imageName: Image Name
+    location: Location
+    misc: Additional Configuration
+    registrationMethod: Registration Method
+    resourceGroup: Resource Group
+    subscriptionID: Subscription ID
+    vmSize: Virtual Machine Size
+    # RKE2 cp variables
+    enableETCDBackup: Enable Automatic ETCD Backups
+    etcdBackupretention: Retention Count
+    etcdBackupscheduleChron: Backup Cron Schedule
+    etcdBackupsnapshotName: Snapshot Name
+    etcdBackupdirectory: Backup Directory Name
+    etcdS3endpoint: S3 Endpoint
+    ectdS3endpointCASecret: CA Secret
+    etcdS3s3CredentialSecret: S3 Credential Secret
+    etcdS3region: S3 AWS Region
+    etcdS3bucket: Bucket
+    etcdS3folder: Folder
+    # RKE2 bootstrap variables
+    rkeBootnodeAnnotations: Node Annotations
+    rkeBootnodeLabels: Node Labels
+    rkeBootnodeTaints: Node Taints
 
+<<<<<<< HEAD
 cluster:
   provider:
     kubeadm: Kubeadm
+=======
+asyncButton:
+  saveGitRepo:
+    action: Save GitRepo
+    waiting: Saving...
+    success: Saved
+
+
+
+
+>>>>>>> 9c6183ff0 (clusterclass variables enhancements: add machine-scoped variable overrides, sections, labels, toggle, highlight)
 nav:
   group:
     CAPITurtles: CAPI
+
+
 
 typeLabel:
   cluster.x-k8s.io.cluster: |-
@@ -187,6 +239,7 @@ typeLabel:
       one { Cluster Class}
       other { Cluster Classes}
     }
+
 validation:
   exclusiveMaxValue: '"{key}" must be less than {maximum}.'
   exclusiveMinValue: '"{key}" must be greater than {minimum}.'

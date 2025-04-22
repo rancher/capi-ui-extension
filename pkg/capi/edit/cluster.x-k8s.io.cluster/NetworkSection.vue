@@ -76,7 +76,7 @@ export default {
   <div>
     <div class="row row-networking">
       <div
-        class="col col-host span-4 mb-20"
+        class="col col-host span-6 mb-20"
       >
         <LabeledInput
           v-model:value="serviceDomain"
@@ -88,7 +88,7 @@ export default {
         />
       </div>
       <div
-        class="col col-port span-2 mb-20"
+        class="col col-port span-6 mb-20"
       >
         <LabeledInput
           v-model:value="apiServerPort"
@@ -103,7 +103,7 @@ export default {
       </div>
     </div>
     <div class="row row-networking">
-      <div class="col col-networking span-5 mb-20">
+      <div class="col col-networking  mb-20">
         <ArrayList
           v-model:value="podsCidrBlocks"
           :protip="false"
@@ -116,7 +116,9 @@ export default {
           @update:value="updateNetwork"
         />
       </div>
-      <div class="col col-networking span-5 mb-20">
+    </div>
+    <div class="row row-networking">
+      <div class="col col-networking  mb-20">
         <ArrayList
           v-model:value="servicesCidrBlocks"
           :protip="false"
@@ -134,10 +136,8 @@ export default {
 </template>
 <style lang="scss" scoped>
 
-@media screen and (min-width: 1100px) {
-    .row-networking {
-        width: 200%
-    }
+.col-networking {
+  width: 100%;
 }
 
 @media screen and (max-width: 1100px) {

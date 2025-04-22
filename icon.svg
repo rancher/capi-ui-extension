@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<svg width="86" height="70" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+ <!-- Created with SVG-edit - https://github.com/SVG-Edit/svgedit-->
+
+ <g class="layer" display="inline">
+  <title>Layer 1</title>
+  <ellipse cx="55.22" cy="40.52" fill="#000000" fill-opacity="0" id="svg_7" rx="21.27" ry="21.08" stroke="#000000" stroke-linecap="null" stroke-linejoin="null" stroke-opacity="null" stroke-width="5"/>
+  <line fill="none" fill-opacity="0" id="svg_9" stroke="#000000" stroke-dasharray="null" stroke-linecap="round" stroke-linejoin="bevel" stroke-opacity="null" stroke-width="5" x1="55.14" x2="55.14" y1="10.33" y2="29.74"/>
+  <line fill="none" fill-opacity="0" id="svg_10" stroke="#000000" stroke-dasharray="null" stroke-linecap="round" stroke-linejoin="bevel" stroke-opacity="null" stroke-width="5" x1="37.78" x2="48.63" y1="64.65" y2="48.56"/>
+  <line fill="none" fill-opacity="0" id="svg_11" stroke="#000000" stroke-dasharray="null" stroke-linecap="round" stroke-linejoin="bevel" stroke-opacity="null" stroke-width="5" x1="65.44" x2="59.77" y1="67.37" y2="48.82"/>
+  <line fill="none" fill-opacity="0" id="svg_12" stroke="#000000" stroke-dasharray="null" stroke-linecap="round" stroke-linejoin="bevel" stroke-opacity="null" stroke-width="5" x1="78.26" x2="63.18" y1="20.47" y2="32.68"/>
+  <line fill="none" fill-opacity="0" id="svg_13" stroke="#000000" stroke-dasharray="null" stroke-linecap="round" stroke-linejoin="bevel" stroke-opacity="null" stroke-width="5" x1="33.85" x2="47.33" y1="19.4" y2="33.36"/>
+  <line fill="none" fill-opacity="0" id="svg_15" stroke="#000000" stroke-dasharray="null" stroke-linecap="round" stroke-linejoin="bevel" stroke-opacity="null" stroke-width="5" x1="26.07" x2="45.4" y1="42.52" y2="40.83"/>
+  <line fill="none" fill-opacity="0" id="svg_16" stroke="#000000" stroke-dasharray="null" stroke-linecap="round" stroke-linejoin="bevel" stroke-opacity="null" stroke-width="5" x1="83.48" x2="64.5" y1="46.95" y2="42.92"/>
+  <ellipse cx="54.77" cy="40.37" fill="#000000" fill-opacity="0" id="svg_17" rx="8.21" ry="8.21" stroke="#000000" stroke-linecap="null" stroke-linejoin="null" stroke-opacity="null" stroke-width="5"/>
+  <g id="svg_27" transform="translate(-62.8472, -49.3056) matrix(0.962053, 0, 0, 0.985941, -98.136, -65.583)">
+   <ellipse cx="196.63" cy="147.42" fill="#000000" fill-opacity="0" id="svg_26" rx="21.27" ry="21.08" stroke="#000000" stroke-dasharray="2" stroke-linejoin="null" stroke-opacity="null" stroke-width="5"/>
+   <line fill="none" fill-opacity="0" id="svg_25" stroke="#000000" stroke-dasharray="2" stroke-linejoin="bevel" stroke-opacity="null" stroke-width="5" x1="196.56" x2="196.56" y1="117.23" y2="136.63"/>
+   <line fill="none" fill-opacity="0" id="svg_24" stroke="#000000" stroke-dasharray="2" stroke-linejoin="bevel" stroke-opacity="null" stroke-width="5" x1="179.19" x2="190.04" y1="171.54" y2="155.46"/>
+   <line fill="none" fill-opacity="0" id="svg_23" stroke="#000000" stroke-dasharray="2" stroke-linejoin="bevel" stroke-opacity="null" stroke-width="5" x1="206.85" x2="201.18" y1="174.27" y2="155.71"/>
+   <line fill="none" fill-opacity="0" id="svg_22" stroke="#000000" stroke-dasharray="2" stroke-linejoin="bevel" stroke-opacity="null" stroke-width="5" x1="219.67" x2="204.59" y1="127.36" y2="139.58"/>
+   <line fill="none" fill-opacity="0" id="svg_21" stroke="#000000" stroke-dasharray="2" stroke-linejoin="bevel" stroke-opacity="null" stroke-width="5" x1="175.26" x2="188.74" y1="126.3" y2="140.25"/>
+   <line fill="none" fill-opacity="0" id="svg_20" stroke="#000000" stroke-dasharray="2" stroke-linejoin="bevel" stroke-opacity="null" stroke-width="5" x1="167.49" x2="186.82" y1="149.42" y2="147.73"/>
+   <line fill="none" fill-opacity="0" id="svg_19" stroke="#000000" stroke-dasharray="2" stroke-linejoin="bevel" stroke-opacity="null" stroke-width="5" x1="227.15" x2="208.17" y1="153.85" y2="149.82"/>
+   <ellipse cx="196.18" cy="147.27" fill="#000000" fill-opacity="0" id="svg_18" rx="8.21" ry="8.21" stroke="#000000" stroke-dasharray="2" stroke-linejoin="null" stroke-opacity="null" stroke-width="5"/>
+  </g>
+ </g>
+</svg>

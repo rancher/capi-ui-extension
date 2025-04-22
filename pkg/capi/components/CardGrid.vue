@@ -72,7 +72,9 @@ export default {
     v-else
     class="m-50 text-center"
   >
-    <h1 v-t="noDataKey" />
+    <slot name="no-rows">
+      <h1 v-t="noDataKey" />
+    </slot>
   </div>
 </template>
 
