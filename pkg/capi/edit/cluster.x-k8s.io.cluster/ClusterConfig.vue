@@ -275,6 +275,11 @@ export default {
         out.push(subtype);
       }
     },
+
+    // TODO nb not this
+    canCreateGitRepos() {
+      return true;
+    }
   },
   methods: {
     set,
@@ -375,6 +380,10 @@ export default {
       } else {
         delete this.value.metadata.labels['cluster-api.cattle.io/rancher-auto-import'];
       }
+    },
+
+    openRepoModal() {
+      this.$store.dispatch('management/promptModal', { component: 'AddExampleRepoDialog', modalWidth: '800px' });
     }
   }
 };
@@ -406,7 +415,22 @@ export default {
         name-field="label"
         side-label-field="tag"
         @clicked="clickedType"
-      />
+      >
+        <template #no-rows>
+          <div v-if="canCreateGitRepos">
+            There are no clusterclasses available.
+            <button
+              type="button"
+              class="btn role-secondary"
+              @click="openRepoModal"
+            >
+              add examples
+            </button>
+          </div>
+        </template>
+        <CardGrid>
+        </cardgrid>
+      </cardgrid>
     </template>
     <template #stepConfiguration>
       <NameNsDescription
