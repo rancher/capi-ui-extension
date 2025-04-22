@@ -218,6 +218,11 @@ export default {
         out.push(subtype);
       }
     },
+
+    // TODO nb not this
+    canCreateGitRepos() {
+      return true;
+    }
   },
   methods: {
     set,
@@ -301,6 +306,10 @@ export default {
       this.clusterClassObj = this.clusterClasses.find((x) => x.id === obj.id) || null;
       this.setClass();
       this.setNamespace();
+    },
+
+    openRepoModal() {
+      this.$store.dispatch('management/promptModal', { component: 'AddExampleRepoDialog', modalWidth: '800px' });
     }
   }
 };
@@ -329,7 +338,22 @@ export default {
         name-field="label"
         side-label-field="tag"
         @clicked="clickedType"
-      />
+      >
+        <template #no-rows>
+          <div v-if="canCreateGitRepos">
+            There are no clusterclasses available.
+            <button
+              type="button"
+              class="btn role-secondary"
+              @click="openRepoModal"
+            >
+              add examples
+            </button>
+          </div>
+        </template>
+        <CardGrid>
+        </cardgrid>
+      </cardgrid>
     </template>
     <template #stepConfiguration>
       <NameNsDescription
