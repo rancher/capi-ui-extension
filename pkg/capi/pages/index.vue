@@ -2,7 +2,7 @@
 import { CAPI as RANCHER_CAPI, SCHEMA } from '@shell/config/types';
 import Banner from '@components/Banner/Banner.vue';
 import { CAPI } from '../types/capi.ts';
-import InstallChart from '../components/InstallChart/index.vue';
+import InstallHelmCharts from '../components/InstallHelmCharts/index.vue';
 
 export default {
   name: 'CAPITurtlesDashboard',
@@ -34,7 +34,7 @@ export default {
     return { willInstall: false };
   },
 
-  components: { Banner, InstallChart },
+  components: { Banner, InstallHelmCharts },
 
   computed: {
     hasClusterClassSchema() {
@@ -79,7 +79,7 @@ export default {
     </div>
   </div>
   <div v-else>
-    <InstallChart
+    <InstallHelmCharts
       chart-name="rancher-turtles"
       repo-name="turtles"
       repo-url="https://rancher.github.io/turtles"
