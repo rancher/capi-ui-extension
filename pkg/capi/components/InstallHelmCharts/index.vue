@@ -15,6 +15,8 @@ import { isPrerelease } from '@shell/utils/version';
 /**
  * Helm CLI options that are not persisted on the back end,
  * but are used for the final install/upgrade operation.
+ *
+ * NOTE: need to append namespace if installing chart into a ns that doesn't already exist
  */
 const defaultCmdOpts = {
   noHooks:                    false,
@@ -62,6 +64,12 @@ export default {
     repoType: {
       type:    String,
       default: 'cluster'
+    },
+
+    // if not set will use chart targetNamespace. If neither this prop nor chart's targetNamespace are defined, will use default
+    targetNamespace: {
+      type:    String,
+      default: null
     },
   },
 
@@ -111,6 +119,7 @@ export default {
 
     chart(neu) {
       if (neu) {
+        console.log('*** chart found', neu);
         this.fetchVersionInfo();
       }
     },
@@ -127,10 +136,12 @@ export default {
         annotations: {
           // TODO nb always cluster?
           [CATALOG_ANNOTATIONS.SOURCE_REPO_TYPE]: 'cluster',
-          [CATALOG_ANNOTATIONS.SOURCE_REPO_NAME]: this.reponame
+          [CATALOG_ANNOTATIONS.SOURCE_REPO_NAME]: this.repoName
         },
         values: { ...this.getGlobalValues() }
       };
+
+      this.installCmd.namespace = this.targetNamespace || this.chart?.targetNamespace || 'default';
     }
   },
 
@@ -139,7 +150,6 @@ export default {
       try {
         // TODO nb probably can't use management here
         // TODO nb nested try block...?
-        // TODO nb namespace??
         const repoObj = await this.$store.dispatch('management/create', {
           type:     CATALOG.CLUSTER_REPO,
           metadata: { name: this.repoName },
