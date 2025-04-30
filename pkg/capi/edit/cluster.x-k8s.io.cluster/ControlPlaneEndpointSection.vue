@@ -6,7 +6,7 @@ import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 export default {
   name:       'ControlPlaneEndpointSection',
   components: { LabeledInput },
-  emits:      ['update:value'],
+  emits:      ['control-plane-endpoint-changed'],
   props:      {
     value: {
       type:     Object,
@@ -24,10 +24,33 @@ export default {
       type: Object,
     },
   },
+  data() {
+    return {
+        host: this?.value?.host || '',
+        port: this?.value?.port || ''
+    }
+  },
+
   computed: {
     ...mapGetters({ t: 'i18n/t' }),
     clusterIsAlreadyCreated() {
       return this.mode === _EDIT;
+    }
+  },
+  methods:{
+    updateControlPlaneEndpoint(){
+        if(!this.host && !this.port){
+            this.$emit('control-plane-endpoint-changed', null);
+        }else {
+            const res = {}
+            if(this.host){
+                res.host = this.host
+            }
+            if(this.port){
+                res.port = parseInt(this.port);
+            }
+            this.$emit('control-plane-endpoint-changed', res)
+        }
     }
   }
 };
@@ -39,24 +62,26 @@ export default {
         class="col col-host span-4 mb-20"
       >
         <LabeledInput
-          v-model:value="value.host"
+          v-model:value="host"
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.controlPlaneEndpoint.host')"
           :rules="rules.host"
+          @update:value="updateControlPlaneEndpoint"
         />
       </div>
       <div
         class="col col-port span-2 mb-20"
       >
         <LabeledInput
-          :value="value.port"
+          v-model:value="port"
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.controlPlaneEndpoint.port')"
           :rules="rules.port"
           type="number"
-          @update:value="(val) => value.port = parseInt(val)"
+          placeholder="49152"
+          @update:value="updateControlPlaneEndpoint"        
         />
       </div>
     </div>

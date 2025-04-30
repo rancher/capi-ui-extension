@@ -7,6 +7,7 @@ export default {
   name: 'NetworkSelection',
 
   components: { LabeledInput },
+  emits:      ['replicas-changed'],
   props:      {
     value: {
       type:     Object,
@@ -26,17 +27,23 @@ export default {
     clusterIsAlreadyCreated() {
       return this.mode === _EDIT;
     },
+    replicas() {
+      return this.value?.controlPlane?.replicas ? this.value.controlPlane.replicas : '';
+    }
   }
 };
 </script>
 <template>
   <div class="row row-cp">
     <LabeledInput
-      v-model:value="value.replicas"
+      :value="replicas"
       :mode="mode"
       :disabled="clusterIsAlreadyCreated"
       :label="t('capi.cluster.topology.controlPlane.replicas')"
       :rules="rules.replicas"
+      type="number"
+      placeholder="1"
+      @update:value="$emit('replicas-changed', $event)"
     />
   </div>
 </template>

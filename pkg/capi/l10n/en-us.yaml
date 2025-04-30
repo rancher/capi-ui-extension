@@ -18,24 +18,25 @@ capi:
       clusterClass:
         title: Cluster Class
         label: Cluster Class
-        subtext:  
-        description:  ''
+        subtext:
+        description: ""
       configuration:
         title: Configuration
         label: Configuration
-        subtext:  
-        description:  ''
+        subtext:
+        description: ""
       variables:
         title: Variables
         label: Variables
-        subtext:  
-        description:  ''
+        subtext:
+        description: ""
     secret:
       reuse: Use existing credential
       create: Create new credential
-    controlPlane:
-      title: Control Plane Options
-      provisioner: Type
+    topology:
+      controlPlane:
+        title: Control Plane
+        replicas: Replicas
     providerConfig:
       title: Infrastructure
     clusterClass:
@@ -61,12 +62,13 @@ capi:
       title: Workers
       class: Class
       name: Name
+      replicas: Replicas
       machineDeployments:
         title: Machine Deployments
       machinePools:
         title: Machine Pools
   clusterClassCard:
-    title: 'Cluster Class Name: {name}'
+    title: "Cluster Class Name: {name}"
     controlPlaneName: Control Plane Name
     controlPlaneKind: Control Plane Kind
     controlPlaneNamespace: Control Plane Namespace
@@ -89,7 +91,7 @@ capi:
     name:
       label: Name
       placeholder: Provider name
-    description: 
+    description:
       label: Description
       placeholder: Any text you want that better describes this provider
     type:
@@ -157,7 +159,7 @@ typeLabel:
       one { Machine Deployment}
       other { Machine Deployments }
     }
-  cluster.x-k8s.io.clusterclass: |-    
+  cluster.x-k8s.io.clusterclass: |-
     {count, plural,
       one { Cluster Class}
       other { Cluster Classes}
@@ -181,6 +183,6 @@ validation:
   version: "Version format  should be in the semver format prefixed with 'v'. Example: v1.9.3"
   name: Name is required and must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character.
   port: Port value must be a number.
-  url: '"Value" must be a valid URL.' 
+  url: '"Value" must be a valid URL.'
 error:
   clusterClassNotFound: Could not find corresponding cluster class. Please check that cluster class exists and is valid.

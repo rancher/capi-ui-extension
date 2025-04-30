@@ -18,23 +18,13 @@ import WorkerItem from './WorkerItem.vue';
 import NetworkSection from './NetworkSection.vue';
 import ControlPlaneEndpointSection from './ControlPlaneEndpointSection.vue';
 import ControlPlaneSection from './ControlPlaneSection.vue';
+import Labels from '@shell/components/form/Labels.vue';
+import { mapGetters } from 'vuex';
 
 const defaultTopologyConfig = {
-  version: '',
-  class:   '',
-  controlPlane: {},
+  version:      '',
+  class:        '',
   workers:           { machineDeployments: [], machinePools: [] }
-};
-const defaultClusterNetwork = {
-  apiServerPort: 6443,
-  pods:          { cidrBlocks: [] },
-  serviceDomain: '',
-  services:      { cidrBlocks: [] }
-};
-
-const defaultCPEndpointConfig = {
-  host: '',
-  port: 49152
 };
 
 export default {
@@ -160,37 +150,67 @@ export default {
   },
 
   computed: {
+    ...mapGetters({ t: 'i18n/t' }),
     fvExtraRules() {
       return {
-        version: versionValidator(this.$store.getters['i18n/t'], this.clusterClassControlPlane),
-        host:    hostValidator(this.$store.getters['i18n/t']),
-        port:    portValidator(this.$store.getters['i18n/t']),
-        cidr:    cidrValidator(this.$store.getters['i18n/t'])
+        version: versionValidator(this.t, this.clusterClassControlPlane),
+        host:    hostValidator(this.t),
+        port:    portValidator(this.t),
+        cidr:    cidrValidator(this.t)
       };
+    },
+    controlPlaneEndpointValid() {
+        const controlPlaneEndpointPortValid = !portValidator(this.t)(this.value?.spec?.controlPlaneEndpoint?.port);
+        const controlPlaneEndpointHostValid = !hostValidator(this.t)(this.value?.spec?.controlPlaneEndpoint?.host);
+        return controlPlaneEndpointPortValid && controlPlaneEndpointHostValid;
+    },
+    controlPlaneValid() {
+        return !this.value?.spec?.topology?.controlPlane?.replicas || isNaN(this.value?.spec?.topology?.controlPlane?.replicas)
+    },
+    networkingValid(){
+        const hostValid = !hostValidator(this.t)(this.value?.spec?.clusterNetwork?.serviceDomain);
+        const portValid = !portValidator(this.t)(this.value?.spec?.clusterNetwork?.apiServerPort);
+      const podsValid = !this.value?.spec?.clusterNetwork?.pods?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.pods.cidrBlocks);
+      const servicesValid = !this.value?.spec?.clusterNetwork?.services?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.services.cidrBlocks);
+      return hostValid && portValid && podsValid && servicesValid;
+    },
+    machineDeploymentsValid() {
+        if(this.value?.spec?.topology?.workers?.machineDeployments.length > 0){
+            this.value?.spec?.topology?.workers?.machineDeployments.forEach((deployment)=>{
+                if(!deployment.name || !deployment.class || !isNaN(deployment.replicas) ){
+                    return false;
+                }
+            })
+        }
+        return true;
+    },
+    machinePoolsValid() {
+        if(this.value?.spec?.topology?.workers?.machinePools.length > 0){
+            this.value?.spec?.topology?.workers?.machinePools.forEach((pool)=>{
+                if(!pool.name || !pool.class || !isNaN(pool.replicas) ){
+                    return false;
+                }
+            })
+        }
+        return true;
     },
     stepConfigurationRequires() {
       const nameValid = !!this.value.metadata.name;
-      const t = this.$store.getters['i18n/t'];
 
-      const versionValid = this.value?.spec?.topology?.version && !versionValidator(t, this.clusterClassControlPlane)(this.value?.spec?.topology?.version);
-      const controlPlaneEndpointPortValid = !portValidator(t)(this.value?.spec?.controlPlaneEndpoint?.port);
-      const controlPlaneEndpointHostValid = !hostValidator(t)(this.value?.spec?.controlPlaneEndpoint?.host);
-      const machineDeploymentsValid = this.value?.spec?.topology?.workers?.machineDeployments?.length > 0 && !!this.value?.spec?.topology?.workers?.machineDeployments[0]?.name && !!this.value?.spec?.topology?.workers?.machineDeployments[0]?.class;
-      const machinePoolsValid = this.value?.spec?.topology?.workers?.machinePools?.length > 0 && !!this.value?.spec?.topology?.workers?.machinePools[0]?.name && !!this.value?.spec?.topology?.workers?.machinePools[0]?.class;
-      const networkPodsValid = !this.value?.spec?.clusterNetwork?.pods?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.pods.cidrBlocks);
-      const networkServicesValid = !this.value?.spec?.clusterNetwork?.services?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.services.cidrBlocks);
-      const networkValid = !!this.value?.spec?.clusterNetwork?.apiServerPort && !isNaN(this.value?.spec?.clusterNetwork?.apiServerPort) && networkPodsValid && networkServicesValid;
-
-      return nameValid && versionValid && controlPlaneEndpointHostValid && controlPlaneEndpointPortValid && networkValid && (machineDeploymentsValid || machinePoolsValid);
+      const versionValid = this.value?.spec?.topology?.version && !versionValidator(this.t, this.clusterClassControlPlane)(this.value?.spec?.topology?.version);
+        const workersValid = ( this.value?.spec?.topology?.workers?.machinePools.length > 0 || this.value?.spec?.topology?.workers?.machineDeployments.length > 0) && this.machineDeploymentsValid && this.machinePoolsValid
+      const formValid = nameValid && versionValid && this.controlPlaneEndpointValid && this.controlPlaneValid && this.networkingValid & workersValid;
+        console
+      return formValid;
     },
-    clusterNetwork() {
-      return this.value?.spec?.clusterNetwork;
+    topology() {
+      return this.value?.spec?.topology;
     },
     controlPlane() {
       return this.value?.spec?.topology?.controlPlane;
     },
     controlPlaneEndpoint() {
-      return this.value?.spec?.controlPlaneEndpoint;
+      return this.value?.spec?.controlPlaneEndpoint || {};
     },
     machineDeployments() {
       return this.value.spec.topology.workers.machineDeployments;
@@ -276,14 +296,6 @@ export default {
       if ( !val.spec.topology ) {
         set(val.spec, 'topology', clone(defaultTopologyConfig));
       }
-
-      if ( !val.spec.clusterNetwork ) {
-        set(val.spec, 'clusterNetwork', clone(defaultClusterNetwork));
-      }
-
-      if ( !val.spec.controlPlaneEndpoint ) {
-        set(val.spec, 'controlPlaneEndpoint', clone(defaultCPEndpointConfig));
-      }
       this.$emit('update:value', { k: 'spec', val: val.spec });
 
       if ( this.preselectedClass) {
@@ -294,6 +306,27 @@ export default {
       if ( this.$refs.cruresource ) {
         this.$refs.cruresource.emitOrRoute();
       }
+    },
+    controlPlaneReplicasChanged(val) {
+      if (val) {
+        this.value.spec.topology = { ...this.value.spec.topology, ...{ controlPlane: { replicas: parseInt(val) } } };
+      } else {
+        delete this.value.spec.topology.controlPlane;
+      }
+    },
+    controlPlaneEndpointChanged(val){
+        if(!val) {
+            delete this.value.spec.controlPlaneEndpoint;
+        } else {
+            this.value.spec = {...this.value.spec, ...{controlPlaneEndpoint: val}};
+        }
+    },
+    networkChanged(val){
+        if(!val) {
+            delete this.value.spec.clusterNetwork;
+        } else {
+            this.value.spec = {...this.value.spec, ...{clusterNetwork: val}};
+        }
     },
     cancel() {
       this.$router.push({
@@ -378,17 +411,18 @@ export default {
             v-model:value="controlPlaneEndpoint"
             :mode="mode"
             :rules="{host:fvGetAndReportPathRules('spec.controlPlaneEndpoint.host'), port:fvGetAndReportPathRules('spec.controlPlaneEndpoint.port') }"
-            @update:value="$emit('update:value', {k: 'spec.controlPlaneEndpoint', val: $event})"
+            @control-plane-endpoint-changed="controlPlaneEndpointChanged"
           />
         </div>
         <div class="col span-6 mt-20">
           <h2>
-            <t k="capi.cluster.controlPlane.title" />
+            <t k="capi.cluster.topology.controlPlane.title" />
           </h2>
           <ControlPlaneSection
-            v-model:value="controlPlane"
+            v-model:value="topology"
             :mode="mode"
             :rules="{replicas:fvGetAndReportPathRules('spec.topology.controlPlane.replicas') }"
+            @replicas-changed="controlPlaneReplicasChanged"
             @update:value="$emit('update:value', {k: 'spec.topology.controlPlane', val: $event})"
           />
         </div>
@@ -398,7 +432,7 @@ export default {
           <t k="capi.cluster.networking.title" />
         </h2>
         <NetworkSection
-          v-model:value="clusterNetwork"
+          v-model:value="value.spec"
           :mode="mode"
           :rules="{
             serviceDomain:fvGetAndReportPathRules('spec.clusterNetwork.serviceDomain'),
@@ -406,18 +440,18 @@ export default {
             pods: fvGetAndReportPathRules('spec.clusterNetwork.pods'),
             services: fvGetAndReportPathRules('spec.clusterNetwork.services')
           }"
-          @update:value="$emit('update:value', {k: 'spec.clusterNetwork', val: $event})"
+          @network-changed="networkChanged"
         />
       </div>
-      <div class="mt-20">
+      <div class="col span-12 mt-20 mb-20">
         <h2>
           <t k="capi.cluster.workers.title" />
           <span class="required">*</span>
         </h2>
-        <div class="row mb-20">
+        <div class="span-12">
           <div
             v-if="!!machineDeploymentOptions"
-            class="col span-4 col-config"
+            class="row"
           >
             <WorkerItem
               :value="machineDeployments"
@@ -431,7 +465,7 @@ export default {
           </div>
           <div
             v-if="!!machinePoolOptions"
-            class="col span-4 col-config"
+            class="row"
           >
             <WorkerItem
               :value="machinePools"
