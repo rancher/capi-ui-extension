@@ -252,13 +252,6 @@ export default {
   </div>
 </template>
 <style lang="scss" scoped>
-
-@media screen and (min-width: 1000px) {
-    .row-cp {
-        width: 200%
-    }
-}
-
 @media screen and (max-width: 1000px) {
     .row-wi {
         flex-direction: column;
