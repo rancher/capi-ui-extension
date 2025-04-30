@@ -26,9 +26,9 @@ export default {
   },
   data() {
     return {
-        host: this?.value?.host || '',
-        port: this?.value?.port || ''
-    }
+      host: this?.value?.host || '',
+      port: this?.value?.port || ''
+    };
   },
 
   computed: {
@@ -37,20 +37,21 @@ export default {
       return this.mode === _EDIT;
     }
   },
-  methods:{
-    updateControlPlaneEndpoint(){
-        if(!this.host && !this.port){
-            this.$emit('control-plane-endpoint-changed', null);
-        }else {
-            const res = {}
-            if(this.host){
-                res.host = this.host
-            }
-            if(this.port){
-                res.port = parseInt(this.port);
-            }
-            this.$emit('control-plane-endpoint-changed', res)
+  methods: {
+    updateControlPlaneEndpoint() {
+      if (!this.host && !this.port) {
+        this.$emit('control-plane-endpoint-changed', null);
+      } else {
+        const res = {};
+
+        if (this.host) {
+          res.host = this.host;
         }
+        if (this.port) {
+          res.port = parseInt(this.port);
+        }
+        this.$emit('control-plane-endpoint-changed', res);
+      }
     }
   }
 };
@@ -81,7 +82,7 @@ export default {
           :rules="rules.port"
           type="number"
           placeholder="49152"
-          @update:value="updateControlPlaneEndpoint"        
+          @update:value="updateControlPlaneEndpoint"
         />
       </div>
     </div>

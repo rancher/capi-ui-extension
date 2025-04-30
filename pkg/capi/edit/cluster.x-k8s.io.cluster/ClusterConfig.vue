@@ -160,47 +160,53 @@ export default {
       };
     },
     controlPlaneEndpointValid() {
-        const controlPlaneEndpointPortValid = !portValidator(this.t)(this.value?.spec?.controlPlaneEndpoint?.port);
-        const controlPlaneEndpointHostValid = !hostValidator(this.t)(this.value?.spec?.controlPlaneEndpoint?.host);
-        return controlPlaneEndpointPortValid && controlPlaneEndpointHostValid;
+      const controlPlaneEndpointPortValid = !portValidator(this.t)(this.value?.spec?.controlPlaneEndpoint?.port);
+      const controlPlaneEndpointHostValid = !hostValidator(this.t)(this.value?.spec?.controlPlaneEndpoint?.host);
+
+      return controlPlaneEndpointPortValid && controlPlaneEndpointHostValid;
     },
     controlPlaneValid() {
-        return !this.value?.spec?.topology?.controlPlane?.replicas || isNaN(this.value?.spec?.topology?.controlPlane?.replicas)
+      return !this.value?.spec?.topology?.controlPlane?.replicas || isNaN(this.value?.spec?.topology?.controlPlane?.replicas);
     },
-    networkingValid(){
-        const hostValid = !hostValidator(this.t)(this.value?.spec?.clusterNetwork?.serviceDomain);
-        const portValid = !portValidator(this.t)(this.value?.spec?.clusterNetwork?.apiServerPort);
+    networkingValid() {
+      const hostValid = !hostValidator(this.t)(this.value?.spec?.clusterNetwork?.serviceDomain);
+      const portValid = !portValidator(this.t)(this.value?.spec?.clusterNetwork?.apiServerPort);
       const podsValid = !this.value?.spec?.clusterNetwork?.pods?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.pods.cidrBlocks);
       const servicesValid = !this.value?.spec?.clusterNetwork?.services?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.services.cidrBlocks);
+
       return hostValid && portValid && podsValid && servicesValid;
     },
     machineDeploymentsValid() {
-        if(this.value?.spec?.topology?.workers?.machineDeployments.length > 0){
-            this.value?.spec?.topology?.workers?.machineDeployments.forEach((deployment)=>{
-                if(!deployment.name || !deployment.class || !isNaN(deployment.replicas) ){
-                    return false;
-                }
-            })
-        }
-        return true;
+      if (this.value?.spec?.topology?.workers?.machineDeployments.length > 0) {
+        this.value?.spec?.topology?.workers?.machineDeployments.forEach((deployment) => {
+          if (!deployment.name || !deployment.class || !isNaN(deployment.replicas) ) {
+            return false;
+          }
+        });
+      }
+
+      return true;
     },
     machinePoolsValid() {
-        if(this.value?.spec?.topology?.workers?.machinePools.length > 0){
-            this.value?.spec?.topology?.workers?.machinePools.forEach((pool)=>{
-                if(!pool.name || !pool.class || !isNaN(pool.replicas) ){
-                    return false;
-                }
-            })
-        }
-        return true;
+      if (this.value?.spec?.topology?.workers?.machinePools.length > 0) {
+        this.value?.spec?.topology?.workers?.machinePools.forEach((pool) => {
+          if (!pool.name || !pool.class || !isNaN(pool.replicas) ) {
+            return false;
+          }
+        });
+      }
+
+      return true;
     },
     stepConfigurationRequires() {
       const nameValid = !!this.value.metadata.name;
 
       const versionValid = this.value?.spec?.topology?.version && !versionValidator(this.t, this.clusterClassControlPlane)(this.value?.spec?.topology?.version);
-        const workersValid = ( this.value?.spec?.topology?.workers?.machinePools.length > 0 || this.value?.spec?.topology?.workers?.machineDeployments.length > 0) && this.machineDeploymentsValid && this.machinePoolsValid
+      const workersValid = ( this.value?.spec?.topology?.workers?.machinePools.length > 0 || this.value?.spec?.topology?.workers?.machineDeployments.length > 0) && this.machineDeploymentsValid && this.machinePoolsValid;
       const formValid = nameValid && versionValid && this.controlPlaneEndpointValid && this.controlPlaneValid && this.networkingValid & workersValid;
-        console
+
+      console;
+
       return formValid;
     },
     topology() {
@@ -314,19 +320,19 @@ export default {
         delete this.value.spec.topology.controlPlane;
       }
     },
-    controlPlaneEndpointChanged(val){
-        if(!val) {
-            delete this.value.spec.controlPlaneEndpoint;
-        } else {
-            this.value.spec = {...this.value.spec, ...{controlPlaneEndpoint: val}};
-        }
+    controlPlaneEndpointChanged(val) {
+      if (!val) {
+        delete this.value.spec.controlPlaneEndpoint;
+      } else {
+        this.value.spec = { ...this.value.spec, ...{ controlPlaneEndpoint: val } };
+      }
     },
-    networkChanged(val){
-        if(!val) {
-            delete this.value.spec.clusterNetwork;
-        } else {
-            this.value.spec = {...this.value.spec, ...{clusterNetwork: val}};
-        }
+    networkChanged(val) {
+      if (!val) {
+        delete this.value.spec.clusterNetwork;
+      } else {
+        this.value.spec = { ...this.value.spec, ...{ clusterNetwork: val } };
+      }
     },
     cancel() {
       this.$router.push({

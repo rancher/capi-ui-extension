@@ -7,7 +7,7 @@ import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 export default {
   name: 'NetworkSelection',
 
-  emits: ['network-changed'],
+  emits:      ['network-changed'],
   components: {
     LabeledInput,
     ArrayList
@@ -33,11 +33,11 @@ export default {
   },
   data() {
     return {
-        serviceDomain: this?.value?.clusterNetwork?.serviceDomain || '',
-        apiServerPort: this?.value?.clusterNetwork?.apiServerPort || '',
-        podsCidrBlocks: this?.value?.clusterNetwork?.pods?.cidrBlocks || [],
-        servicesCidrBlocks: this?.value?.clusterNetwork?.services?.cidrBlocks || []
-    }
+      serviceDomain:      this?.value?.clusterNetwork?.serviceDomain || '',
+      apiServerPort:      this?.value?.clusterNetwork?.apiServerPort || '',
+      podsCidrBlocks:     this?.value?.clusterNetwork?.pods?.cidrBlocks || [],
+      servicesCidrBlocks: this?.value?.clusterNetwork?.services?.cidrBlocks || []
+    };
   },
   computed: {
     ...mapGetters({ t: 'i18n/t' }),
@@ -45,28 +45,29 @@ export default {
       return this.mode === _EDIT;
     }
   },
-  methods:{
-    updateNetwork(){
-        if(!this.serviceDomain && !this.apiServerPort && this.podsCidrBlocks.length === 0 && this.servicesCidrBlocks.length === 0){
-            this.$emit('network-changed', null);
-        } else {
-            const res = {}
-            if(this.serviceDomain){
-                res.serviceDomain = this.serviceDomain;
-            }
-            if(this.apiServerPort){
-                res.apiServerPort = parseInt(this.apiServerPort);
-            }
-            
-            if(this.podsCidrBlocks.length > 0){
-                res.pods = {cidrBlocks: this.podsCidrBlocks};
-            }
-            if(this.servicesCidrBlocks.length > 0){
-                res.services = {cidrBlocks: this.podsCidrBlocks};
-            }
-            
-            this.$emit('network-changed', res)
+  methods: {
+    updateNetwork() {
+      if (!this.serviceDomain && !this.apiServerPort && this.podsCidrBlocks.length === 0 && this.servicesCidrBlocks.length === 0) {
+        this.$emit('network-changed', null);
+      } else {
+        const res = {};
+
+        if (this.serviceDomain) {
+          res.serviceDomain = this.serviceDomain;
         }
+        if (this.apiServerPort) {
+          res.apiServerPort = parseInt(this.apiServerPort);
+        }
+
+        if (this.podsCidrBlocks.length > 0) {
+          res.pods = { cidrBlocks: this.podsCidrBlocks };
+        }
+        if (this.servicesCidrBlocks.length > 0) {
+          res.services = { cidrBlocks: this.podsCidrBlocks };
+        }
+
+        this.$emit('network-changed', res);
+      }
     }
   }
 };
@@ -90,7 +91,7 @@ export default {
         class="col col-port span-2 mb-20"
       >
         <LabeledInput
-        v-model:value="apiServerPort"
+          v-model:value="apiServerPort"
           type="number"
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
@@ -98,7 +99,7 @@ export default {
           :rules="rules.apiServerPort"
           placeholder="6443"
           @update:value="updateNetwork"
-          />
+        />
       </div>
     </div>
     <div class="row row-networking">

@@ -162,57 +162,57 @@ export default {
         class="box"
       >
         <div class="value row row-wi">
-            <div class="col-long mr-20 span-4 mt-20">
-              <LabeledInput
-                ref="value"
-                v-model:value="row.value.name"
-                :mode="mode"
-                :disabled="false"
-                :label="t('capi.cluster.workers.name')"
-                required
-              />
-            </div>
-            <div class="col-long mr-20 span-4 mt-20">
-              <LabeledSelect
-                v-model:value="row.value.class"
-                :mode="mode"
-                :options="classOptions"
-                label-key="capi.cluster.workers.class"
-                required
-              />
-            </div>
-            <div class="col-short mr-10 mt-20">
-              <LabeledInput
-                :value="row.value.replicas"
-                :mode="mode"
-                :disabled="false"
-                :label="t('capi.cluster.workers.replicas')"
-                type="number"
-                placeholder="1"
-                @update:value="(val) => !!val ? row.value.replicas = parseInt(val) : row.value.replicas = null"
-              />
-            </div>
-            <div
-              v-if="removeAllowed"
-              class="remove mt-30"
+          <div class="col-long mr-20 span-4 mt-20">
+            <LabeledInput
+              ref="value"
+              v-model:value="row.value.name"
+              :mode="mode"
+              :disabled="false"
+              :label="t('capi.cluster.workers.name')"
+              required
+            />
+          </div>
+          <div class="col-long mr-20 span-4 mt-20">
+            <LabeledSelect
+              v-model:value="row.value.class"
+              :mode="mode"
+              :options="classOptions"
+              label-key="capi.cluster.workers.class"
+              required
+            />
+          </div>
+          <div class="col-short mr-10 mt-20">
+            <LabeledInput
+              :value="row.value.replicas"
+              :mode="mode"
+              :disabled="false"
+              :label="t('capi.cluster.workers.replicas')"
+              type="number"
+              placeholder="1"
+              @update:value="(val) => !!val ? row.value.replicas = parseInt(val) : row.value.replicas = null"
+            />
+          </div>
+          <div
+            v-if="removeAllowed"
+            class="remove mt-30"
+          >
+            <slot
+              name="remove-button"
+              :remove="() => remove(row, idx)"
+              :i="idx"
+              :row="row"
             >
-              <slot
-                name="remove-button"
-                :remove="() => remove(row, idx)"
-                :i="idx"
-                :row="row"
+              <button
+                type="button"
+                :disabled="isView"
+                class="btn role-link"
+                :data-testid="`remove-item-${idx}`"
+                @click="remove(row, idx)"
               >
-                <button
-                  type="button"
-                  :disabled="isView"
-                  class="btn role-link"
-                  :data-testid="`remove-item-${idx}`"
-                  @click="remove(row, idx)"
-                >
-                  {{ removeLabel }}
-                </button>
-              </slot>
-            </div>
+                {{ removeLabel }}
+              </button>
+            </slot>
+          </div>
         </div>
       </div>
     </template>

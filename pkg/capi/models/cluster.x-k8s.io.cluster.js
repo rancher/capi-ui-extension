@@ -22,6 +22,6 @@ export default class CapiCluster extends SteveModel {
   get _availableActions() {
     const out = super._availableActions;
 
-    return out.filter(action => action.action !== 'goToEdit' && action.action !== 'goToViewConfig');
+    return out.filter((action) => action.action !== 'goToEdit' && action.action !== 'goToViewConfig');
   }
 }
