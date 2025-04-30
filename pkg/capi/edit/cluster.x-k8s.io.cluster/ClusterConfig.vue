@@ -7,10 +7,10 @@ import FormValidation from '@shell/mixins/form-validation';
 import CruResource from '@shell/components/CruResource.vue';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import Labels from '@shell/components/form/Labels.vue';
-
+import { _EDIT } from '@shell/config/query-params';
 import ClusterClassVariables from '../../components/CCVariables/index.vue';
 import { versionValidator, hostValidator, portValidator, cidrValidator } from '../../util/validators';
-
+import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
 import CardGrid from '../../components/CardGrid.vue';
 import WorkerItem from './WorkerItem.vue';
 import NetworkSection from './NetworkSection.vue';
@@ -36,7 +36,8 @@ export default {
     ClusterClassVariables,
     CardGrid,
     Labels,
-    ControlPlaneSection
+    ControlPlaneSection,
+    Checkbox
   },
   mixins: [CreateEditView, FormValidation],
   emits:  ['update:value'],
@@ -120,7 +121,8 @@ export default {
       },
       variablesReady:  true,
       clusterClassObj: null,
-      loading:         true
+      loading:         true,
+      autoImport:      !!this.value?.metadata?.labels && !!this.value?.metadata?.labels['cluster-api.cattle.io/rancher-auto-import']
     };
   },
 
@@ -187,9 +189,10 @@ export default {
 
       return this.fvFormIsValid & workersValid;
     },
-    topology() {
-      return this.value?.spec?.topology;
+    clusterIsAlreadyCreated() {
+      return this.mode === _EDIT;
     },
+
     controlPlane: {
       get() {
         return this.value?.spec?.topology?.controlPlane || {};
@@ -304,8 +307,9 @@ export default {
     initSpecs() {
       const val = this.value;
 
-      if (!val) {
-        set(val, 'spec', {});
+      if ( !val ) {
+        set(val, 'spec', { });
+        set(val, 'metadata', { labels: {}, annotations: {} });
       }
       if (!val.spec.topology) {
         set(val.spec, 'topology', clone(defaultTopologyConfig));
@@ -337,6 +341,13 @@ export default {
       this.clusterClassObj = this.clusterClasses.find((x) => x.id === obj.id) || null;
       this.setClass();
       this.setNamespace();
+    },
+    enableAutoImport(val) {
+      if (val) {
+        this.value.metadata.labels['cluster-api.cattle.io/rancher-auto-import'] = true;
+      } else {
+        delete this.value.metadata.labels['cluster-api.cattle.io/rancher-auto-import'];
+      }
     }
   }
 };
@@ -468,10 +479,27 @@ export default {
           </div>
         </div>
       </div>
+      <div class="mt-30">
+        <h2>
+          <t
+            k="capi.cluster.labels.title"
+            :raw="true"
+          />
+        </h2>
+      </div>
       <div class="mt-20">
         <Labels
           :value="value"
           :mode="mode"
+        />
+      </div>
+      <div class="mt-30">
+        <Checkbox
+          v-model:value="autoImport"
+          :mode="mode"
+          label-key="capi.cluster.labels.autoimport.label"
+          :disabled="clusterIsAlreadyCreated"
+          @update:value="enableAutoImport"
         />
       </div>
     </template>

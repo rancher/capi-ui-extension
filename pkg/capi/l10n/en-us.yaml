@@ -18,17 +18,14 @@ capi:
       clusterClass:
         title: Cluster Class
         label: Cluster Class
-        subtext:
         description: ""
       configuration:
         title: Configuration
         label: Configuration
-        subtext:
         description: ""
       variables:
         title: Variables
         label: Variables
-        subtext:
         description: ""
     secret:
       reuse: Use existing credential
@@ -67,6 +64,10 @@ capi:
         title: Machine Deployments
       machinePools:
         title: Machine Pools
+    labels:
+      title: Labels &amp; Annotations
+      autoimport:
+        label: Auto-import cluster into Rancher
   clusterClassCard:
     title: "Cluster Class Name: {name}"
     controlPlaneName: Control Plane Name
