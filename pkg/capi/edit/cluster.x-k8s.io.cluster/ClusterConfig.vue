@@ -344,7 +344,7 @@ export default {
     },
     enableAutoImport(val) {
       if (val) {
-        this.value.metadata.labels['cluster-api.cattle.io/rancher-auto-import'] = true;
+        this.value.metadata.labels['cluster-api.cattle.io/rancher-auto-import'] = 'true';
       } else {
         delete this.value.metadata.labels['cluster-api.cattle.io/rancher-auto-import'];
       }
