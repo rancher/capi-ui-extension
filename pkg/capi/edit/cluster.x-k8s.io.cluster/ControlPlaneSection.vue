@@ -7,7 +7,7 @@ export default {
   name: 'NetworkSelection',
 
   components: { LabeledInput },
-  emits:      ['replicas-changed'],
+  emits:      ['update:value'],
   props:      {
     value: {
       type:     Object,
@@ -28,7 +28,7 @@ export default {
       return this.mode === _EDIT;
     },
     replicas() {
-      return this.value?.controlPlane?.replicas ? this.value.controlPlane.replicas : '';
+      return this.value?.replicas || '';
     }
   }
 };
@@ -43,7 +43,7 @@ export default {
       :rules="rules.replicas"
       type="number"
       placeholder="1"
-      @update:value="$emit('replicas-changed', $event)"
+      @update:value="$emit('update:value', $event)"
     />
   </div>
 </template>

@@ -158,62 +158,79 @@ export default {
         cidr:    cidrValidator(this.t)
       };
     },
-    controlPlaneEndpointValid() {
-      const controlPlaneEndpointPortValid = !portValidator(this.t)(this.value?.spec?.controlPlaneEndpoint?.port);
-      const controlPlaneEndpointHostValid = !hostValidator(this.t)(this.value?.spec?.controlPlaneEndpoint?.host);
 
-      return controlPlaneEndpointPortValid && controlPlaneEndpointHostValid;
-    },
-    controlPlaneValid() {
-      return !this.value?.spec?.topology?.controlPlane?.replicas || isNaN(this.value?.spec?.topology?.controlPlane?.replicas);
-    },
-    networkingValid() {
-      const hostValid = !hostValidator(this.t)(this.value?.spec?.clusterNetwork?.serviceDomain);
-      const portValid = !portValidator(this.t)(this.value?.spec?.clusterNetwork?.apiServerPort);
-      const podsValid = !this.value?.spec?.clusterNetwork?.pods?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.pods.cidrBlocks);
-      const servicesValid = !this.value?.spec?.clusterNetwork?.services?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.services.cidrBlocks);
-
-      return hostValid && portValid && podsValid && servicesValid;
-    },
     machineDeploymentsValid() {
       if (this.value?.spec?.topology?.workers?.machineDeployments.length > 0) {
-        this.value?.spec?.topology?.workers?.machineDeployments.forEach((deployment) => {
+        for (const deployment of this.value?.spec?.topology?.workers?.machineDeployments) {
           if (!deployment.name || !deployment.class || !isNaN(deployment.replicas)) {
             return false;
           }
-        });
+        }
       }
 
       return true;
     },
     machinePoolsValid() {
       if (this.value?.spec?.topology?.workers?.machinePools.length > 0) {
-        this.value?.spec?.topology?.workers?.machinePools.forEach((pool) => {
+        for (const pool of this.value?.spec?.topology?.workers?.machinePools) {
           if (!pool.name || !pool.class || !isNaN(pool.replicas)) {
             return false;
           }
-        });
+        }
       }
 
       return true;
     },
+
+    networkCIDRValid() {
+      const podsValid = !this.value?.spec?.clusterNetwork?.pods?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.pods.cidrBlocks);
+      const servicesValid = !this.value?.spec?.clusterNetwork?.services?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.services.cidrBlocks);
+
+      return podsValid && servicesValid;
+    },
     stepConfigurationRequires() {
-      const nameValid = !!this.value.metadata.name;
-
-      const versionValid = this.value?.spec?.topology?.version && !versionValidator(this.t, this.clusterClassControlPlane)(this.value?.spec?.topology?.version);
       const workersValid = (this.value?.spec?.topology?.workers?.machinePools.length > 0 || this.value?.spec?.topology?.workers?.machineDeployments.length > 0) && this.machineDeploymentsValid && this.machinePoolsValid;
-      const formValid = nameValid && versionValid && this.controlPlaneEndpointValid && this.controlPlaneValid && this.networkingValid & workersValid;
 
-      return formValid;
+      return this.fvFormIsValid & workersValid && this.networkCIDRValid;
     },
     topology() {
       return this.value?.spec?.topology;
     },
-    controlPlane() {
-      return this.value?.spec?.topology?.controlPlane;
+    controlPlane: {
+      get() {
+        return this.value?.spec?.topology?.controlPlane || {};
+      },
+      set(neu) {
+        if (neu) {
+          this.value.spec.topology.controlPlane = { replicas: parseInt(neu) };
+        } else {
+          delete this.value.spec.topology.controlPlane;
+        }
+      }
     },
-    controlPlaneEndpoint() {
-      return this.value?.spec?.controlPlaneEndpoint || {};
+    controlPlaneEndpoint: {
+      get() {
+        return this.value?.spec?.controlPlaneEndpoint || {};
+      },
+      set(neu) {
+        if (!neu) {
+          delete this.value.spec.controlPlaneEndpoint;
+        } else {
+          this.value.spec.controlPlaneEndpoint = neu;
+        }
+      }
+    },
+    network: {
+      get() {
+        return this.value?.spec?.clusterNetwork || {};
+      },
+      set(neu) {
+        if (!neu) {
+          delete this.value.spec.clusterNetwork;
+        } else {
+          this.value.spec.clusterNetwork = neu;
+        }
+      }
     },
     machineDeployments() {
       return this.value.spec.topology.workers.machineDeployments;
@@ -310,27 +327,6 @@ export default {
         this.$refs.cruresource.emitOrRoute();
       }
     },
-    controlPlaneReplicasChanged(val) {
-      if (val) {
-        this.value.spec.topology.controlPlane = { replicas: parseInt(val) };
-      } else {
-        delete this.value.spec.topology.controlPlane;
-      }
-    },
-    controlPlaneEndpointChanged(val) {
-      if (!val) {
-        delete this.value.spec.controlPlaneEndpoint;
-      } else {
-        this.value.spec.controlPlaneEndpoint = val;
-      }
-    },
-    networkChanged(val) {
-      if (!val) {
-        delete this.value.spec.clusterNetwork;
-      } else {
-        this.value.spec.clusterNetwork = val;
-      }
-    },
     cancel() {
       this.$router.push({
         name:   'c-cluster-manager-capi',
@@ -396,7 +392,7 @@ export default {
             <t k="capi.cluster.version.title" />
           </h2>
           <LabeledInput
-            :value="value.spec.topology.version"
+            v-model:value="value.spec.topology.version"
             :mode="mode"
             label-key="cluster.kubernetesVersion.label"
             required
@@ -414,7 +410,6 @@ export default {
             v-model:value="controlPlaneEndpoint"
             :mode="mode"
             :rules="{ host: fvGetAndReportPathRules('spec.controlPlaneEndpoint.host'), port: fvGetAndReportPathRules('spec.controlPlaneEndpoint.port') }"
-            @control-plane-endpoint-changed="controlPlaneEndpointChanged"
           />
         </div>
         <div class="col span-6 mt-20">
@@ -422,11 +417,9 @@ export default {
             <t k="capi.cluster.topology.controlPlane.title" />
           </h2>
           <ControlPlaneSection
-            v-model:value="topology"
+            v-model:value="controlPlane"
             :mode="mode"
             :rules="{ replicas: fvGetAndReportPathRules('spec.topology.controlPlane.replicas') }"
-            @replicas-changed="controlPlaneReplicasChanged"
-            @update:value="$emit('update:value', { k: 'spec.topology.controlPlane', val: $event })"
           />
         </div>
       </div>
@@ -435,7 +428,7 @@ export default {
           <t k="capi.cluster.networking.title" />
         </h2>
         <NetworkSection
-          v-model:value="value.spec"
+          v-model:value="network"
           :mode="mode"
           :rules="{
             serviceDomain: fvGetAndReportPathRules('spec.clusterNetwork.serviceDomain'),
@@ -443,7 +436,6 @@ export default {
             pods: fvGetAndReportPathRules('spec.clusterNetwork.pods'),
             services: fvGetAndReportPathRules('spec.clusterNetwork.services')
           }"
-          @network-changed="networkChanged"
         />
       </div>
       <div class="col span-12 mt-20 mb-20">
@@ -457,7 +449,7 @@ export default {
             class="row"
           >
             <WorkerItem
-              :value="machineDeployments"
+              v-model:value="machineDeployments"
               :mode="mode"
               :title="t('capi.cluster.workers.machineDeployments.title')"
               :default-add-value="defaultWorkerAddValue"
@@ -471,7 +463,7 @@ export default {
             class="row"
           >
             <WorkerItem
-              :value="machinePools"
+              v-model:value="machinePools"
               :mode="mode"
               :title="t('capi.cluster.workers.machinePools.title')"
               :default-add-value="defaultWorkerAddValue"
@@ -494,7 +486,7 @@ export default {
         <t k="capi.cluster.variables.title" />
       </h2>
       <ClusterClassVariables
-        :value="value.spec.topology.variables"
+        v-model:value="value.spec.topology.variables"
         :cluster-class="clusterClassObj"
         @validation-passed="e => variablesReady = e"
         @update:value="$emit('update:value', { k: 'spec.topology.variables', val: $event })"

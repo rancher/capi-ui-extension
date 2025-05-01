@@ -6,7 +6,7 @@ import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 export default {
   name:       'ControlPlaneEndpointSection',
   components: { LabeledInput },
-  emits:      ['control-plane-endpoint-changed'],
+  emits:      ['update:value'],
   props:      {
     value: {
       type:     Object,
@@ -40,7 +40,7 @@ export default {
   methods: {
     updateControlPlaneEndpoint() {
       if (!this.host && !this.port) {
-        this.$emit('control-plane-endpoint-changed', null);
+        this.$emit('update:value', null);
       } else {
         const res = {};
 
@@ -50,7 +50,7 @@ export default {
         if (this.port) {
           res.port = parseInt(this.port);
         }
-        this.$emit('control-plane-endpoint-changed', res);
+        this.$emit('update:value', res);
       }
     }
   }

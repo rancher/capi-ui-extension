@@ -196,22 +196,15 @@ export default {
             v-if="removeAllowed"
             class="remove mt-30"
           >
-            <slot
-              name="remove-button"
-              :remove="() => remove(row, idx)"
-              :i="idx"
-              :row="row"
+            <button
+              type="button"
+              :disabled="isView"
+              class="btn role-link"
+              :data-testid="`remove-item-${idx}`"
+              @click="remove(row, idx)"
             >
-              <button
-                type="button"
-                :disabled="isView"
-                class="btn role-link"
-                :data-testid="`remove-item-${idx}`"
-                @click="remove(row, idx)"
-              >
-                {{ removeLabel }}
-              </button>
-            </slot>
+              {{ removeLabel }}
+            </button>
           </div>
         </div>
       </div>

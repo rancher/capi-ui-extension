@@ -170,7 +170,8 @@ const stringFormatValidators = function (
       return (val: string) => (val && !isIpv4(val) ? errorMessage : undefined);
     case "cidr":
       return (val: string) =>
-        val && !isValidCIDR(val) ? errorMessage : undefined;
+        //We need to verify that what we are validating is not an array of cidrs first which happens because of how validation works
+        val && (typeof val == "string" && !isValidCIDR(val)) ? errorMessage : undefined;
     case "mac":
       return (val: string) =>
         val && !isValidMac(val) ? errorMessage : undefined;
