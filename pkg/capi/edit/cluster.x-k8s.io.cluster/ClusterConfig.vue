@@ -262,6 +262,11 @@ export default {
         out.push(subtype);
       }
     },
+
+    // TODO nb not this
+    canCreateGitRepos() {
+      return true;
+    }
   },
   methods: {
     set,
@@ -337,6 +342,10 @@ export default {
       this.clusterClassObj = this.clusterClasses.find((x) => x.id === obj.id) || null;
       this.setClass();
       this.setNamespace();
+    },
+
+    openRepoModal() {
+      this.$store.dispatch('management/promptModal', { component: 'AddExampleRepoDialog', modalWidth: '800px' });
     }
   }
 };
@@ -365,7 +374,24 @@ export default {
         name-field="label"
         side-label-field="tag"
         @clicked="clickedType"
-      />
+      >
+        <template #no-rows>
+          <div v-if="canCreateGitRepos">
+            It looks like you don't have any cluster classes. Rancher Turtles has a curated collection of sample classes to get you started.
+            <div class="mt-20">
+              <button
+                type="button"
+                class="btn role-secondary"
+                @click="openRepoModal"
+              >
+                Add Example Classes
+              </button>
+            </div>
+          </div>
+        </template>
+        <CardGrid>
+        </cardgrid>
+      </cardgrid>
     </template>
     <template #stepConfiguration>
       <NameNsDescription
