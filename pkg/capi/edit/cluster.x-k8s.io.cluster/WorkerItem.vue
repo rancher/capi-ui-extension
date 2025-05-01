@@ -167,7 +167,7 @@ export default {
         class="box"
       >
         <div class="value row row-wi">
-          <div class="col-long mr-20 span-4 mt-10">
+          <div class="col-long mr-20 span-4 mt-20">
             <LabeledInput
               ref="value"
               v-model:value="row.value.name"

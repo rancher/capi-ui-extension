@@ -49,13 +49,13 @@ export default {
 </template>
 <style lang="scss" scoped>
 
-@media screen and (min-width: 1100px) {
+@media screen and (min-width: 1000px) {
     .row-cp {
         width: 50%
     }
 }
 
-@media screen and (max-width: 1100px) {
+@media screen and (max-width: 1000px) {
     .row-cp {
         flex-direction: column;
         width: 200%

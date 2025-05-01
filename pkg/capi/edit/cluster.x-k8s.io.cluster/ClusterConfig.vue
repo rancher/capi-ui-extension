@@ -239,6 +239,10 @@ export default {
         }
       }
     },
+    
+    topology() {
+      return this.value?.spec?.topology;
+    },
     machineDeployments() {
       return this.value.spec.topology.workers.machineDeployments;
     },
@@ -588,16 +592,13 @@ export default {
     width: 65%
 }
 
-@media screen and (max-width: 1100px) {
+@media screen and (max-width: 1000px) {
   .row-config {
     flex-direction: column;
     width: 100%
   }
 
   .col-config {
-    width: 100%
-  }
-  .version {
     width: 100%
   }
 }
