@@ -7,7 +7,7 @@ import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 export default {
   name: 'NetworkSelection',
 
-  emits:      ['network-changed'],
+  emits:      ['update:value'],
   components: {
     LabeledInput,
     ArrayList
@@ -48,7 +48,7 @@ export default {
   methods: {
     updateNetwork() {
       if (!this.serviceDomain && !this.apiServerPort && this.podsCidrBlocks.length === 0 && this.servicesCidrBlocks.length === 0) {
-        this.$emit('network-changed', null);
+        this.$emit('update:value', null);
       } else {
         const res = {};
 
@@ -66,7 +66,7 @@ export default {
           res.services = { cidrBlocks: this.podsCidrBlocks };
         }
 
-        this.$emit('network-changed', res);
+        this.$emit('update:value', res);
       }
     }
   }
