@@ -170,8 +170,7 @@ const stringFormatValidators = function (
       return (val: string) => (val && !isIpv4(val) ? errorMessage : undefined);
     case "cidr":
       return (val: string) =>
-        //We need to verify that what we are validating is not an array of cidrs first which happens because of how validation works
-        val && (typeof val == "string" && !isValidCIDR(val)) ? errorMessage : undefined;
+        (val && !isValidCIDR(val)) || val === '' ? errorMessage : undefined;
     case "mac":
       return (val: string) =>
         val && !isValidMac(val) ? errorMessage : undefined;
@@ -239,11 +238,7 @@ export const portValidator = function (t: Translation): Validator {
 export const cidrValidator = function (t: Translation): Validator {
   return stringFormatValidators(t, { key: "Value" }, "cidr");
 };
-export const cidrArrayValid = function (arr: string[]) {
-  return arr.every((item: string) => {
-    return isValidCIDR(item);
-  });
-};
+
 export const urlValidator = function (t: Translation): Validator {
   return (val: string) =>
     val && !val.match(/^https?:\/\/(.*)$/) ? t("validation.url") : undefined;

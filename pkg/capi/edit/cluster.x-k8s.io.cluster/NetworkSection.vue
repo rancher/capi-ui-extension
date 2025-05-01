@@ -63,7 +63,7 @@ export default {
           res.pods = { cidrBlocks: this.podsCidrBlocks };
         }
         if (this.servicesCidrBlocks.length > 0) {
-          res.services = { cidrBlocks: this.podsCidrBlocks };
+          res.services = { cidrBlocks: this.servicesCidrBlocks };
         }
 
         this.$emit('update:value', res);

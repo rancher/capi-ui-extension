@@ -9,9 +9,7 @@ import CreateEditView from '@shell/mixins/create-edit-view';
 import Labels from '@shell/components/form/Labels.vue';
 
 import ClusterClassVariables from '../../components/CCVariables/index.vue';
-import {
-  versionValidator, hostValidator, portValidator, cidrValidator, cidrArrayValid
-} from '../../util/validators';
+import { versionValidator, hostValidator, portValidator, cidrValidator } from '../../util/validators';
 
 import CardGrid from '../../components/CardGrid.vue';
 import WorkerItem from './WorkerItem.vue';
@@ -110,8 +108,8 @@ export default {
         { path: 'spec.controlPlaneEndpoint.port', rules: ['port'] },
         { path: 'spec.clusterNetwork.serviceDomain', rules: ['host'] },
         { path: 'spec.clusterNetwork.apiServerPort', rules: ['port'] },
-        { path: 'spec.clusterNetwork.pods', rules: ['cidr'] },
-        { path: 'spec.clusterNetwork.services', rules: ['cidr'] }
+        { path: 'spec.clusterNetwork.pods.cidrBlocks', rules: ['cidr'] },
+        { path: 'spec.clusterNetwork.services.cidrBlocks', rules: ['cidr'] }
       ],
       credentialId:          '',
       credential:            null,
@@ -152,17 +150,17 @@ export default {
     ...mapGetters({ t: 'i18n/t' }),
     fvExtraRules() {
       return {
-        version: versionValidator(this.t, this.clusterClassControlPlane),
-        host:    hostValidator(this.t),
-        port:    portValidator(this.t),
-        cidr:    cidrValidator(this.t)
+        version:   versionValidator(this.t, this.clusterClassControlPlane),
+        host:      hostValidator(this.t),
+        port:      portValidator(this.t),
+        cidr:      cidrValidator(this.t)
       };
     },
 
     machineDeploymentsValid() {
-      if (this.value?.spec?.topology?.workers?.machineDeployments.length > 0) {
+      if (this.value?.spec?.topology?.workers?.machineDeployments && this.value?.spec?.topology?.workers?.machineDeployments.length > 0) {
         for (const deployment of this.value?.spec?.topology?.workers?.machineDeployments) {
-          if (!deployment.name || !deployment.class || !isNaN(deployment.replicas)) {
+          if (!deployment.name || !deployment.class || Number.isNaN(deployment.replicas)) {
             return false;
           }
         }
@@ -171,9 +169,9 @@ export default {
       return true;
     },
     machinePoolsValid() {
-      if (this.value?.spec?.topology?.workers?.machinePools.length > 0) {
+      if (this.value?.spec?.topology?.workers?.machinePools && this.value?.spec?.topology?.workers?.machinePools.length > 0) {
         for (const pool of this.value?.spec?.topology?.workers?.machinePools) {
-          if (!pool.name || !pool.class || !isNaN(pool.replicas)) {
+          if (!pool.name || !pool.class || Number.isNaN(pool.replicas)) {
             return false;
           }
         }
@@ -182,16 +180,12 @@ export default {
       return true;
     },
 
-    networkCIDRValid() {
-      const podsValid = !this.value?.spec?.clusterNetwork?.pods?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.pods.cidrBlocks);
-      const servicesValid = !this.value?.spec?.clusterNetwork?.services?.cidrBlocks || cidrArrayValid(this.value.spec.clusterNetwork.services.cidrBlocks);
-
-      return podsValid && servicesValid;
-    },
     stepConfigurationRequires() {
-      const workersValid = (this.value?.spec?.topology?.workers?.machinePools.length > 0 || this.value?.spec?.topology?.workers?.machineDeployments.length > 0) && this.machineDeploymentsValid && this.machinePoolsValid;
+      const workersValid = ((this.value?.spec?.topology?.workers?.machinePools && this.value?.spec?.topology?.workers?.machinePools.length > 0) ||
+         (this.value?.spec?.topology?.workers?.machineDeployments && this.value?.spec?.topology?.workers?.machineDeployments.length > 0)) &&
+         this.machineDeploymentsValid && this.machinePoolsValid;
 
-      return this.fvFormIsValid & workersValid && this.networkCIDRValid;
+      return this.fvFormIsValid & workersValid;
     },
     topology() {
       return this.value?.spec?.topology;
@@ -433,8 +427,8 @@ export default {
           :rules="{
             serviceDomain: fvGetAndReportPathRules('spec.clusterNetwork.serviceDomain'),
             apiServerPort: fvGetAndReportPathRules('spec.clusterNetwork.apiServerPort'),
-            pods: fvGetAndReportPathRules('spec.clusterNetwork.pods'),
-            services: fvGetAndReportPathRules('spec.clusterNetwork.services')
+            pods: fvGetAndReportPathRules('spec.clusterNetwork.pods.cidrBlocks'),
+            services: fvGetAndReportPathRules('spec.clusterNetwork.services.cidrBlocks')
           }"
         />
       </div>
