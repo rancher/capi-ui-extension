@@ -7,6 +7,7 @@ import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 export default {
   name: 'NetworkSelection',
 
+  emits:      ['update:value'],
   components: {
     LabeledInput,
     ArrayList
@@ -30,11 +31,44 @@ export default {
       type: Object,
     },
   },
+  data() {
+    return {
+      serviceDomain:      this?.value?.clusterNetwork?.serviceDomain || '',
+      apiServerPort:      this?.value?.clusterNetwork?.apiServerPort || '',
+      podsCidrBlocks:     this?.value?.clusterNetwork?.pods?.cidrBlocks || [],
+      servicesCidrBlocks: this?.value?.clusterNetwork?.services?.cidrBlocks || []
+    };
+  },
   computed: {
     ...mapGetters({ t: 'i18n/t' }),
     clusterIsAlreadyCreated() {
       return this.mode === _EDIT;
-    },
+    }
+  },
+  methods: {
+    updateNetwork() {
+      if (!this.serviceDomain && !this.apiServerPort && this.podsCidrBlocks.length === 0 && this.servicesCidrBlocks.length === 0) {
+        this.$emit('update:value', null);
+      } else {
+        const res = {};
+
+        if (this.serviceDomain) {
+          res.serviceDomain = this.serviceDomain;
+        }
+        if (this.apiServerPort) {
+          res.apiServerPort = parseInt(this.apiServerPort);
+        }
+
+        if (this.podsCidrBlocks.length > 0) {
+          res.pods = { cidrBlocks: this.podsCidrBlocks };
+        }
+        if (this.servicesCidrBlocks.length > 0) {
+          res.services = { cidrBlocks: this.servicesCidrBlocks };
+        }
+
+        this.$emit('update:value', res);
+      }
+    }
   }
 };
 </script>
@@ -45,47 +79,50 @@ export default {
         class="col col-host span-4 mb-20"
       >
         <LabeledInput
-          v-model:value="value.serviceDomain"
+          v-model:value="serviceDomain"
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.networking.serviceDomain')"
           :rules="rules.serviceDomain"
+          @update:value="updateNetwork"
         />
       </div>
       <div
         class="col col-port span-2 mb-20"
       >
         <LabeledInput
-          :value="value.apiServerPort"
+          v-model:value="apiServerPort"
           type="number"
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.networking.apiServerPort')"
           :rules="rules.apiServerPort"
-          required
-          @update:value="(val) => value.apiServerPort = parseInt(val)"
+          placeholder="6443"
+          @update:value="updateNetwork"
         />
       </div>
     </div>
     <div class="row row-networking">
       <div class="col col-networking span-5 mb-20">
         <ArrayList
-          v-model:value="value.pods.cidrBlocks"
+          v-model:value="podsCidrBlocks"
           :protip="false"
           :mode="mode"
           :title="t('capi.cluster.networking.pods')"
           :value-placeholder="t('capi.cluster.networking.cidrplaceholder')"
           :rules="rules.pods"
+          @update:value="updateNetwork"
         />
       </div>
       <div class="col col-networking span-5 mb-20">
         <ArrayList
-          v-model:value="value.services.cidrBlocks"
+          v-model:value="servicesCidrBlocks"
           :protip="false"
           :mode="mode"
           :title="t('capi.cluster.networking.services')"
           :value-placeholder="t('capi.cluster.networking.cidrplaceholder')"
           :rules="rules.services"
+          @update:value="updateNetwork"
         />
       </div>
     </div>
@@ -95,14 +132,14 @@ export default {
 
 @media screen and (min-width: 1000px) {
     .row-networking {
-        width: 100%
+        width: 200%
     }
 }
 
 @media screen and (max-width: 1000px) {
     .row-networking {
         flex-direction: column;
-        width: 100%
+        width: 200%
     }
     .col-port{
         width: 50%

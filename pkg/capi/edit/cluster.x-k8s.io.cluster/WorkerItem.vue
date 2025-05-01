@@ -142,7 +142,7 @@ export default {
 };
 </script>
 <template>
-  <div>
+  <div class="span-9">
     <div
       v-if="title"
       class="clearfix"
@@ -161,66 +161,52 @@ export default {
         :data-testid="`array-list-box${ idx }`"
         class="box"
       >
-        <slot
-          name="columns"
-          :queue-update="queueUpdate"
-          :i="idx"
-          :rows="rows"
-          :row="row"
-          :mode="mode"
-          :is-view="isView"
-        >
-          <div class="value">
-            <slot
-              name="value"
-              :row="row"
+        <div class="value row row-wi">
+          <div class="col-long mr-20 span-4 mt-20">
+            <LabeledInput
+              ref="value"
+              v-model:value="row.value.name"
               :mode="mode"
-              :is-view="isView"
-              :queue-update="queueUpdate"
-            >
-              <div
-                class="col mt-20"
-              >
-                <LabeledInput
-                  ref="value"
-                  v-model:value="row.value.name"
-                  :mode="mode"
-                  :disabled="false"
-                  :label="t('capi.cluster.workers.name')"
-                />
-              </div>
-              <div class="col mt-20">
-                <LabeledSelect
-                  v-model:value="row.value.class"
-                  :mode="mode"
-                  :options="classOptions"
-                  label-key="capi.cluster.workers.class"
-                />
-              </div>
-            </slot>
-            <div
-              v-if="removeAllowed"
-              class="remove"
-            >
-              <slot
-                name="remove-button"
-                :remove="() => remove(row, idx)"
-                :i="idx"
-                :row="row"
-              >
-                <button
-                  type="button"
-                  :disabled="isView"
-                  class="btn role-link"
-                  :data-testid="`remove-item-${idx}`"
-                  @click="remove(row, idx)"
-                >
-                  {{ removeLabel }}
-                </button>
-              </slot>
-            </div>
+              :disabled="false"
+              :label="t('capi.cluster.workers.name')"
+              required
+            />
           </div>
-        </slot>
+          <div class="col-long mr-20 span-4 mt-20">
+            <LabeledSelect
+              v-model:value="row.value.class"
+              :mode="mode"
+              :options="classOptions"
+              label-key="capi.cluster.workers.class"
+              required
+            />
+          </div>
+          <div class="col-short mr-10 mt-20">
+            <LabeledInput
+              :value="row.value.replicas"
+              :mode="mode"
+              :disabled="false"
+              :label="t('capi.cluster.workers.replicas')"
+              type="number"
+              placeholder="1"
+              @update:value="(val) => !!val ? row.value.replicas = parseInt(val) : row.value.replicas = null"
+            />
+          </div>
+          <div
+            v-if="removeAllowed"
+            class="remove mt-30"
+          >
+            <button
+              type="button"
+              :disabled="isView"
+              class="btn role-link"
+              :data-testid="`remove-item-${idx}`"
+              @click="remove(row, idx)"
+            >
+              {{ removeLabel }}
+            </button>
+          </div>
+        </div>
       </div>
     </template>
     <div
@@ -234,7 +220,7 @@ export default {
     </div>
     <div
       v-if="addAllowed && !isView"
-      class="footer"
+      class="footer mt-20"
     >
       <slot
         v-if="addAllowed"
@@ -258,3 +244,17 @@ export default {
     </div>
   </div>
 </template>
+<style lang="scss" scoped>
+@media screen and (max-width: 1000px) {
+    .row-wi {
+        flex-direction: column;
+        width: 100%
+    }
+    .col-long {
+        width: 130%
+    }
+    .col-short {
+        width: 50%
+    }
+}
+</style>
