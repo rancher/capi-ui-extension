@@ -24,10 +24,34 @@ export default {
       type: Object,
     },
   },
+  data() {
+    return {
+      host: this?.value?.host || '',
+      port: this?.value?.port || ''
+    };
+  },
+
   computed: {
     ...mapGetters({ t: 'i18n/t' }),
     clusterIsAlreadyCreated() {
       return this.mode === _EDIT;
+    }
+  },
+  methods: {
+    updateControlPlaneEndpoint() {
+      if (!this.host && !this.port) {
+        this.$emit('update:value', null);
+      } else {
+        const res = {};
+
+        if (this.host) {
+          res.host = this.host;
+        }
+        if (this.port) {
+          res.port = parseInt(this.port);
+        }
+        this.$emit('update:value', res);
+      }
     }
   }
 };
@@ -39,24 +63,26 @@ export default {
         class="col col-host span-4 mb-20"
       >
         <LabeledInput
-          v-model:value="value.host"
+          v-model:value="host"
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.controlPlaneEndpoint.host')"
           :rules="rules.host"
+          @update:value="updateControlPlaneEndpoint"
         />
       </div>
       <div
         class="col col-port span-2 mb-20"
       >
         <LabeledInput
-          :value="value.port"
+          v-model:value="port"
           :mode="mode"
           :disabled="clusterIsAlreadyCreated"
           :label="t('capi.cluster.controlPlaneEndpoint.port')"
           :rules="rules.port"
           type="number"
-          @update:value="(val) => value.port = parseInt(val)"
+          placeholder="49152"
+          @update:value="updateControlPlaneEndpoint"
         />
       </div>
     </div>
@@ -66,7 +92,7 @@ export default {
 
 @media screen and (min-width: 1000px) {
     .row-cp {
-        width: 100%
+        width: 200%
     }
 }
 
@@ -76,10 +102,10 @@ export default {
         width: 100%
     }
     .col-port {
-        width: 50%
+        width: 100%
     }
     .col-host {
-        width: 100%
+        width: 200%
     }
 }
 </style>

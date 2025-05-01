@@ -25,6 +25,9 @@ export default {
 </script>
 
 <template>
-  <i v-if="isAutoImport" class="icon icon-checkmark" />
+  <i
+    v-if="isAutoImport"
+    class="icon icon-checkmark"
+  />
   <span v-else>&mdash;</span>
 </template>
