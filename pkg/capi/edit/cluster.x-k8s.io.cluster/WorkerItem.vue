@@ -26,6 +26,10 @@ export default {
       type:     Array,
       default:  null,
     },
+    addBtnTitle: {
+      type:     String,
+      default: 'Add'
+    },
     addAllowed: {
       type:    Boolean,
       default: true,
@@ -162,7 +166,7 @@ export default {
         class="box"
       >
         <div class="value row row-wi">
-          <div class="col-long mr-20 span-4 mt-20">
+          <div class="col-long mr-20 span-4 mt-10">
             <LabeledInput
               ref="value"
               v-model:value="row.value.name"
@@ -172,7 +176,7 @@ export default {
               required
             />
           </div>
-          <div class="col-long mr-20 span-4 mt-20">
+          <div class="col-long mr-20 span-4 mt-10">
             <LabeledSelect
               v-model:value="row.value.class"
               :mode="mode"
@@ -181,7 +185,7 @@ export default {
               required
             />
           </div>
-          <div class="col-short mr-10 mt-20">
+          <div class="col-short mr-10 mt-10">
             <LabeledInput
               :value="row.value.replicas"
               :mode="mode"
@@ -194,7 +198,7 @@ export default {
           </div>
           <div
             v-if="removeAllowed"
-            class="remove mt-30"
+            class="remove mt-20"
           >
             <button
               type="button"
@@ -238,14 +242,14 @@ export default {
             v-if="loading"
             class="mr-5 icon icon-spinner icon-spin icon-lg"
           />
-          {{ addLabel }}
+          {{ addBtnTitle }}
         </button>
       </slot>
     </div>
   </div>
 </template>
 <style lang="scss" scoped>
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 1100px) {
     .row-wi {
         flex-direction: column;
         width: 100%

@@ -108,9 +108,10 @@ export default {
           v-model:value="podsCidrBlocks"
           :protip="false"
           :mode="mode"
-          :title="t('capi.cluster.networking.pods')"
+          :title="t('capi.cluster.networking.pods.title')"
           :value-placeholder="t('capi.cluster.networking.cidrplaceholder')"
           :rules="rules.pods"
+          :add-label="t('capi.cluster.networking.pods.add')"
           @update:value="updateNetwork"
         />
       </div>
@@ -119,9 +120,10 @@ export default {
           v-model:value="servicesCidrBlocks"
           :protip="false"
           :mode="mode"
-          :title="t('capi.cluster.networking.services')"
+          :title="t('capi.cluster.networking.services.title')"
           :value-placeholder="t('capi.cluster.networking.cidrplaceholder')"
           :rules="rules.services"
+          :add-label="t('capi.cluster.networking.services.add')"
           @update:value="updateNetwork"
         />
       </div>
@@ -130,22 +132,24 @@ export default {
 </template>
 <style lang="scss" scoped>
 
-@media screen and (min-width: 1000px) {
+@media screen and (min-width: 1100px) {
     .row-networking {
         width: 200%
     }
 }
 
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 1100px) {
     .row-networking {
         flex-direction: column;
         width: 200%
     }
     .col-port{
-        width: 50%
+        width: 50%;
+        min-width: 120px;
     }
     .col-host {
-        width: 100%
+        width: 100%;
+        min-width: 120px;
     }
     .col-networking {
         width: 100%

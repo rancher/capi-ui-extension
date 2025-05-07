@@ -48,9 +48,14 @@ capi:
       title: Networking
       apiServerPort: API Server Port
       serviceDomain: Service Domain
-      pods: Pod CIDR Blocks
-      services: Service VIP CIDR Blocks
+      pods:
+        title: Pod CIDR Blocks
+        add: Add Pod CIDR Block
+      services:
+        title: Service VIP CIDR Blocks
+        add: Add Service VIP CIDR Block
       cidrplaceholder: e.g. 192.168.0.0/16
+
     controlPlaneEndpoint:
       title: Control Plane Endpoint
       host: Host
@@ -62,8 +67,10 @@ capi:
       replicas: Replicas
       machineDeployments:
         title: Machine Deployments
+        add: Add Machine Deployment
       machinePools:
         title: Machine Pools
+        add: Add Machine Pool
     labels:
       title: Labels &amp; Annotations
       autoimport:
