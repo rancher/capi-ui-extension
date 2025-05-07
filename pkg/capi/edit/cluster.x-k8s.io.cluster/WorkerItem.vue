@@ -73,9 +73,6 @@ export default {
     },
     removeLabel() {
       return this.$store.getters['i18n/t']('generic.remove');
-    },
-    addLabel() {
-      return this.$store.getters['i18n/t']('generic.add');
     }
   },
   watch:    {
@@ -224,7 +221,7 @@ export default {
     </div>
     <div
       v-if="addAllowed && !isView"
-      class="footer mt-20"
+      class="footer mt-30"
     >
       <slot
         v-if="addAllowed"
