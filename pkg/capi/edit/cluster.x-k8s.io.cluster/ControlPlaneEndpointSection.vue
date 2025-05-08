@@ -90,22 +90,24 @@ export default {
 </template>
 <style lang="scss" scoped>
 
-@media screen and (min-width: 1000px) {
+@media screen and (min-width: 1100px) {
     .row-cp {
         width: 200%
     }
 }
 
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 1100px) {
     .row-cp {
         flex-direction: column;
         width: 100%
     }
     .col-port {
-        width: 100%
+        width: 100%;
+        min-width: 120px;
     }
     .col-host {
-        width: 200%
+        width: 200%;
+        min-width: 120px;
     }
 }
 </style>

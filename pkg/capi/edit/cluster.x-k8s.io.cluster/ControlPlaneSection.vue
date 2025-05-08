@@ -34,7 +34,7 @@ export default {
 };
 </script>
 <template>
-  <div class="row row-cp">
+  <div class="row row-cp mb-20">
     <LabeledInput
       :value="replicas"
       :mode="mode"
@@ -49,13 +49,13 @@ export default {
 </template>
 <style lang="scss" scoped>
 
-@media screen and (min-width: 1000px) {
+@media screen and (min-width: 1100px) {
     .row-cp {
         width: 50%
     }
 }
 
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 1100px) {
     .row-cp {
         flex-direction: column;
         width: 200%
