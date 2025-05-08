@@ -185,7 +185,9 @@ export default {
          (this.value?.spec?.topology?.workers?.machineDeployments && this.value?.spec?.topology?.workers?.machineDeployments.length > 0)) &&
          this.machineDeploymentsValid && this.machinePoolsValid;
 
-      return this.fvFormIsValid & workersValid;
+      // return this.fvFormIsValid & workersValid;
+      // TODO nb remove
+      return workersValid;
     },
     topology() {
       return this.value?.spec?.topology;
