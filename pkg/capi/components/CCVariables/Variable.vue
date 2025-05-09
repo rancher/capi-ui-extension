@@ -8,9 +8,10 @@ import KeyValue from '@shell/components/form/KeyValue.vue';
 import ArrayList from '@shell/components/form/ArrayList.vue';
 import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
 import YamlEditor from '@shell/components/YamlEditor';
-import { createYaml, saferDump } from '@shell/utils/create-yaml';
+import { createYaml } from '@shell/utils/create-yaml';
 import { mapGetters } from 'vuex';
 import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
+import { makeYamlPlaceholders } from '../../util/schemas';
 
 export default {
   name: 'CCVariable',
@@ -60,7 +61,9 @@ export default {
       } else {
         switch (type) {
         case 'object':
-          out = { component: KeyValue, name: 'keyvalue-var' };
+          // out = { component: KeyValue, name: 'keyvalue-var' };
+          out = { component: YamlEditor, name: 'yamleditor-var' };
+
           break;
         case 'array':
           if (this.schema?.items?.type === 'string') {
@@ -165,23 +168,26 @@ export default {
       if (!this.isYamlComponent) {
         return;
       }
-      console.log('*** generating yaml...');
-      const { schema } = this;
-      const mockSchema = { id: 'ccvariable', resourceFields: { subnets: { type: 'array', subtype: 'ccvariable-sub' } } };
-      const mockSchemaSub = { id: 'ccvariable-sub', resourceFields: schema?.items?.properties };
+      // console.log('*** generating yaml...');
+      // const { schema } = this;
+      // const mockSchema = { id: 'ccvariable', resourceFields: { subnets: { type: 'array', subtype: 'ccvariable-sub' } } };
+      // const mockSchemaSub = { id: 'ccvariable-sub', resourceFields: schema?.items?.properties };
 
-      let out;
+      // let out;
 
-      try {
-        out = createYaml([mockSchema, mockSchemaSub], 'ccvariable', {}, false);
-      } catch (err) {
-        console.error(err);
-      }
-      const sliced = out.slice(out.indexOf('\n') + 1);
+      // try {
+      //   out = createYaml([mockSchema, mockSchemaSub], 'ccvariable', {}, false);
+      // } catch (err) {
+      //   console.error(err);
+      // }
 
-      console.log('*** yaml sliced: ', sliced);
+      const out = makeYamlPlaceholders(this.schema);
+      // remove first line, don't need a key just the array
+      // const sliced = out.slice(out.indexOf('\n') + 1);
 
-      return sliced;
+      console.log('*** yaml sliced: ', out);
+
+      return out;
     },
 
   },
@@ -194,7 +200,7 @@ export default {
         try {
           out = jsyaml.load(e);
         } catch (err) {
-          // we can fail silently here; the yamleditor component will show an error icon if the user has entered invalid yaml
+          // the yamleditor component will show an error icon if the user has entered invalid yaml
         }
       }
 
