@@ -2,16 +2,15 @@
 import isEqual from 'lodash/isEqual';
 import jsyaml from 'js-yaml';
 
-import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
-import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
-import KeyValue from '@shell/components/form/KeyValue.vue';
-import ArrayList from '@shell/components/form/ArrayList.vue';
-import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
+// import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
+// import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
+// import KeyValue from '@shell/components/form/KeyValue.vue';
+// import ArrayList from '@shell/components/form/ArrayList.vue';
+// import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
 import YamlEditor from '@shell/components/YamlEditor';
-import { createYaml } from '@shell/utils/create-yaml';
 import { mapGetters } from 'vuex';
 import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
-import { makeYamlPlaceholders } from '../../util/schemas';
+import { componentForType, makeYamlPlaceholders, SIMPLE_TYPES } from '../../util/clusterclass-variables';
 
 export default {
   name: 'CCVariable',
@@ -53,47 +52,7 @@ export default {
     ...mapGetters({ t: 'i18n/t' }),
 
     componentForType() {
-      const { type } = this.schema;
-      let out;
-
-      if (this.variableOptions) {
-        out = { component: LabeledSelect, name: 'text-var' };
-      } else {
-        switch (type) {
-        case 'object':
-          // out = { component: KeyValue, name: 'keyvalue-var' };
-          out = { component: YamlEditor, name: 'yamleditor-var' };
-
-          break;
-        case 'array':
-          if (this.schema?.items?.type === 'string') {
-            out = { component: ArrayList, name: 'arraylist-var' };
-          } else {
-            // out = { component: ArrayList, name: 'yamleditor-var' };
-            out = { component: YamlEditor, name: 'yamleditor-var' };
-          }
-          break;
-        case 'string':
-          out = { component: LabeledInput, name: 'text-var' };
-          break;
-        case 'integer':
-          out = { component: LabeledInput, name: 'text-var' };
-
-          break;
-        case 'number':
-          out = { component: LabeledInput, name: 'text-var' };
-
-          break;
-        case 'boolean':
-          out = { component: Checkbox, name: 'checkbox-var' };
-
-          break;
-        default:
-          break;
-        }
-      }
-
-      return out;
+      return componentForType(this.schema);
     },
 
     schema() {
@@ -156,38 +115,31 @@ export default {
     },
 
     isListComponent() {
-      return this.componentForType?.name === 'arraylist-var' || this.componentForType?.name === 'keyvalue-var';
+      return this.componentForType?.name === 'arraylist-var' || this.componentForType?.name === 'keyvalue-var' || this.componentForType?.name === 'keyvalue-yaml-var';
     },
 
     isYamlComponent() {
       return this.componentForType?.name === 'yamleditor-var';
     },
 
-    // TODO nb use createYaml function to generate commented-out placeholders
+    isYamlKeyValueComponent() {
+      return this.isListComponent && this.schema?.additionalProperties?.properties;
+    },
+
     yamlPlaceholder() {
-      if (!this.isYamlComponent) {
+      if (!this.isYamlComponent && !this.isYamlKeyValueComponent) {
         return;
       }
-      // console.log('*** generating yaml...');
-      // const { schema } = this;
-      // const mockSchema = { id: 'ccvariable', resourceFields: { subnets: { type: 'array', subtype: 'ccvariable-sub' } } };
-      // const mockSchemaSub = { id: 'ccvariable-sub', resourceFields: schema?.items?.properties };
 
-      // let out;
+      try {
+        const out = makeYamlPlaceholders(this.schema);
 
-      // try {
-      //   out = createYaml([mockSchema, mockSchemaSub], 'ccvariable', {}, false);
-      // } catch (err) {
-      //   console.error(err);
-      // }
+        return out || '';
+      } catch (err) {
+        console.error(err);
+      }
 
-      const out = makeYamlPlaceholders(this.schema);
-      // remove first line, don't need a key just the array
-      // const sliced = out.slice(out.indexOf('\n') + 1);
-
-      console.log('*** yaml sliced: ', out);
-
-      return out;
+      return '';
     },
 
   },
@@ -214,12 +166,20 @@ export default {
 <template>
   <div
     v-if="componentForType"
-    :class="{'wider': isListComponent || isYamlComponent, 'align-center': componentForType?.name==='checkbox-var', [`${componentForType.name}`]: true}"
+    :class="{'wider': isListComponent, 'widest': isYamlKeyValueComponent || isYamlComponent, 'align-center': componentForType?.name==='checkbox-var', [`${componentForType.name}`]: true}"
   >
+    <label
+      v-if="isYamlComponent"
+      :for="componentForType.name"
+      class="text-label"
+    >
+      {{ variable.name }}
+    </label>
     <component
       :is="componentForType.component"
       v-if="componentForType"
-      :value="yamlPlaceholder || value"
+      :id="componentForType.name"
+      :value="isYamlComponent ? yamlPlaceholder || value : value"
       :label="variable.name"
       :placeholder="schema.example"
       :tooltip="schema.description"
@@ -246,16 +206,15 @@ export default {
           </span>
         </div>
       </template>
-      <!-- <template
-        v-if="isYamlComponent"
-        #value="{queueUpdate}"
+      <template
+        v-if="isYamlKeyValueComponent && yamlPlaceholder"
+        #value="{queueUpdate, row}"
       >
         <YamlEditor
-          :value="yamlPlaceholder"
-          :required="variable.required && validateRequired"
-          @update:value="queueUpdate"
+          :value="yamlPlaceholder || row"
+          @update="queueUpdate"
         />
-      </template> -->
+      </template>
     </component>
     <div class="flexbox-newline" />
   </div>
