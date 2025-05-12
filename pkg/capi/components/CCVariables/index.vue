@@ -3,6 +3,7 @@ import debounce from 'lodash/debounce';
 
 import { randomStr } from '@shell/utils/string';
 import Variable from './Variable.vue';
+import { componentForType, SIMPLE_TYPES } from '../../util/clusterclass-variables';
 
 export default {
   name: 'ClusterClassVariables',
@@ -110,7 +111,50 @@ export default {
       });
 
       return out;
-    }
+    },
+
+    // put list type variables at the end
+    // put required variables first
+    /**
+     * times b should go before a:
+     * a is a list and b is not
+     * b is required and a is not
+     * a is yaml and b is not
+     */
+    sortedVariableDefinitions() {
+      // negative means a before b
+      return [...this.variableDefinitions].sort((a, b) => {
+        const aSchema = a?.schema?.openAPIV3Schema;
+        const bSchema = b?.schema?.openAPIV3Schema;
+        const componentForA = componentForType(aSchema);
+        const componentForB = componentForType(bSchema);
+
+        const aIsList = componentForA.name === 'arraylist-var' || componentForA.name === 'keyvalue-var';
+        const bIsList = componentForB.name === 'arraylist-var' || componentForB.name === 'keyvalue-var';
+
+        const aIsYaml = componentForA.name.includes('yaml');
+        const bIsYaml = componentForA.name.includes('yaml');
+
+        // const aIsYaml = (aSchema.type === 'object' && !aSchema.additionalProperties) || (aSchema.type === 'array' && !aIsList);
+        // const bIsYaml = (bSchema.type === 'object' && !bSchema.additionalProperties) || (bSchema.type === 'array' && !bIsList);
+
+        const aRequired = a.required;
+        const bRequired = b.required;
+
+        if (aIsYaml && !bIsYaml) {
+          return 1;
+        }
+
+        if (aIsList && !bIsList) {
+          return 1;
+        }
+        if (bRequired && !aRequired) {
+          return 1;
+        }
+
+        return -1;
+      });
+    },
   },
 
   methods: {
@@ -207,7 +251,7 @@ export default {
   <div class="variables">
     <template v-if="variableDefinitions && variableDefinitions.length">
       <template
-        v-for="(variableDef, i) in variableDefinitions"
+        v-for="(variableDef, i) in sortedVariableDefinitions"
         :key="`${variableDef.name}`"
       >
         <Variable
@@ -231,6 +275,7 @@ export default {
 <style lang="scss" scoped>
 $standard-input: 23.25%;
 $wider-input: 48.25%;
+$widest-input: 98.25%;
 
 .variables {
   display: flex;
@@ -244,6 +289,11 @@ $wider-input: 48.25%;
     &::v-deep.wider{
       flex: 0 1 $wider-input;
       max-width: $wider-input;
+    }
+
+    &::v-deep.widest{
+      flex: 0 1 $widest-input;
+      max-width: $widest-input;
     }
 
   }
