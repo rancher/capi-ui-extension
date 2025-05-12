@@ -241,20 +241,21 @@ export default {
     @cancel="done"
     @error="e=>errors=e"
   >
-    <NameNsDescription
-      :value="value"
-      :mode="mode"
-      :namespaced="true"
-      :namespace-options="allNamespaces"
-      :namespace-new-allowed="true"
-      name-label="capi.provider.name.label"
-      name-placeholder="capi.provider.name.placeholder"
-      description-label="capi.provider.description.label"
-      description-placeholder="capi.provider.description.placeholder"
-      :rules="{name:fvGetAndReportPathRules('metadata.name')}"
-      @update:value="$emit('update:value', {k: 'metadata', val: $event.metadata })"
-    />
     <div v-if="isCustom">
+      <NameNsDescription
+        :value="value"
+        :mode="mode"
+        :namespaced="true"
+        :namespace-options="allNamespaces"
+        :namespace-new-allowed="true"
+        :name-required="false"
+        name-label="capi.provider.name.label"
+        name-placeholder="capi.provider.name.placeholder"
+        description-label="capi.provider.description.label"
+        description-placeholder="capi.provider.description.placeholder"
+        :rules="{name:fvGetAndReportPathRules('metadata.name')}"
+        @update:value="$emit('update:value', {k: 'metadata', val: $event.metadata })"
+      />
       <div class="row mb-20">
         <div
           class="col span-3"
@@ -310,6 +311,21 @@ export default {
           />
         </div>
       </div>
+    </div>
+    <div v-else>
+      <NameNsDescription
+        :value="value"
+        :mode="mode"
+        :namespaced="true"
+        :namespace-options="allNamespaces"
+        :namespace-new-allowed="true"
+        :name-hidden="true"
+        name-label="capi.provider.name.label"
+        name-placeholder="capi.provider.name.placeholder"
+        description-label="capi.provider.description.label"
+        description-placeholder="capi.provider.description.placeholder"
+        @update:value="$emit('update:value', {k: 'metadata', val: $event.metadata })"
+      />
     </div>
     <div
       v-if="credentialComponent"
