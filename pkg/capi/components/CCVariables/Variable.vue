@@ -1,18 +1,19 @@
 <script>
 import isEqual from 'lodash/isEqual';
+import jsyaml from 'js-yaml';
 
-import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
-import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
-import KeyValue from '@shell/components/form/KeyValue.vue';
-import ArrayList from '@shell/components/form/ArrayList.vue';
-import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
-
+import YamlEditor from '@shell/components/YamlEditor';
 import { mapGetters } from 'vuex';
 import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
+import { componentForType, makeYamlPlaceholders, VARIABLE_INPUT_NAMES } from '../../util/clusterclass-variables';
 
 export default {
-  name:  'CCVariable',
+  name: 'CCVariable',
+
   emits: ['validation-passed', 'update:value'],
+
+  components: { YamlEditor },
+
   props: {
     variable: {
       type:     Object,
@@ -46,40 +47,7 @@ export default {
     ...mapGetters({ t: 'i18n/t' }),
 
     componentForType() {
-      const { type } = this.schema;
-      let out;
-
-      if (this.variableOptions) {
-        out = { component: LabeledSelect, name: 'text-var' };
-      } else {
-        switch (type) {
-        case 'object':
-          out = { component: KeyValue, name: 'keyvalue-var' };
-          break;
-        case 'array':
-          out = { component: ArrayList, name: 'arraylist-var' };
-          break;
-        case 'string':
-          out = { component: LabeledInput, name: 'text-var' };
-          break;
-        case 'integer':
-          out = { component: LabeledInput, name: 'text-var' };
-
-          break;
-        case 'number':
-          out = { component: LabeledInput, name: 'text-var' };
-
-          break;
-        case 'boolean':
-          out = { component: Checkbox, name: 'checkbox-var' };
-
-          break;
-        default:
-          break;
-        }
-      }
-
-      return out;
+      return componentForType(this.schema);
     },
 
     schema() {
@@ -141,22 +109,58 @@ export default {
       }, []);
     },
 
-    listComponent() {
-      return this.componentForType?.name === 'arraylist-var' || this.componentForType?.name === 'keyvalue-var';
-    }
+    isListComponent() {
+      return this.componentForType?.name === VARIABLE_INPUT_NAMES.ARRAY || this.componentForType?.name === VARIABLE_INPUT_NAMES.MAP || this.componentForType?.name === VARIABLE_INPUT_NAMES.MAP_YAML;
+    },
+
+    isYamlComponent() {
+      return this.componentForType?.name === VARIABLE_INPUT_NAMES.YAML;
+    },
+
+    isYamlKeyValueComponent() {
+      return this.isListComponent && this.schema?.additionalProperties?.properties;
+    },
+
+    yamlPlaceholder() {
+      if (!this.isYamlComponent && !this.isYamlKeyValueComponent) {
+        return;
+      }
+
+      try {
+        const out = makeYamlPlaceholders(this.schema);
+
+        return out || '';
+      } catch (err) {
+
+      }
+
+      return '';
+    },
+
   },
 
   methods: {
+    setYamlMapValue(e, row, queueUpdate) {
+      try {
+        const out = jsyaml.load(e);
+
+        row.value = out;
+        queueUpdate();
+      } catch (err) {
+
+      }
+    },
     setValue(e) {
       let out = e;
 
-      const { type } = this.schema;
-
-      if (type === 'object') {
+      if (this.isYamlComponent) {
         try {
-          out = JSON.parse(e);
-        } catch {}
+          out = jsyaml.load(e);
+        } catch (err) {
+          // the yamleditor component will show an error icon if the user has entered invalid yaml + focuses away
+        }
       }
+
       this.$emit('update:value', out);
     }
   },
@@ -166,20 +170,33 @@ export default {
 <template>
   <div
     v-if="componentForType"
-    :class="{'wider': listComponent, 'align-center': componentForType?.name==='checkbox-var', [`${componentForType.name}`]: true}"
+    :class="{'wider': isListComponent, 'widest': isYamlKeyValueComponent || isYamlComponent, 'align-center': componentForType?.name==='checkbox-var', [`${componentForType.name}`]: true}"
   >
+    <label
+      v-if="isYamlComponent"
+      :for="componentForType.name"
+      class="text-label"
+    >
+      {{ variable.name }}
+      <span
+        v-if="variable.required"
+        class="text-error"
+      >*</span>
+    </label>
     <component
       :is="componentForType.component"
       v-if="componentForType"
-      :value="value"
+      :id="componentForType.name"
+      :value="isYamlComponent ? yamlPlaceholder || value : value"
       :label="variable.name"
       :placeholder="schema.example"
       :tooltip="schema.description"
       :required="variable.required && validateRequired"
       :title="variable.name"
       :options="variableOptions"
-      :rules="!listComponent ? validationRules : []"
+      :rules="!isListComponent ? validationRules : []"
       :type="schema.type === 'number' || schema.type === 'integer' ? 'number' : 'text'"
+      :as-map="true"
       @update:value="setValue"
     >
       <template #title>
@@ -197,6 +214,15 @@ export default {
             />
           </span>
         </div>
+      </template>
+      <template
+        v-if="isYamlKeyValueComponent && yamlPlaceholder"
+        #value="{queueUpdate, row}"
+      >
+        <YamlEditor
+          :value="yamlPlaceholder || row"
+          @update:value="e=>setYamlMapValue(e, row, queueUpdate)"
+        />
       </template>
     </component>
     <div class="flexbox-newline" />
