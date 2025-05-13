@@ -229,14 +229,17 @@ export default {
 
     newComponentType(variableDef, i) {
       const refs = this.$refs;
+
+      console.log('*** refs: ', this.$refs);
       const inputEl = refs[`${ variableDef.name }-input`]?.[0]?.$el;
       const nextInputEl = refs[`${ this.sortedVariableDefinitions[i + 1]?.name }-input`]?.[0]?.$el;
+
+      console.log('**** inputEl ref', refs[`${ variableDef.name }-input`]);
 
       if (!nextInputEl) {
         return false;
       }
-      console.log('****', inputEl?._prevClass, nextInputEl._prevClass);
-      // inputEl?._prevClass !== nextInputEl._prevClass;
+      console.log('**** input and next input classes', inputEl?._prevClass, nextInputEl._prevClass);
 
       return inputEl?._prevClass !== nextInputEl._prevClass;
     }
