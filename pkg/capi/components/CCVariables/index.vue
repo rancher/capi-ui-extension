@@ -1,6 +1,6 @@
 <script>
 import debounce from 'lodash/debounce';
-
+import { nextTick } from 'vue';
 import { randomStr } from '@shell/utils/string';
 import Variable from './Variable.vue';
 import { componentForType, VARIABLE_INPUT_NAMES } from '../../util/clusterclass-variables';
@@ -113,44 +113,6 @@ export default {
       return out;
     },
 
-    // put list type variables at the end
-    // put required variables first
-    /**
-     * times b should go before a:
-     * a is a list and b is not
-     * b is required and a is not
-     * a is yaml and b is not
-     */
-    sortedVariableDefinitions() {
-      return [...this.variableDefinitions].sort((a, b) => {
-        const aSchema = a?.schema?.openAPIV3Schema;
-        const bSchema = b?.schema?.openAPIV3Schema;
-        const componentForA = componentForType(aSchema);
-        const componentForB = componentForType(bSchema);
-
-        const aIsList = componentForA.component === VARIABLE_INPUT_NAMES.ARRAY || componentForA.name === VARIABLE_INPUT_NAMES.MAP;
-        const bIsList = componentForB.name === VARIABLE_INPUT_NAMES.ARRAY || componentForB.name === VARIABLE_INPUT_NAMES.MAP;
-
-        const aIsYaml = componentForA.name.includes('yaml');
-        const bIsYaml = componentForB.name.includes('yaml');
-
-        const aRequired = a.required;
-        const bRequired = b.required;
-
-        if (aIsYaml && !bIsYaml) {
-          return 1;
-        }
-
-        if (aIsList && !bIsList) {
-          return 1;
-        }
-        if (bRequired && !aRequired) {
-          return 1;
-        }
-
-        return -1;
-      });
-    },
   },
 
   methods: {
@@ -228,20 +190,11 @@ export default {
     },
 
     newComponentType(variableDef, i) {
-      const refs = this.$refs;
+      const nextVariableDef = this.variableDefinitions[i + 1];
 
-      console.log('*** refs: ', this.$refs);
-      const inputEl = refs[`${ variableDef.name }-input`]?.[0]?.$el;
-      const nextInputEl = refs[`${ this.sortedVariableDefinitions[i + 1]?.name }-input`]?.[0]?.$el;
-
-      console.log('**** inputEl ref', refs[`${ variableDef.name }-input`]);
-
-      if (!nextInputEl) {
-        return false;
+      if (nextVariableDef) {
+        return componentForType(variableDef?.schema?.openAPIV3Schema)?.name !== componentForType(nextVariableDef?.schema?.openAPIV3Schema)?.name;
       }
-      console.log('**** input and next input classes', inputEl?._prevClass, nextInputEl._prevClass);
-
-      return inputEl?._prevClass !== nextInputEl._prevClass;
     }
   },
 
@@ -250,9 +203,9 @@ export default {
 
 <template>
   <div class="variables">
-    <template v-if="sortedVariableDefinitions && sortedVariableDefinitions.length">
+    <template v-if="variableDefinitions && variableDefinitions.length">
       <template
-        v-for="(variableDef, i) in sortedVariableDefinitions"
+        v-for="(variableDef, i) in variableDefinitions"
         :key="`${variableDef.name}`"
       >
         <Variable
