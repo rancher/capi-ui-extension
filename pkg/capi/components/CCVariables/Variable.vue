@@ -5,7 +5,7 @@ import jsyaml from 'js-yaml';
 import YamlEditor from '@shell/components/YamlEditor';
 import { mapGetters } from 'vuex';
 import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
-import { componentForType, makeYamlPlaceholders } from '../../util/clusterclass-variables';
+import { componentForType, makeYamlPlaceholders, VARIABLE_INPUT_NAMES } from '../../util/clusterclass-variables';
 
 export default {
   name: 'CCVariable',
@@ -110,11 +110,11 @@ export default {
     },
 
     isListComponent() {
-      return this.componentForType?.name === 'arraylist-var' || this.componentForType?.name === 'keyvalue-var' || this.componentForType?.name === 'keyvalue-yaml-var';
+      return this.componentForType?.name === VARIABLE_INPUT_NAMES.ARRAY || this.componentForType?.name === VARIABLE_INPUT_NAMES.MAP || this.componentForType?.name === VARIABLE_INPUT_NAMES.MAP_YAML;
     },
 
     isYamlComponent() {
-      return this.componentForType?.name === 'yamleditor-var';
+      return this.componentForType?.name === VARIABLE_INPUT_NAMES.YAML;
     },
 
     isYamlKeyValueComponent() {
