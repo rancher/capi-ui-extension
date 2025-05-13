@@ -197,9 +197,7 @@ export default {
          (this.value?.spec?.topology?.workers?.machineDeployments && this.value?.spec?.topology?.workers?.machineDeployments.length > 0)) &&
          this.machineDeploymentsValid && this.machinePoolsValid;
 
-      // return this.fvFormIsValid & workersValid;
-      // TODO nb remove
-      return workersValid;
+      return this.fvFormIsValid & workersValid;
     },
     clusterIsAlreadyCreated() {
       return this.mode === _EDIT;

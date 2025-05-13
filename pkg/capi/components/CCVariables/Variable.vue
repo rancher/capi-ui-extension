@@ -2,11 +2,6 @@
 import isEqual from 'lodash/isEqual';
 import jsyaml from 'js-yaml';
 
-// import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
-// import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
-// import KeyValue from '@shell/components/form/KeyValue.vue';
-// import ArrayList from '@shell/components/form/ArrayList.vue';
-// import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
 import YamlEditor from '@shell/components/YamlEditor';
 import { mapGetters } from 'vuex';
 import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
@@ -136,7 +131,7 @@ export default {
 
         return out || '';
       } catch (err) {
-        console.error(err);
+
       }
 
       return '';
@@ -152,7 +147,7 @@ export default {
         row.value = out;
         queueUpdate();
       } catch (err) {
-        console.error(err);
+
       }
     },
     setValue(e) {
@@ -183,6 +178,10 @@ export default {
       class="text-label"
     >
       {{ variable.name }}
+      <span
+        v-if="variable.required"
+        class="text-error"
+      >*</span>
     </label>
     <component
       :is="componentForType.component"
