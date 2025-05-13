@@ -1,9 +1,8 @@
 <script>
 import debounce from 'lodash/debounce';
-import { nextTick } from 'vue';
 import { randomStr } from '@shell/utils/string';
 import Variable from './Variable.vue';
-import { componentForType, VARIABLE_INPUT_NAMES } from '../../util/clusterclass-variables';
+import { componentForType } from '../../util/clusterclass-variables';
 
 export default {
   name: 'ClusterClassVariables',
