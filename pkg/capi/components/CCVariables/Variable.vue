@@ -145,6 +145,18 @@ export default {
   },
 
   methods: {
+    setYamlMapValue(e, row, queueUpdate) {
+      console.log('attempting to parse value ', e);
+      try {
+        const out = jsyaml.load(e);
+
+        console.log('set yaml updating value to ', out);
+        row.value = out;
+        queueUpdate();
+      } catch (err) {
+        console.error(err);
+      }
+    },
     setValue(e) {
       let out = e;
 
@@ -188,6 +200,7 @@ export default {
       :options="variableOptions"
       :rules="!isListComponent ? validationRules : []"
       :type="schema.type === 'number' || schema.type === 'integer' ? 'number' : 'text'"
+      :as-map="true"
       @update:value="setValue"
     >
       <template #title>
@@ -212,7 +225,7 @@ export default {
       >
         <YamlEditor
           :value="yamlPlaceholder || row"
-          @update="queueUpdate"
+          @update:value="e=>setYamlMapValue(e, row, queueUpdate)"
         />
       </template>
     </component>
