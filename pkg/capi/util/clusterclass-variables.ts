@@ -7,45 +7,21 @@ import ArrayList from '@shell/components/form/ArrayList.vue';
 import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
 import YamlEditor from '@shell/components/YamlEditor';
 
-// type JSONSchemaProps = {
-//     type: string,
-//     properties: any,
-//     additionalProperties: any,
-//     items: JSONSchemaProps
-// }
+export const VARIABLE_INPUT_NAMES = {
+  TEXT:           'text-var',
+  BOOL:       'checkbox-var',
+  MAP:      'keyvalue-var',
+  MAP_YAML: 'keyvalue-yaml-var',
+  ARRAY:          'arraylist-var',
+  YAML:           'yamleditor-var'
+};
 
-// type openAPIV3Schema = {
-//     additionalProperties?: Map<string, any>
-//     default?: any
-//     description?: string,
-//     enum?: Array<any>,
-//     example?: any,
-//     exclusiveMaximum?: boolean,
-//     exclusiveMinimum?: boolean,
-//     format?: string,
-//     items?: openAPIV3Schema,
-//     maxItems?: number,
-//     maxLength?: number,
-//     maximum?: number,
-//     minItems?: number,
-//     minLength?: number
-//     minimum?: number,
-//     pattern?: string,
-//     properties?: Map<string, openAPIV3Schema>,
-//     required?: Array<String>,
-//     type: string,
-//     uniqueItems?: boolean,
-//     ['x-kubernetes-preserve-unknown-fields']?: boolean
-//   }
-
-//  type ClusterClassVariable = {
-//     name: string,
-//     required: boolean,
-//     schema: {
-//       openAPIV3Schema: openAPIV3Schema
-//     }
-//   }
-
+/**
+ * Accepts a clusterclass variable schema and determines which input component would best represent that variable
+ * The 'name' field of the output is used by the component containing all variable inputs, to position inputs dependent on their type
+ * @param schema <clusterclass>.spec.variables[].schema.openAPIV3Schema
+ * @returns /{component: <input component>, name: string name of input component}
+ */
 export const componentForType = (schema) => {
   let out;
 
@@ -58,41 +34,39 @@ export const componentForType = (schema) => {
   }
 
   if (hasEnum) {
-    out = { component: LabeledSelect, name: 'text-var' };
+    out = { component: LabeledSelect, name: VARIABLE_INPUT_NAMES.TEXT };
   } else {
     switch (type) {
     case 'object':
-      // out = { component: KeyValue, name: 'keyvalue-var' };
-      out = { component: YamlEditor, name: 'yamleditor-var' };
+      out = { component: YamlEditor, name: VARIABLE_INPUT_NAMES.YAML };
       break;
     case 'map':
       if (schema.additionalProperties.properties) {
-        out = { component: KeyValue, name: 'keyvalue-yaml-var' };
+        out = { component: KeyValue, name: VARIABLE_INPUT_NAMES.MAP_YAML };
       } else {
-        out = { component: KeyValue, name: 'keyvalue-var' };
+        out = { component: KeyValue, name: VARIABLE_INPUT_NAMES.MAP };
       }
       break;
     case 'array':
-      // TODO nb test boolean values?
       if (SIMPLE_TYPES.includes(schema?.items?.type) ) {
-        out = { component: ArrayList, name: 'arraylist-var' };
+        out = { component: ArrayList, name: VARIABLE_INPUT_NAMES.ARRAY };
       } else {
-        out = { component: YamlEditor, name: 'yamleditor-var' };
+        out = { component: YamlEditor, name: VARIABLE_INPUT_NAMES.YAML };
       }
       break;
     case 'string':
-      out = { component: LabeledInput, name: 'text-var' };
+      out = { component: LabeledInput, name: VARIABLE_INPUT_NAMES.TEXT };
       break;
     case 'integer':
-      out = { component: LabeledInput, name: 'text-var' };
+      out = { component: LabeledInput, name: VARIABLE_INPUT_NAMES.TEXT };
 
       break;
     case 'number':
-      out = { component: LabeledInput, name: 'text-var' };
+      out = { component: LabeledInput, name: VARIABLE_INPUT_NAMES.TEXT };
 
       break;
     case 'boolean':
-      out = { component: Checkbox, name: 'checkbox-var' };
+      out = { component: Checkbox, name: VARIABLE_INPUT_NAMES.BOOL };
 
       break;
     default:
@@ -103,8 +77,16 @@ export const componentForType = (schema) => {
   return out;
 };
 
+// types that do not require an additional schema definition
 export const SIMPLE_TYPES = ['string', 'int', 'boolean'];
 
+/**
+ * This function accepts the schema from a clusterclass variable definition and parses it into the same schema format that steve schemas use.
+ * Allows us to generate yaml previews of expected capi cluster variable specification for a more guided cluster creation experience
+ * @param openSchema object - openAPIV3Schema property of a clusterclass variable definition
+ * @param id string - used while generating sub-schemas for complex fields (e.g. an array of objects will have a schema for the array which references a schema for the object)
+ * @returns - array of "schema" in the same format as our /schemaDefinitions/<type> endpoint
+ */
 export const makeSchemas = function(openSchema, id = 'ccvariable') {
   const schemas = [];
 
@@ -127,28 +109,7 @@ export const makeSchemas = function(openSchema, id = 'ccvariable') {
 
     schemas.push(mockSchema);
     schemas.push(mockSchemaSub);
-
-  // additionalProperties are used with map types
-  }
-  // else if (openSchema.additionalProperties && id === 'ccvariable') {
-  //   const placeholder = randomStr();
-
-  //   if (SIMPLE_TYPES.includes(openSchema.additionalProperties.type)) {
-  //     const mockSchema = { id, resourceFields: { [placeholder]: { type: 'map', subtype: openSchema.additionalProperties.type } } };
-
-  //     schemas.push(mockSchema);
-  //   } else {
-  //     const subtype = randomStr();
-  //     const mockSchema = { id, resourceFields: { [placeholder]: { type: 'map', subtype } } };
-  //     const mockSchemaSub = { id: subtype, resourceFields: openSchema?.additionalProperties?.properties };
-
-  //     schemas.push(mockSchema);
-  //     schemas.push(mockSchemaSub);
-  //   }
-
-  // // must be a generic object
-  // }
-  else {
+  } else {
     const properties = openSchema.type === 'array' ? openSchema?.items?.properties : openSchema.additionalProperties?.properties || openSchema?.properties;
 
     const mockSchema = { id, resourceFields: {} };
@@ -193,6 +154,12 @@ export const makeSchemas = function(openSchema, id = 'ccvariable') {
   return schemas;
 };
 
+/**
+ *
+ * @param openSchema object - openAPIV3Schema property of a clusterclass variable definition
+ * @param data existing variable configuration
+ * @returns string - yaml preview of fields defined in the openAPIV3Schema
+ */
 export const makeYamlPlaceholders = function(openSchema, data = {}) {
   const schemas = makeSchemas(openSchema);
   let out;
@@ -209,12 +176,6 @@ export const makeYamlPlaceholders = function(openSchema, data = {}) {
 
     return sliced;
   }
-
-  // if (openSchema.additionalProperties) {
-  //   const sliced = out.slice(out.indexOf(`:`) + 1);
-
-  //   return `#${ sliced }`;
-  // }
 
   return out;
 };
