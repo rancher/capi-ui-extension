@@ -3,7 +3,7 @@ import debounce from 'lodash/debounce';
 
 import { randomStr } from '@shell/utils/string';
 import Variable from './Variable.vue';
-import { componentForType, SIMPLE_TYPES } from '../../util/clusterclass-variables';
+import { componentForType, VARIABLE_INPUT_NAMES } from '../../util/clusterclass-variables';
 
 export default {
   name: 'ClusterClassVariables',
@@ -122,21 +122,17 @@ export default {
      * a is yaml and b is not
      */
     sortedVariableDefinitions() {
-      // negative means a before b
       return [...this.variableDefinitions].sort((a, b) => {
         const aSchema = a?.schema?.openAPIV3Schema;
         const bSchema = b?.schema?.openAPIV3Schema;
         const componentForA = componentForType(aSchema);
         const componentForB = componentForType(bSchema);
 
-        const aIsList = componentForA.name === 'arraylist-var' || componentForA.name === 'keyvalue-var';
-        const bIsList = componentForB.name === 'arraylist-var' || componentForB.name === 'keyvalue-var';
+        const aIsList = componentForA.component === VARIABLE_INPUT_NAMES.ARRAY || componentForA.name === VARIABLE_INPUT_NAMES.MAP;
+        const bIsList = componentForB.name === VARIABLE_INPUT_NAMES.ARRAY || componentForB.name === VARIABLE_INPUT_NAMES.MAP;
 
         const aIsYaml = componentForA.name.includes('yaml');
-        const bIsYaml = componentForA.name.includes('yaml');
-
-        // const aIsYaml = (aSchema.type === 'object' && !aSchema.additionalProperties) || (aSchema.type === 'array' && !aIsList);
-        // const bIsYaml = (bSchema.type === 'object' && !bSchema.additionalProperties) || (bSchema.type === 'array' && !bIsList);
+        const bIsYaml = componentForB.name.includes('yaml');
 
         const aRequired = a.required;
         const bRequired = b.required;
@@ -234,11 +230,13 @@ export default {
     newComponentType(variableDef, i) {
       const refs = this.$refs;
       const inputEl = refs[`${ variableDef.name }-input`]?.[0]?.$el;
-      const nextInputEl = refs[`${ this.variableDefinitions[i + 1]?.name }-input`]?.[0]?.$el;
+      const nextInputEl = refs[`${ this.sortedVariableDefinitions[i + 1]?.name }-input`]?.[0]?.$el;
 
       if (!nextInputEl) {
         return false;
       }
+      console.log('****', inputEl?._prevClass, nextInputEl._prevClass);
+      // inputEl?._prevClass !== nextInputEl._prevClass;
 
       return inputEl?._prevClass !== nextInputEl._prevClass;
     }
@@ -249,7 +247,7 @@ export default {
 
 <template>
   <div class="variables">
-    <template v-if="variableDefinitions && variableDefinitions.length">
+    <template v-if="sortedVariableDefinitions && sortedVariableDefinitions.length">
       <template
         v-for="(variableDef, i) in sortedVariableDefinitions"
         :key="`${variableDef.name}`"

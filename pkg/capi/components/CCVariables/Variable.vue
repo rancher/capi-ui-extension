@@ -10,7 +10,7 @@ import jsyaml from 'js-yaml';
 import YamlEditor from '@shell/components/YamlEditor';
 import { mapGetters } from 'vuex';
 import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
-import { componentForType, makeYamlPlaceholders, SIMPLE_TYPES } from '../../util/clusterclass-variables';
+import { componentForType, makeYamlPlaceholders } from '../../util/clusterclass-variables';
 
 export default {
   name: 'CCVariable',
@@ -146,11 +146,9 @@ export default {
 
   methods: {
     setYamlMapValue(e, row, queueUpdate) {
-      console.log('attempting to parse value ', e);
       try {
         const out = jsyaml.load(e);
 
-        console.log('set yaml updating value to ', out);
         row.value = out;
         queueUpdate();
       } catch (err) {
@@ -164,11 +162,10 @@ export default {
         try {
           out = jsyaml.load(e);
         } catch (err) {
-          // the yamleditor component will show an error icon if the user has entered invalid yaml
+          // the yamleditor component will show an error icon if the user has entered invalid yaml + focuses away
         }
       }
 
-      console.log('*** variable component updating value to ', out);
       this.$emit('update:value', out);
     }
   },
