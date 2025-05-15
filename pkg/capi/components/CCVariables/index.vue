@@ -93,7 +93,7 @@ export default {
     // use variable metadata to add vars to groups
     // TODO nb perhaps a less silly way of keeping ungrouped at the end
     groupedVariableDefinitions() {
-      const out = { zzzungrouped: [] };
+      const out = { aaaaungrouped: [] };
 
       this.variableDefinitions.forEach((spec) => {
         const group = spec?.metadata?.labels?.[LABELS.GROUP];
@@ -105,7 +105,7 @@ export default {
             out[group].push(spec);
           }
         } else {
-          out.zzzungrouped.push(spec);
+          out.aaaaungrouped.push(spec);
         }
       });
 
@@ -237,7 +237,7 @@ export default {
       class="mb-40"
     >
       <GroupPanel
-        v-if="group !== 'zzzungrouped'"
+        v-if="group !== 'aaaaungrouped'"
         :label="group"
       >
         <div class="variables-group">
@@ -248,6 +248,7 @@ export default {
           >
             <Variable
               :ref="`${variableDef.name}-input`"
+              :all-variables="value"
               :variable="variableDef"
               :value="valueFor(variableDef)"
               :validate-required="!machineDeploymentClass && !machinePoolClass"
@@ -267,12 +268,13 @@ export default {
         class="variables-group"
       >
         <template
-          v-for="(variableDef, i) in groupedVariableDefinitions.zzzungrouped"
+          v-for="(variableDef, i) in groupedVariableDefinitions.aaaaungrouped"
 
           :key="`${variableDef.name}`"
         >
           <Variable
             :ref="`${variableDef.name}-input`"
+            :all-variables="value"
             :variable="variableDef"
             :value="valueFor(variableDef)"
             :validate-required="!machineDeploymentClass && !machinePoolClass"

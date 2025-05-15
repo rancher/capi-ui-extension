@@ -27,6 +27,11 @@ export default {
     validateRequired: {
       type:    Boolean,
       default: true
+    },
+
+    allVariables: {
+      type:    Array,
+      default: () => []
     }
   },
 
@@ -143,7 +148,20 @@ export default {
 
     listComponent() {
       return this.componentForType?.name === 'arraylist-var' || this.componentForType?.name === 'keyvalue-var';
-    }
+    },
+
+    // if variable def has a toggled-by  label, check allVariables for the toggle's state and show/hide this variable accordingly
+    toggled() {
+      const toggleLabel = this.variable?.metadata?.labels?.['turtles-capi.cattle.io/toggled-by'];
+
+      const toggleVariable = this.allVariables.find((v) => v.name === toggleLabel);
+
+      if (toggleVariable) {
+        return !!toggleVariable.value;
+      }
+
+      return true;
+    },
   },
 
   methods: {
@@ -166,6 +184,7 @@ export default {
 <template>
   <div
     v-if="componentForType"
+    v-show="toggled"
     :class="{'wider': listComponent, 'align-center': componentForType?.name==='checkbox-var', [`${componentForType.name}`]: true}"
   >
     <component
