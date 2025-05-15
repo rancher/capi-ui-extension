@@ -17,6 +17,9 @@ import NetworkSection from './NetworkSection.vue';
 import ControlPlaneEndpointSection from './ControlPlaneEndpointSection.vue';
 import ControlPlaneSection from './ControlPlaneSection.vue';
 import { mapGetters } from 'vuex';
+import { LABELS, CAPI } from '../../types/capi';
+import Loading from '@shell/components/Loading.vue';
+import { NAMESPACE } from '@shell/config/types';
 
 const defaultTopologyConfig = {
   version: '',
@@ -37,7 +40,8 @@ export default {
     CardGrid,
     Labels,
     ControlPlaneSection,
-    Checkbox
+    Checkbox,
+    Loading
   },
   mixins: [CreateEditView, FormValidation],
   emits:  ['update:value'],
@@ -61,7 +65,13 @@ export default {
     }
   },
   beforeMount() {
-    this.initSpecs();
+    this.initSpecs().then((namespaces) => {
+      this.allNamespaces = namespaces || [];
+    }).catch((err) => {
+      this.errors.push(err);
+      this.loading = false;
+    });
+
     this.$nextTick(() => {
       this.loading = false;
     });
@@ -87,7 +97,6 @@ export default {
       ready:          false,
       weight:         30
     };
-
     const stepVariables = {
       name:           'stepVariables',
       title:          t('capi.cluster.steps.variables.title'),
@@ -119,10 +128,12 @@ export default {
         name:  '',
         class: ''
       },
-      variablesReady:  true,
-      clusterClassObj: null,
-      loading:         true,
-      autoImport:      !!this.value?.metadata?.labels && !!this.value?.metadata?.labels['cluster-api.cattle.io/rancher-auto-import']
+      variablesReady:          true,
+      clusterClassObj:         null,
+      loading:                 true,
+      autoImport:              !!this.value?.metadata?.labels && !!this.value?.metadata?.labels[LABELS.AUTO_IMPORT],
+      classNamespaceSupported: false,
+      allNamespaces:           [],
     };
   },
 
@@ -276,7 +287,7 @@ export default {
       }) || null;
       if (!!this.clusterClassObj) {
         this.setClass();
-        this.setNamespace();
+        this.setClassNamespace();
       } else {
         this.errors.push(this.t('error.clusterClassNotFound'));
       }
@@ -286,10 +297,13 @@ export default {
 
       this.$emit('update:value', { k: 'spec.topology.class', val: clusterClassName });
     },
-    setNamespace() {
+    setClassNamespace() {
       const clusterClassNs = this.clusterClassObj?.metadata?.namespace;
 
       this.$emit('update:value', { k: 'metadata.namespace', val: clusterClassNs });
+      if (this.classNamespaceSupported) {
+        this.value.spec.topology.classNamespace = clusterClassNs;
+      }
     },
     async saveOverride() {
       if (this.errors) {
@@ -304,8 +318,10 @@ export default {
       }
     },
 
-    initSpecs() {
+    async initSpecs() {
+      const inStore = this.$store.getters['currentStore'](NAMESPACE);
       const val = this.value;
+      let namespaces = [];
 
       if ( !val ) {
         set(val, 'spec', { });
@@ -319,6 +335,18 @@ export default {
       if (this.preselectedClass) {
         this.setClassInfo(this.preselectedClass);
       }
+
+      const schema = this.$store.getters[`management/schemaFor`](
+        CAPI.CLUSTER
+      );
+
+      await schema.fetchResourceFields();
+      if ( schema.schemaDefinitions?.[`${ schema.schemaDefinition.type }.spec.topology`]?.resourceFields?.classNamespace ) {
+        this.classNamespaceSupported = true;
+        namespaces = await this.$store.dispatch(`${ inStore }/findAll`, { type: NAMESPACE });
+      }
+
+      return namespaces;
     },
     cancelCredential() {
       if (this.$refs.cruresource) {
@@ -340,7 +368,7 @@ export default {
     clickedType(obj) {
       this.clusterClassObj = this.clusterClasses.find((x) => x.id === obj.id) || null;
       this.setClass();
-      this.setNamespace();
+      this.setClassNamespace();
     },
     enableAutoImport(val) {
       if (val) {
@@ -353,7 +381,10 @@ export default {
 };
 </script>
 <template>
+  <Loading v-if="loading" />
+
   <CruResource
+    v-else
     :mode="mode"
     :show-as-form="true"
     :resource="value"
@@ -383,7 +414,8 @@ export default {
         v-if="!isView"
         :value="value"
         :mode="mode"
-        :namespaced="false"
+        :namespaced="classNamespaceSupported"
+        :namespace-options="allNamespaces"
         name-label="cluster.name.label"
         name-placeholder="cluster.name.placeholder"
         description-label="cluster.description.label"

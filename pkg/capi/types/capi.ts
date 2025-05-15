@@ -10,6 +10,7 @@ export const RANCHER_TURTLES_SYSTEM_NAMESPACE = 'capi-system';
 export const RANCHER_TURTLES_SYSTEM_NAME = 'capi-env-variables';
 
 export const CAPI = {
+  CLUSTER:       'cluster.x-k8s.io.cluster',
   CLUSTER_CLASS: 'cluster.x-k8s.io.clusterclass',
   PROVIDER:      'turtles-capi.cattle.io.capiprovider',
 };
