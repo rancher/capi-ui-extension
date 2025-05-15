@@ -3,9 +3,12 @@ import { CAPI as RANCHER_CAPI, SCHEMA } from '@shell/config/types';
 import Banner from '@components/Banner/Banner.vue';
 import { CAPI } from '../types/capi.ts';
 import InstallHelmCharts from '../components/InstallHelmCharts/index.vue';
+import { Checkbox } from '@rancher/components';
 
 export default {
   name: 'CAPITurtlesDashboard',
+
+  components: { Checkbox },
 
   async beforeCreate() {
     try {
@@ -46,7 +49,7 @@ export default {
 </script>
 
 <template>
-  <div v-if="!willInstall">
+  <div>
     <div
       v-if="!hasClusterClassSchema"
       class="centered"
@@ -68,7 +71,7 @@ export default {
         </div>
       </Banner>
     </div>
-    <div>
+    <!-- <div v-if="!willInstall">
       <button
         type="button"
         class="btn role-primary"
@@ -76,14 +79,23 @@ export default {
       >
         install turts
       </button>
+    </div> -->
+    <div>
+      <InstallHelmCharts
+        store="management"
+        chart-name="rancher-turtles"
+        repo-name="turtles"
+        repo-url="https://rancher.github.io/turtles"
+        :extra-values="{rancherTurtles: {features:{default: false}}}"
+      >
+        <template #values="{setValues, values}">
+          <Checkbox
+            :value="values?.['cluster-api-operator']?.['cert-manager']?.enabled"
+            @update:value="setValues(`['cluster-api-operator'].['cert-manager'].enabled`)"
+          />
+        </template>
+      </InstallHelmCharts>
     </div>
-  </div>
-  <div v-else>
-    <InstallHelmCharts
-      chart-name="rancher-turtles"
-      repo-name="turtles"
-      repo-url="https://rancher.github.io/turtles"
-    />
   </div>
 </template>
 
