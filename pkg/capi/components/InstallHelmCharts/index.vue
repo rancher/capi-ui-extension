@@ -4,11 +4,13 @@ import debounce from 'lodash/debounce';
 
 import { CATALOG, MANAGEMENT } from '@shell/config/types';
 import { SETTING } from '@shell/config/settings';
-import { WINDOWS } from '@shell/store/catalog';
+import { WINDOWS, LINUX } from '@shell/store/catalog';
 import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
 
 import AsyncButton from '@shell/components/AsyncButton';
 import { isPrerelease } from '@shell/utils/version';
+import { nextTick } from 'vue';
+import { set } from '@shell/utils/object';
 
 // TODO nb import from install.vue?
 // actual POST request looks formatted different and smaller than what is in install.vue
@@ -46,6 +48,12 @@ export default {
   components: { AsyncButton },
 
   props: {
+    // vuex store (probably want management or cluster)
+    store: {
+      type:    String,
+      default: 'cluster'
+    },
+
     chartName: {
       type:     String,
       required: true
@@ -71,6 +79,14 @@ export default {
       type:    String,
       default: null
     },
+
+    // consuming component can supply some values to merge with chart values
+    extraValues: {
+      type:    Object,
+      default: () => {
+        return {};
+      }
+    }
   },
 
   async fetch() {
@@ -87,7 +103,7 @@ export default {
     }
 
     try {
-      this.serverUrlSetting = await this.$store.dispatch('management/find', {
+      this.serverUrlSetting = await this.$store.dispatch(`${ this.store }/find`, {
         type: MANAGEMENT.SETTING,
         id:   SETTING.SERVER_URL,
       });
@@ -95,7 +111,7 @@ export default {
       console.error('Unable to fetch `server-url` setting: ', e); // eslint-disable-line no-console
     }
     // TODO nb use resourceFetch utils?
-    await this.$store.dispatch('management/findAll', { type: MANAGEMENT.PROJECT });
+    await this.$store.dispatch(`${ this.store }/findAll`, { type: MANAGEMENT.PROJECT });
   },
 
   data() {
@@ -104,41 +120,87 @@ export default {
       debouncedRefreshCharts: null,
       versionInfo:            null,
       versionInfoError:       null,
+      userValues:             {},
       // payload for 'install' action on clusterrepo resource
       // contains array of chart install info as well as some helm install opts that are set by default in the regular chart install ui
       installCmd:             { charts: [], ...defaultCmdOpts },
+      // TODO nb localize
+      stages:                 {
+        addRepo:           {
+          label:        'Add Respository',
+          loadingLabel:   'Adding repository...',
+          loading:      false,
+          done:         false,
+          errors:       []
+        },
+        loadCharts:        {
+          label:        'Fetch repository chart(s)',
+          loadingLabel:   'Fetching respository chart(s)...',
+          loading:      false,
+          done:         false,
+          errors:       []
+        },
+        // checkRequirements: {
+        //   label:        'Verify system requirements',
+        //   loadingLabel:   'Verifying system requirements...',
+        //   loading:      false,
+        //   done:         false,
+        //   errors:       []
+        // },
+        configureChart:    {
+          label:   'Configure Installation Options',
+          // loadingLabel:   'Configure Installation Options',
+          loading:      false,
+          done:         false,
+          errors:       []
+        },
+        installChart:      {
+          label:        'Install Chart',
+          loadingLabel:   'Installing chart...',
+          loading:      false,
+          done:         false,
+          errors:       []
+        }
+      },
     };
   },
 
   watch: {
-    targetRepo() {
-      if (!this.chart) {
-        this.fetchRepoCharts();
+    targetRepo(neu) {
+      if (neu) {
+        this.stages.addRepo.done = true;
+        this.stages.addRepo.errors = '';
+
+        if (!this.chart) {
+          this.fetchRepoCharts();
+        }
       }
     },
 
     chart(neu) {
       if (neu) {
-        console.log('*** chart found', neu);
+        this.stages.loadCharts.done = true;
+        this.stages.loadCharts.errors = '';
         this.fetchVersionInfo();
       }
     },
 
+    // TODO nb check system requirements
     versionInfo(neu) {
       const { chart: chartInfo } = neu;
 
-      // TODO nb if versionInfo found initialize the 'chart' object used in install cmd
-      // TODO nb add values from chart
       this.installCmd.charts[0] = {
         chartName:   this.chartName,
         releaseName: chartInfo.name,
         version:     chartInfo.version,
         annotations: {
-          // TODO nb always cluster?
-          [CATALOG_ANNOTATIONS.SOURCE_REPO_TYPE]: 'cluster',
+          [CATALOG_ANNOTATIONS.SOURCE_REPO_TYPE]: this.repoType,
           [CATALOG_ANNOTATIONS.SOURCE_REPO_NAME]: this.repoName
         },
-        values: { ...this.getGlobalValues() }
+        // TODO nb include chart values from slots
+        // TODO nb use mergeWith... function?
+        // this only needs to be values that differ from the default
+        values: { ...this.getGlobalValues(), ...this.extraValues }
       };
 
       this.installCmd.namespace = this.targetNamespace || this.chart?.targetNamespace || 'default';
@@ -147,10 +209,12 @@ export default {
 
   methods: {
     async addRepository(btnCb) {
+      this.stages.addRepo.loading = true;
+      this.stages.addRepo.error = null;
+
       try {
-        // TODO nb probably can't use management here
         // TODO nb nested try block...?
-        const repoObj = await this.$store.dispatch('management/create', {
+        const repoObj = await this.$store.dispatch(`${ this.store }/create`, {
           type:     CATALOG.CLUSTER_REPO,
           metadata: { name: this.repoName },
           spec:     { url: this.repoUrl },
@@ -160,15 +224,26 @@ export default {
           await repoObj.save();
         } catch (e) {
           this.$store.dispatch('growl/fromError', { err: e });
+          this.stages.addRepo.loading = false;
+
+          this.stages.addRepo.error = e;
+
           btnCb(false);
 
           return;
         }
+
+        this.stages.addRepo.loading = false;
+        this.stages.addRepo.done = true;
+        await nextTick();
         this.debouncedRefreshCharts();
+
         btnCb(true);
       } catch (e) {
         this.$store.dispatch('growl/fromError', { err: e });
+        this.stages.addRepo.loading = false;
 
+        this.stages.addRepo.error = e;
         btnCb(false);
       }
     },
@@ -176,40 +251,45 @@ export default {
     // it takes time to fetch a repo's charts when the repo resource is created
     // so we retry loading the chart info using the "refresh" clusterrepo model action
     async fetchRepoCharts() {
+      this.stages.loadCharts.loading = true;
+      this.stages.loadCharts.error = '';
+
       let tries = 0;
 
       while (tries < MAX_TRIES) {
         try {
-          console.log('*** chart try number ', tries);
           tries++;
           await this.targetRepo.refresh();
           if (this.chart) {
-            console.log('*** chart found');
             break;
           }
           await new Promise((resolve) => setTimeout(resolve, RETRY_WAIT));
         } catch (err) {
-          // TODO nb some errors are expected - should we show others to users?
-          // this.$store.dispatch('growl/fromError', { err });
+          // TODO nb growl?
+          // some errors here are expected; should we show them so prominently?
           console.error(err);
         }
       }
 
+      this.stages.loadCharts.loading = false;
+
       // tried all our tries and the chart still isn't found - tell users something has gone wrong
       if (!this.chart) {
-        this.$store.dispatch('growl/fromError', { err: `Unable to locate the ${ this.chartName } chart in the ${ this.repoName } repository` });
+        this.stages.loadCharts.error = `Unable to locate the ${ this.chartName } chart in the ${ this.repoName } repository`;
+
+        // this.$store.dispatch('growl/fromError', { err: `Unable to locate the ${ this.chartName } chart in the ${ this.repoName } repository` });
+      } else {
+        this.stages.loadCharts.done = true;
       }
     },
 
     async fetchVersionInfo() {
+      // this.stages.checkRequirements.loading = true;
       try {
-        console.log('*** fetching version info');
         // assume we want the latest non-prerelease version
         const targetVersion = (this.chart?.versions || []).find((v) => v.version && !isPrerelease(v.version))?.version;
 
         if (!targetVersion) {
-          console.log('*** no target version found');
-
           return;
         }
         this.versionInfo = await this.$store.dispatch('catalog/getVersionInfo', {
@@ -224,8 +304,8 @@ export default {
 
         console.error('Unable to fetch VersionInfo: ', e); // eslint-disable-line no-console
       }
-
-      console.log('*** versionInfo fetched: ', this.versionInfo);
+      // this.stages.checkRequirements.loading = false;
+      // this.stages.checkRequirements.done = true;
     },
 
     getGlobalValues() {
@@ -245,8 +325,7 @@ export default {
       const rkeWindowsPathPrefix = this.currentCluster?.spec?.rancherKubernetesEngineConfig?.winPrefixPath || '';
       const isWindows = (this.currentCluster?.workerOSs || []).includes(WINDOWS);
 
-      // TODO nb can we rely on getters here?
-      const projects = this.$store.getters['management/all'](MANAGEMENT.PROJECT);
+      const projects = this.$store.getters[`${ this.store }/all`](MANAGEMENT.PROJECT);
 
       const systemProjectId = projects.find((p) => p.spec?.displayName === 'System')?.id?.split('/')?.[1] || '';
 
@@ -270,26 +349,42 @@ export default {
       return values;
     },
 
-    setValue(key, value) {
+    async installChart() {
+      let res;
 
-    },
-
-    installChart() {
       try {
-        this.targetRepo.doAction('install', this.installCmd);
+        res = await this.targetRepo.doAction('install', this.installCmd);
       } catch (err) {
+        // TODO nb growl?
         console.error(err);
       }
+
+      console.log('*** chart install response: ', res);
     },
+
+    setValue(key, val) {
+      console.log('set ', key, ' to ', val);
+      set(this.userValues, key, val);
+    }
   },
 
   computed: {
-    ...mapGetters(['currentCluster']),
+    // ...mapGetters(['currentCluster']),
     ...mapGetters({
       charts: 'catalog/charts',
       repos:  'catalog/repos',
       t:      'i18n/t'
     }),
+
+    currentCluster() {
+      const storeCluster = this.$store.getters['currentCluster'];
+
+      if (storeCluster) {
+        return storeCluster;
+      }
+
+      return this.$store.getters[`management/byId`](MANAGEMENT.CLUSTER, 'local' );
+    },
 
     /**
        * [!IMPORTANT]
@@ -305,7 +400,7 @@ export default {
         // TODO nb repo type?
         return this.$store.getters['catalog/chart']({
           repoName:  this.repoName,
-          repoType:  'cluster',
+          repoType:  this.repoType,
           chartName: this.chartName
         });
       }
@@ -314,9 +409,7 @@ export default {
     },
 
     targetRepo() {
-      // TODO nb repo type check?
-      // return this.repos?.find((repo) => repo?.metadata?.name === this.repoName);
-      return this.$store.getters['catalog/repo']({ repoType: 'cluster', repoName: this.repoName });
+      return this.$store.getters['catalog/repo']({ repoType: this.repoType, repoName: this.repoName });
     },
 
   }
@@ -324,12 +417,50 @@ export default {
 </script>
 
 <template>
-  <div>
+  <Loading v-if="$fetchState.pending" />
+
+  <div v-else>
+    <ul class="stages">
+      <li
+        v-for="stage in stages"
+        :key="stage.label"
+      >
+        <i
+          v-if="stage.loading"
+          class="icon icon-spinner icon-spin"
+        />
+        <i
+          v-else-if="stage.errors.length"
+          class="icon icon-error text-error"
+        />
+        <i
+          v-else-if="stage.done"
+          class="icon icon-checkmark text-success"
+        />
+        <span
+          v-else
+          class="text-muted"
+        > &mdash;</span>
+
+        <label> {{ stage.loading ? stage.loadingLabel : stage.label }} </label>
+        <span
+          v-if="stage.error"
+          class="text-error"
+        >{{ stage.error }}</span>
+      </li>
+    </ul>
+    <div v-if="stage.loadCharts.done && chart">
+      <slot
+        :set-value="setValue"
+        :values="userValues"
+        name="values"
+      />
+    </div>
     <AsyncButton
       v-if="!targetRepo"
       type="button"
       class="btn role-primary"
-      mode="create"
+      mode="install"
       @click="addRepository"
     />
 
@@ -351,5 +482,7 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-
+.stages {
+  list-style-type: none;
+}
 </style>
