@@ -62,6 +62,7 @@ capi:
       host: Host
       port: Port
     workers:
+      add: Add Worker
       title: Workers
       class: Class
       name: Name

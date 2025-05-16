@@ -5,9 +5,11 @@ import { clone } from '@shell/utils/object';
 import { _EDIT, _VIEW } from '@shell/config/query-params';
 import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
-
+import CCVariables from '../../components/CCVariables/index.vue';
 export default {
-  components: { LabeledSelect, LabeledInput },
+  components: {
+    LabeledSelect, LabeledInput, CCVariables
+  },
   emits:      ['add', 'remove', 'update:value'],
   props:      {
     value: {
@@ -34,10 +36,6 @@ export default {
       type:    Boolean,
       default: true,
     },
-    removeAllowed: {
-      type:    Boolean,
-      default: true,
-    },
     defaultAddValue: {
       type:    [String, Number, Object, Array],
       default: ''
@@ -53,6 +51,12 @@ export default {
     componentTestid: {
       type:    String,
       default: 'worker-item',
+    },
+    clusterClass: {
+      type:    Object,
+      default: () => {
+        return {};
+      }
     }
   },
   data() {
@@ -102,6 +106,22 @@ export default {
   created() {
     this.queueUpdate = debounce(this.update, 50);
   },
+
+  computed: {
+    isView() {
+      return this.mode === _VIEW;
+    },
+    removeLabel() {
+      return this.$store.getters['i18n/t']('generic.remove');
+    },
+    addLabel() {
+      return this.$store.getters['i18n/t']('capi.cluster.workers.add');
+    },
+    machineClassType() {
+      return this.title.includes('Deployments') ? 'machineDeploymentClass' : 'machinePoolClass';
+    }
+  },
+
   methods: {
     add() {
       this.rows.push({ value: clone(this.defaultAddValue) });
@@ -195,6 +215,18 @@ export default {
               type="number"
               placeholder="1"
               @update:value="(val) => !!val ? row.value.replicas = parseInt(val) : row.value.replicas = null"
+            />
+          </div>
+          <div
+            v-if="row.value.class"
+            class="machine-variables"
+          >
+            <CCVariables
+              v-model:value="row.value.variables"
+              :cluster-class="clusterClass"
+              :mode="mode"
+              :machine-class-name="row.value.class"
+              :machine-class-type="machineClassType"
             />
           </div>
           <div

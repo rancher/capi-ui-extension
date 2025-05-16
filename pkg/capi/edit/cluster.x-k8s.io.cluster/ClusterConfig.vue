@@ -581,6 +581,7 @@ export default {
               :class-options="machineDeploymentOptions"
               :initial-empty-row="true"
               component-testid="machine-deployments-item"
+              :cluster-class="clusterClassObj"
               @update:value="$emit('update:value', { k: 'spec.topology.workers.machineDeployments', val: $event })"
             />
           </div>
@@ -596,7 +597,7 @@ export default {
               :add-btn-title="t('capi.cluster.workers.machinePools.add')"
               :class-options="machinePoolOptions"
               :initial-empty-row="true"
-              component-testid="machine-pools-item"
+              :cluster-class="clusterClassObj"
               @update:value="$emit('update:value', { k: 'spec.topology.workers.machinePools', val: $event })"
             />
           </div>
