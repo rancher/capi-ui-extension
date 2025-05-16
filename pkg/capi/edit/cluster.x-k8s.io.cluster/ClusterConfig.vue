@@ -535,6 +535,7 @@ export default {
               :default-add-value="defaultWorkerAddValue"
               :class-options="machineDeploymentOptions"
               :initial-empty-row="true"
+              :cluster-class="clusterClassObj"
               @update:value="$emit('update:value', { k: 'spec.topology.workers.machineDeployments', val: $event })"
             />
           </div>
@@ -549,6 +550,7 @@ export default {
               :default-add-value="defaultWorkerAddValue"
               :class-options="machinePoolOptions"
               :initial-empty-row="true"
+              :cluster-class="clusterClassObj"
               @update:value="$emit('update:value', { k: 'spec.topology.workers.machinePools', val: $event })"
             />
           </div>
