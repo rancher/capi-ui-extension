@@ -166,23 +166,29 @@ export default {
   },
 
   watch: {
-    targetRepo(neu) {
-      if (neu) {
-        this.stages.addRepo.done = true;
-        this.stages.addRepo.errors = '';
+    targetRepo: {
+      handler(neu) {
+        if (neu) {
+          this.stages.addRepo.done = true;
+          this.stages.addRepo.errors = '';
 
-        if (!this.chart) {
-          this.fetchRepoCharts();
+          if (!this.chart) {
+            this.fetchRepoCharts();
+          }
         }
-      }
+      },
+      immediate: true
     },
 
-    chart(neu) {
-      if (neu) {
-        this.stages.loadCharts.done = true;
-        this.stages.loadCharts.errors = '';
-        this.fetchVersionInfo();
-      }
+    chart: {
+      handler(neu) {
+        if (neu) {
+          this.stages.loadCharts.done = true;
+          this.stages.loadCharts.errors = '';
+          this.fetchVersionInfo();
+        }
+      },
+      immediate: true
     },
 
     // TODO nb check system requirements
@@ -200,7 +206,9 @@ export default {
         // TODO nb include chart values from slots
         // TODO nb use mergeWith... function?
         // this only needs to be values that differ from the default
-        values: { ...this.getGlobalValues(), ...this.extraValues }
+        values: {
+          ...this.getGlobalValues(), ...this.extraValues, ...this.userValues
+        }
       };
 
       this.installCmd.namespace = this.targetNamespace || this.chart?.targetNamespace || 'default';
@@ -360,6 +368,9 @@ export default {
       }
 
       console.log('*** chart install response: ', res);
+
+      this.installOperationName = res.operationName;
+      this.installOperationNamespace = res.operationNamespace;
     },
 
     setValue(key, val) {
@@ -449,7 +460,7 @@ export default {
         >{{ stage.error }}</span>
       </li>
     </ul>
-    <div v-if="stage.loadCharts.done && chart">
+    <div v-if="stages.loadCharts.done && chart">
       <slot
         :set-value="setValue"
         :values="userValues"
@@ -469,7 +480,6 @@ export default {
         no chart :(
       </div>
       <div v-else>
-        u have chart
         <AsyncButton
           type="button"
           class="btn role-primary"

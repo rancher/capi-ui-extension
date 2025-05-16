@@ -8,8 +8,6 @@ import { Checkbox } from '@rancher/components';
 export default {
   name: 'CAPITurtlesDashboard',
 
-  components: { Checkbox },
-
   async beforeCreate() {
     try {
       // // TODO nb turn back on
@@ -37,7 +35,9 @@ export default {
     return { willInstall: false };
   },
 
-  components: { Banner, InstallHelmCharts },
+  components: {
+    Banner, InstallHelmCharts, Checkbox
+  },
 
   computed: {
     hasClusterClassSchema() {
@@ -88,10 +88,11 @@ export default {
         repo-url="https://rancher.github.io/turtles"
         :extra-values="{rancherTurtles: {features:{default: false}}}"
       >
-        <template #values="{setValues, values}">
+        <template #values="{setValue, values}">
           <Checkbox
+            label="also cert manager"
             :value="values?.['cluster-api-operator']?.['cert-manager']?.enabled"
-            @update:value="setValues(`['cluster-api-operator'].['cert-manager'].enabled`)"
+            @update:value="e=>setValue(`'cluster-api-operator'.'cert-manager'.enabled`, e)"
           />
         </template>
       </InstallHelmCharts>
