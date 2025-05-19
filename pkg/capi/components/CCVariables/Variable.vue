@@ -25,10 +25,26 @@ export default {
       default: () => null
     },
 
-    validateRequired: {
+    //  if the component is being used in a machine pool use the global variable value as placeholder
+    // and do not validate required fields (the field will be validated as required at global level)
+    isMachineScoped: {
       type:    Boolean,
-      default: true
+      default: false
+    },
+
+    // the full set of variables that this component is one of
+    // either cluster-level variables or one machine pool's available variable overrides
+    allVariables: {
+      type:    Array,
+      default: () => []
+    },
+
+    // cluster-level variables
+    globalVariables: {
+      type:    Array,
+      default: () => []
     }
+
   },
 
   watch: {
@@ -76,7 +92,7 @@ export default {
 
       const required = this.variable?.required;
 
-      if (required && this.validateRequired) {
+      if (required && !this.isMachineScoped) {
         out.push((val) => !isDefined(val) ? t('validation.required', { key: this.variable.name }) : undefined);
       }
 
@@ -137,6 +153,32 @@ export default {
       return '';
     },
 
+    // if mahcine variable, use global value as placeholder
+    // otherwise use cluster class's variable definition
+    placeholder() {
+      if (this.isMachineScoped) {
+        const globvalValue = this.globalVariables.find((v) => v.name === this.variable.name)?.value;
+
+        if (globvalValue) {
+          return globvalValue;
+        }
+      }
+
+      return this.schema.example;
+    },
+
+    // if variable def has a toggled-by  label, check allVariables for the toggle's state and show/hide this variable accordingly
+    toggled() {
+      const toggleLabel = this.variable?.metadata?.labels?.['turtles-capi.cattle.io/toggled-by'];
+      const toggleVariable = (this.allVariables || []).find((v) => v.name === toggleLabel);
+
+      if (toggleVariable) {
+        return !!toggleVariable.value;
+      }
+
+      return true;
+    },
+
   },
 
   methods: {
@@ -170,6 +212,7 @@ export default {
 <template>
   <div
     v-if="componentForType"
+    v-show="toggled"
     :class="{'wider': isListComponent, 'widest': isYamlKeyValueComponent || isYamlComponent, 'align-center': componentForType?.name==='checkbox-var', [`${componentForType.name}`]: true}"
   >
     <label
@@ -189,9 +232,9 @@ export default {
       :id="componentForType.name"
       :value="isYamlComponent ? yamlPlaceholder || value : value"
       :label="variable.name"
-      :placeholder="schema.example"
+      :placeholder="placeholder"
       :tooltip="schema.description"
-      :required="variable.required && validateRequired"
+      :required="variable.required && !isMachineScoped"
       :title="variable.name"
       :options="variableOptions"
       :rules="!isListComponent ? validationRules : []"

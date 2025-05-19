@@ -98,16 +98,17 @@ export default {
       weight:         30
     };
 
-    const stepVariables = {
-      name:           'stepVariables',
-      title:          t('capi.cluster.steps.variables.title'),
-      label:          t('capi.cluster.steps.variables.label'),
-      subtext:        '',
-      descriptionKey: 'capi.cluster.steps.variables.description',
-      ready:          true,
-      weight:         30
-    };
-    const addSteps = !!this.preselectedClass ? [stepConfiguration, stepVariables] : [stepClusterClass, stepConfiguration, stepVariables];
+    // const stepVariables = {
+    //   name:           'stepVariables',
+    //   title:          t('capi.cluster.steps.variables.title'),
+    //   label:          t('capi.cluster.steps.variables.label'),
+    //   subtext:        '',
+    //   descriptionKey: 'capi.cluster.steps.variables.description',
+    //   ready:          true,
+    //   weight:         30
+    // };
+    // const addSteps = !!this.preselectedClass ? [stepConfiguration, stepVariables] : [stepClusterClass, stepConfiguration, stepVariables];
+    const addSteps = !!this.preselectedClass ? [stepConfiguration] : [stepClusterClass, stepConfiguration];
 
     return {
       addSteps,
@@ -126,9 +127,11 @@ export default {
       credential:            null,
       versionInfo:           {},
       defaultWorkerAddValue: {
-        name:  '',
-        class: ''
+        name:      '',
+        class:     '',
+        variables: { overrides: [] }
       },
+      // TODO nb rename/make each validator work the same
       variablesReady:  true,
       clusterClassObj: null,
       loading:         true,
@@ -152,11 +155,11 @@ export default {
       step.ready = !!neu;
     },
 
-    variablesReady(neu) {
-      const step = this.addSteps.find((s) => s.name === 'stepVariables');
+    // variablesReady(neu) {
+    //   const step = this.addSteps.find((s) => s.name === 'stepVariables');
 
-      step.ready = !!neu;
-    }
+    //   step.ready = !!neu;
+    // }
   },
 
   computed: {
@@ -198,11 +201,14 @@ export default {
          (this.value?.spec?.topology?.workers?.machineDeployments && this.value?.spec?.topology?.workers?.machineDeployments.length > 0)) &&
          this.machineDeploymentsValid && this.machinePoolsValid;
 
-      return this.fvFormIsValid & workersValid;
+      // TODO nb test variable validation as part of step 2
+      return this.fvFormIsValid & workersValid && this.variablesReady ;
     },
+
     topology() {
       return this.value?.spec?.topology;
     },
+
     controlPlane: {
       get() {
         return this.value?.spec?.topology?.controlPlane || {};
@@ -215,6 +221,7 @@ export default {
         }
       }
     },
+
     controlPlaneEndpoint: {
       get() {
         return this.value?.spec?.controlPlaneEndpoint || {};
@@ -227,6 +234,7 @@ export default {
         }
       }
     },
+
     network: {
       get() {
         return this.value?.spec?.clusterNetwork || {};
@@ -518,6 +526,19 @@ export default {
           }"
         />
       </div>
+
+      <!-- VARIABLES -->
+      <h2>
+        <t k="capi.cluster.variables.title" />
+      </h2>
+      <ClusterClassVariables
+        v-model:value="value.spec.topology.variables"
+        :cluster-class="clusterClassObj"
+        @validation-passed="e => variablesReady = e"
+        @update:value="$emit('update:value', { k: 'spec.topology.variables', val: $event })"
+      />
+
+      <!-- WORKERS -->
       <div class="col span-12 mt-20 mb-20">
         <h2>
           <t k="capi.cluster.workers.title" />
@@ -530,6 +551,7 @@ export default {
           >
             <WorkerItem
               v-model:value="machineDeployments"
+              :global-variables="value.spec.topology.variables"
               :mode="mode"
               :title="t('capi.cluster.workers.machineDeployments.title')"
               :default-add-value="defaultWorkerAddValue"
@@ -545,6 +567,7 @@ export default {
           >
             <WorkerItem
               v-model:value="machinePools"
+              :global-variables="value.spec.topology.variables"
               :mode="mode"
               :title="t('capi.cluster.workers.machinePools.title')"
               :default-add-value="defaultWorkerAddValue"
@@ -563,7 +586,7 @@ export default {
         />
       </div>
     </template>
-    <template #stepVariables>
+    <!-- <template #stepVariables>
       <h2>
         <t k="capi.cluster.variables.title" />
       </h2>
@@ -573,7 +596,7 @@ export default {
         @validation-passed="e => variablesReady = e"
         @update:value="$emit('update:value', { k: 'spec.topology.variables', val: $event })"
       />
-    </template>
+    </template> -->
   </CruResource>
 </template>
 <style lang="scss" scoped>
