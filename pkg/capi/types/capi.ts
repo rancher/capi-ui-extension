@@ -4,11 +4,15 @@ export const QUERY_PARAMS = { CLASS: 'class' };
 
 export const BLANK_CLUSTER = '_';
 
-export const LABELS = {
-  AUTO_IMPORT: 'cluster-api.cattle.io/rancher-auto-import',
+export const LABELS = { AUTO_IMPORT: 'cluster-api.cattle.io/rancher-auto-import' };
 
-  // clusterclass variable labels
-  GROUP: 'turtles-capi.cattle.io/group'
+export const ANNOTATIONS = {
+  // clusterclass variable styling
+  GROUP:      'turtles-capi.cattle.io/group',
+  SECTION:    'turtles-capi.cattle.io/section',
+  TOGGLED_BY: 'turtles-capi.cattle.io/toggled-by',
+  LABEL:      'turtles-capi.cattle.io/label'
+
 };
 
 export const RANCHER_TURTLES_SYSTEM_NAMESPACE = 'capi-system';

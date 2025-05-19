@@ -495,6 +495,7 @@ export default {
       </cardgrid>
     </template>
     <template #stepConfiguration>
+      <!-- GENERAL CONFIGURATION -->
       <NameNsDescription
         v-if="!isView"
         :value="value"
@@ -508,8 +509,9 @@ export default {
         :rules="{ name: fvGetAndReportPathRules('metadata.name') }"
         @update:value="$emit('update:value', { k: 'metadata', val: $event.metadata })"
       />
-      <div class="row mb-20 span-12">
-        <div class="col col-config span-6 mt-20">
+
+      <div class="row mb-20">
+        <div class="col col-config span-4 mt-20">
           <h2>
             <t k="capi.cluster.version.title" />
           </h2>
@@ -534,6 +536,17 @@ export default {
           />
         </div>
       </div>
+      <ClusterClassVariables
+        v-model:value="value.spec.topology.variables"
+        section="general"
+        :cluster-class="clusterClassObj"
+        @validation-passed="e => variablesReady = e"
+        @update:value="$emit('update:value', { k: 'spec.topology.variables', val: $event })"
+      />
+
+      <hr />
+
+      <!-- CONTROL PLANE CONFIGURATION -->
       <div class="row span-12 row-config">
         <div class="col span-6 mt-20">
           <h2>
@@ -556,6 +569,17 @@ export default {
           />
         </div>
       </div>
+      <ClusterClassVariables
+        v-model:value="value.spec.topology.variables"
+        section="controlplane"
+        :cluster-class="clusterClassObj"
+        @validation-passed="e => variablesReady = e"
+        @update:value="$emit('update:value', { k: 'spec.topology.variables', val: $event })"
+      />
+
+      <hr />
+
+      <!-- NETWORKING CONFIGURATION -->
       <div class="col span-6 mt-20">
         <h2>
           <t k="capi.cluster.networking.title" />
@@ -571,8 +595,17 @@ export default {
           }"
         />
       </div>
+      <ClusterClassVariables
+        v-model:value="value.spec.topology.variables"
+        :cluster-class="clusterClassObj"
+        section="networking"
+        @validation-passed="e => variablesReady = e"
+        @update:value="$emit('update:value', { k: 'spec.topology.variables', val: $event })"
+      />
 
-      <!-- VARIABLES -->
+      <hr />
+
+      <!-- GENERIC VARIABLES -->
       <h2>
         <t k="capi.cluster.variables.title" />
       </h2>
@@ -582,6 +615,8 @@ export default {
         @validation-passed="e => variablesReady = e"
         @update:value="$emit('update:value', { k: 'spec.topology.variables', val: $event })"
       />
+
+      <hr />
 
       <!-- WORKERS -->
       <div class="col span-12 mt-20 mb-20">
@@ -651,17 +686,6 @@ export default {
         />
       </div>
     </template>
-    <!-- <template #stepVariables>
-      <h2>
-        <t k="capi.cluster.variables.title" />
-      </h2>
-      <ClusterClassVariables
-        v-model:value="value.spec.topology.variables"
-        :cluster-class="clusterClassObj"
-        @validation-passed="e => variablesReady = e"
-        @update:value="$emit('update:value', { k: 'spec.topology.variables', val: $event })"
-      />
-    </template> -->
   </CruResource>
 </template>
 <style lang="scss" scoped>

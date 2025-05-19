@@ -3,7 +3,7 @@ import debounce from 'lodash/debounce';
 import { randomStr } from '@shell/utils/string';
 import Variable from './Variable.vue';
 import { componentForType } from '../../util/clusterclass-variables';
-import { LABELS } from '../../types/capi';
+import { LABELS, ANNOTATIONS } from '../../types/capi';
 import GroupPanel from '@shell/components/GroupPanel';
 export default {
   name: 'ClusterClassVariables',
@@ -43,7 +43,12 @@ export default {
     globalVariables: {
       type:    Array,
       default: () => []
-    }
+    },
+
+    section: {
+      type:    String,
+      default: ''
+    },
   },
 
   data() {
@@ -80,11 +85,19 @@ export default {
       return this.machineClassName && this.machineClassType;
     },
 
+    // if not machine scoped, scope using section prop
+    // if neither machine scoped nor section scoped show all variables that are not section scoped
     variableDefinitions() {
       const allVariableDefinitions = this.clusterClass?.spec?.variables || [];
 
       if (!this.isMachineScoped) {
-        return allVariableDefinitions;
+        // variables with annotation matching this section
+        if (this.section) {
+          return allVariableDefinitions.filter((v) => v?.metadata?.annotations?.[ANNOTATIONS.SECTION] === this.section);
+          // if this component doesn't have section prop show all variables without section prop
+        } else {
+          return allVariableDefinitions.filter((v) => !v?.metadata?.annotations?.[ANNOTATIONS.SECTION]);
+        }
       }
       const variableNames = this.machineScopedJsonPatches.reduce((names, patch) => {
         const valueFromVariable = patch?.valueFrom?.variable;
@@ -112,7 +125,7 @@ export default {
       const out = { zzzungrouped: [] };
 
       this.variableDefinitions.forEach((spec) => {
-        const group = spec?.metadata?.labels?.[LABELS.GROUP];
+        const group = spec?.metadata?.annotations?.[ANNOTATIONS.GROUP];
 
         if (group) {
           if (!out[group]) {
@@ -233,7 +246,7 @@ export default {
       const nextVariableDef = this.variableDefinitions[i + 1];
 
       if (nextVariableDef) {
-        return componentForType(variableDef?.schema?.openAPIV3Schema)?.name !== componentForType(nextVariableDef?.schema?.openAPIV3Schema)?.name;
+        return componentForType(variableDef?.schema?.openAPIV3Schema, variableDef?.name)?.name !== componentForType(nextVariableDef?.schema?.openAPIV3Schema, variableDef?.name)?.name;
       }
     }
   },
