@@ -7,11 +7,15 @@ import { componentForType } from '../../util/clusterclass-variables';
 import { LABELS, ANNOTATIONS } from '../../types/capi';
 import GroupPanel from '@shell/components/GroupPanel';
 import { FORM_SECTIONS } from '../../edit/cluster.x-k8s.io.cluster/ClusterConfig.vue';
+import Accordion from '@components/Accordion/Accordion.vue';
+
 export default {
   name: 'ClusterClassVariables',
 
-  components: { Variable, GroupPanel },
-  emits:      ['validation-passed', 'update:value'],
+  components: {
+    Variable, GroupPanel, Accordion
+  },
+  emits: ['validation-passed', 'update:value', 'update-variables'],
 
   props: {
     // cluster.x-k8s.io.clusterclass
@@ -84,6 +88,12 @@ export default {
   computed: {
     ...mapGetters({ withFallback: 'i18n/withFallback' }),
 
+    // this.value is all variable values for the cluster
+    // ownedVariables are the subset of those variables that this instance of CCVariables controls
+    ownedVariables() {
+      return this.value.filter((v) => this.ownedVariableNames.includes(v.name));
+    },
+
     // is  the component being used for top  level cluster variables or machine overrides?
     isMachineScoped() {
       return this.machineClassName && this.machineClassType;
@@ -124,13 +134,35 @@ export default {
       return allVariableDefinitions.filter((v) => variableNames.includes(v.name));
     },
 
+    // group variables by section
+    // if this component has a section prop defined, this will return
+    // {misc: [], [this.section]: <this sections variables>[]}
+    sectionedVariableDefinitions() {
+      const out = { misc: [] };
+
+      this.variableDefinitions.forEach((spec) => {
+        const section = spec?.metadata?.annotations?.[ANNOTATIONS.SECTION];
+
+        if (section) {
+          if (!out[section]) {
+            out[section] = [spec];
+          } else {
+            out[section].push(spec);
+          }
+        } else {
+          out.misc.push(spec);
+        }
+      });
+
+      return out;
+    },
+
     // use variable metadata to add vars to groups
     // TODO nb perhaps a less silly way of keeping ungrouped at the end
     groupedVariableDefinitions() {
       const out = { };
 
       for (const section in this.sectionedVariableDefinitions) {
-        console.log('grouping section  ', section);
         const grouped = { misc: [] };
 
         this.sectionedVariableDefinitions[section].forEach((spec) => {
@@ -150,41 +182,23 @@ export default {
         out[section] = grouped;
       }
 
-      // this.variableDefinitions.forEach((spec) => {
-      //   const group = spec?.metadata?.annotations?.[ANNOTATIONS.GROUP];
-
-      //   if (group) {
-      //     if (!out[group]) {
-      //       out[group] = [spec];
-      //     } else {
-      //       out[group].push(spec);
-      //     }
-      //   } else {
-      //     out.misc.push(spec);
-      //   }
-      // });
-
       return out;
     },
 
-    // group variables by section
-    // if this component has a section prop defined, this will return
-    // {misc: [], [this.section]: <this sections variables>[]}
-    sectionedVariableDefinitions() {
-      const out = { misc: [] };
+    // an instance of CCVariables may display only a subset of cluster class' variables
+    // if it is section scoped
+    // if it is machine scoped
+    ownedVariableNames() {
+      const out = [];
 
-      this.variableDefinitions.forEach((spec) => {
-        const section = spec?.metadata?.annotations?.[ANNOTATIONS.SECTION];
+      Object.keys(this.groupedVariableDefinitions || {}).forEach((s) => {
+        Object.keys(this.groupedVariableDefinitions[s] || {}).forEach((g) => {
+          const group = this.groupedVariableDefinitions[s][g] || [];
 
-        if (section) {
-          if (!out[section]) {
-            out[section] = [spec];
-          } else {
-            out[section].push(spec);
+          if (group.length) {
+            out.push(...group.map((v) => v.name));
           }
-        } else {
-          out.misc.push(spec);
-        }
+        });
       });
 
       return out;
@@ -223,14 +237,16 @@ export default {
     },
 
     updateVariables(val, variableDef) {
-      const out = [...this.value];
-      const existingIdx = this.value.findIndex((variable) => variable.name === variableDef.name);
+      const out = [...this.ownedVariables];
+      const existingIdx = this.ownedVariables.findIndex((variable) => variable.name === variableDef.name);
 
       if (existingIdx >= 0) {
         out[existingIdx].value = val;
       } else {
         out.push({ value: val, name: variableDef.name });
       }
+      this.$emit('update-variables', out, this.ownedVariableNames);
+
       this.$emit('update:value', out);
     },
 
@@ -238,7 +254,7 @@ export default {
     // will not  be run when the component is used in machine context
     updateVariableDefaults(neu, old) {
       // remove or update variables from previous cc
-      const out = [...this.value].reduce((acc, existingVar) => {
+      const out = [...this.ownedVariables].reduce((acc, existingVar) => {
         const neuDef = (neu || []).find((n) => n.name === existingVar.name);
 
         // do not include variables not defined in the new cluster class
@@ -276,12 +292,13 @@ export default {
           newDefault = false;
         }
         if (newDefault !== undefined && !out.find((v) => v.name === def.name)) {
-          // console.log('adding new default', def.name, newDefault);
           out.push({ name: def.name, value: newDefault });
         }
       });
 
       this.errorCount = 0;
+      this.$emit('update-variables', out, this.ownedVariableNames);
+
       this.$emit('update:value', out);
     },
 
@@ -306,28 +323,56 @@ export default {
 </script>
 
 <template>
-  <template v-if="groupedVariableDefinitions && Object.keys(groupedVariableDefinitions).length>1">
+  <template v-if="groupedVariableDefinitions">
     <div
       v-for="(s, key) in groupedVariableDefinitions"
       :key="key"
     >
-      <h2 v-if="key!=='misc' && !section">
-        <span>{{ withFallback(`capi.variables.${key}`, null, key) }}</span>
-      </h2>
-      <h2 v-else-if="!section">
-        <t k="capi.cluster.variables.title" />
-      </h2>
-      <div
-        v-for="(group, label) in s"
-        :key="label"
-        class="mb-40"
+      <Accordion
+        v-if="!section && !isMachineScoped"
+        class="mt-20"
+        :title="withFallback(`capi.variables.${key}`, null, key)"
+        open-initially
       >
-        <GroupPanel
-          v-if="label !== 'misc'"
-          class="ccvariable-group-panel"
-          :label="label"
+        <div
+          v-for="(group, label) in s"
+          :key="label"
+          class="mb-40"
         >
-          <div class="variables-group">
+          <GroupPanel
+            v-if="label !== 'misc'"
+            class="ccvariable-group-panel"
+            :label="label"
+          >
+            <div class="variables-group">
+              <template
+                v-for="(variableDef, i) in group"
+
+                :key="`${variableDef.name}`"
+              >
+                <Variable
+                  :ref="`${variableDef.name}-input`"
+                  :all-variables="value"
+                  :variable="variableDef"
+                  :value="valueFor(variableDef)"
+                  :is-machine-scoped="isMachineScoped"
+                  :global-variables="globalVariables"
+                  :validate-required="!machineDeploymentClass && !machinePoolClass"
+                  @update:value="e=>updateVariables(e, variableDef)"
+                  @validation-passed="updateErrors"
+                />
+                <div
+                  v-if="newComponentType(variableDef, i)"
+                  :key="`${i}-${rerenderKey}`"
+                  class="force-newline"
+                />
+              </template>
+            </div>
+          </GroupPanel>
+          <div
+            v-else
+            class="variables-group"
+          >
             <template
               v-for="(variableDef, i) in group"
 
@@ -335,12 +380,12 @@ export default {
             >
               <Variable
                 :ref="`${variableDef.name}-input`"
+                :global-variables="globalVariables"
                 :all-variables="value"
                 :variable="variableDef"
                 :value="valueFor(variableDef)"
+                :validate-required="!isMachineScoped"
                 :is-machine-scoped="isMachineScoped"
-                :global-variables="globalVariables"
-                :validate-required="!machineDeploymentClass && !machinePoolClass"
                 @update:value="e=>updateVariables(e, variableDef)"
                 @validation-passed="updateErrors"
               />
@@ -351,33 +396,71 @@ export default {
               />
             </template>
           </div>
-        </GroupPanel>
+        </div>
+      </Accordion>
+      <div v-else>
         <div
-          v-else
-          class="variables-group"
+          v-for="(group, label) in s"
+          :key="label"
+          class="mb-40"
         >
-          <template
-            v-for="(variableDef, i) in group"
-
-            :key="`${variableDef.name}`"
+          <GroupPanel
+            v-if="label !== 'misc'"
+            class="ccvariable-group-panel"
+            :label="label"
           >
-            <Variable
-              :ref="`${variableDef.name}-input`"
-              :global-variables="globalVariables"
-              :all-variables="value"
-              :variable="variableDef"
-              :value="valueFor(variableDef)"
-              :validate-required="!isMachineScoped"
-              :is-machine-scoped="isMachineScoped"
-              @update:value="e=>updateVariables(e, variableDef)"
-              @validation-passed="updateErrors"
-            />
-            <div
-              v-if="newComponentType(variableDef, i)"
-              :key="`${i}-${rerenderKey}`"
-              class="force-newline"
-            />
-          </template>
+            <div class="variables-group">
+              <template
+                v-for="(variableDef, i) in group"
+
+                :key="`${variableDef.name}`"
+              >
+                <Variable
+                  :ref="`${variableDef.name}-input`"
+                  :all-variables="value"
+                  :variable="variableDef"
+                  :value="valueFor(variableDef)"
+                  :is-machine-scoped="isMachineScoped"
+                  :global-variables="globalVariables"
+                  :validate-required="!machineDeploymentClass && !machinePoolClass"
+                  @update:value="e=>updateVariables(e, variableDef)"
+                  @validation-passed="updateErrors"
+                />
+                <div
+                  v-if="newComponentType(variableDef, i)"
+                  :key="`${i}-${rerenderKey}`"
+                  class="force-newline"
+                />
+              </template>
+            </div>
+          </GroupPanel>
+          <div
+            v-else
+            class="variables-group"
+          >
+            <template
+              v-for="(variableDef, i) in group"
+
+              :key="`${variableDef.name}`"
+            >
+              <Variable
+                :ref="`${variableDef.name}-input`"
+                :global-variables="globalVariables"
+                :all-variables="value"
+                :variable="variableDef"
+                :value="valueFor(variableDef)"
+                :validate-required="!isMachineScoped"
+                :is-machine-scoped="isMachineScoped"
+                @update:value="e=>updateVariables(e, variableDef)"
+                @validation-passed="updateErrors"
+              />
+              <div
+                v-if="newComponentType(variableDef, i)"
+                :key="`${i}-${rerenderKey}`"
+                class="force-newline"
+              />
+            </template>
+          </div>
         </div>
       </div>
     </div>
