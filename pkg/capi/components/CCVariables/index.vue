@@ -19,6 +19,7 @@ export default {
     },
 
     // cluster.x-k8s.io.cluster .spec.variables
+    // or .spec.machinePools[].variables.overrides
     value: {
       type:    Array,
       default: () => {
@@ -36,6 +37,12 @@ export default {
     machineClassName: {
       type:    String,
       default: null
+    },
+
+    // used in machine context to display the global value as a placeholder
+    globalVariables: {
+      type:    Array,
+      default: () => []
     }
   },
 
@@ -52,7 +59,9 @@ export default {
     },
 
     variableDefinitions(neu, old) {
-      this.updateVariableDefaults(neu, old);
+      if (!this.isMachineScoped) {
+        this.updateVariableDefaults(neu, old);
+      }
       this.$nextTick(() => {
         this.rerenderKey = randomStr();
       });
@@ -60,14 +69,21 @@ export default {
   },
 
   created() {
-    this.updateVariableDefaults(this.variableDefinitions, []);
+    if (!this.isMachineScoped) {
+      this.updateVariableDefaults(this.variableDefinitions, []);
+    }
   },
 
   computed: {
+    // is  the component being used for top  level cluster variables or machine overrides?
+    isMachineScoped() {
+      return this.machineClassName && this.machineClassType;
+    },
+
     variableDefinitions() {
       const allVariableDefinitions = this.clusterClass?.spec?.variables || [];
 
-      if (!this.machineClassType && !this.machineClassName) {
+      if (!this.isMachineScoped) {
         return allVariableDefinitions;
       }
       const variableNames = this.machineScopedJsonPatches.reduce((names, patch) => {
@@ -113,7 +129,7 @@ export default {
     },
 
     machineScopedJsonPatches() {
-      if (!this.machineClassName && !this.machineClassType) {
+      if (!this.isMachineScoped) {
         return [];
       }
       const out = [];
@@ -244,8 +260,11 @@ export default {
           >
             <Variable
               :ref="`${variableDef.name}-input`"
+              :all-variables="value"
               :variable="variableDef"
               :value="valueFor(variableDef)"
+              :is-machine-scoped="isMachineScoped"
+              :global-variables="globalVariables"
               :validate-required="!machineDeploymentClass && !machinePoolClass"
               @update:value="e=>updateVariables(e, variableDef)"
               @validation-passed="updateErrors"
@@ -269,9 +288,12 @@ export default {
         >
           <Variable
             :ref="`${variableDef.name}-input`"
+            :global-variables="globalVariables"
+            :all-variables="value"
             :variable="variableDef"
             :value="valueFor(variableDef)"
-            :validate-required="!machineDeploymentClass && !machinePoolClass"
+            :validate-required="!isMachineScoped"
+            :is-machine-scoped="isMachineScoped"
             @update:value="e=>updateVariables(e, variableDef)"
             @validation-passed="updateErrors"
           />

@@ -52,6 +52,12 @@ export default {
       type:    String,
       default: 'worker-item',
     },
+
+    globalVariables: {
+      type:    Array,
+      default: () => []
+    },
+
     clusterClass: {
       type:    Object,
       default: () => {
@@ -217,18 +223,7 @@ export default {
               @update:value="(val) => !!val ? row.value.replicas = parseInt(val) : row.value.replicas = null"
             />
           </div>
-          <div
-            v-if="row.value.class"
-            class="machine-variables"
-          >
-            <CCVariables
-              v-model:value="row.value.variables"
-              :cluster-class="clusterClass"
-              :mode="mode"
-              :machine-class-name="row.value.class"
-              :machine-class-type="machineClassType"
-            />
-          </div>
+
           <div
             v-if="removeAllowed"
             class="remove mt-20"
@@ -243,6 +238,19 @@ export default {
               {{ removeLabel }}
             </button>
           </div>
+        </div>
+        <div
+          v-if="row.value.class"
+          class="machine-variables"
+        >
+          <CCVariables
+            v-model:value="row.value.variables.overrides"
+            :global-variables="globalVariables"
+            :cluster-class="clusterClass"
+            :mode="mode"
+            :machine-class-name="row.value.class"
+            :machine-class-type="machineClassType"
+          />
         </div>
       </div>
     </template>
