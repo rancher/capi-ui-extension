@@ -142,6 +142,19 @@ asyncButton:
     waiting: Saving...
     success: Saved
 
+  # TODO nb docs
+  variables:
+    azureClusterIdentityName: Azure Cluster Identity Name
+    enableETCDBackup: Enable Automatic ETCD Backups
+    etcdBackupRetention: Retention Count
+    etcdBackupScheduleCron: Cron Schedule
+    imageGallery: Image Gallery
+    imageName: Image Name
+    location: Location
+    registrationMethod: Registration Method
+    resourceGroup: Resource Group
+    subscriptionID: Subscription ID
+    vmSize: Virtual Machine Size
 nav:
   group:
     CAPITurtles: CAPI

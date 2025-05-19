@@ -5,6 +5,7 @@ import Variable from './Variable.vue';
 import { componentForType } from '../../util/clusterclass-variables';
 import { LABELS, ANNOTATIONS } from '../../types/capi';
 import GroupPanel from '@shell/components/GroupPanel';
+import { FORM_SECTIONS } from '../../edit/cluster.x-k8s.io.cluster/ClusterConfig.vue';
 export default {
   name: 'ClusterClassVariables',
 
@@ -95,8 +96,9 @@ export default {
         if (this.section) {
           return allVariableDefinitions.filter((v) => v?.metadata?.annotations?.[ANNOTATIONS.SECTION] === this.section);
           // if this component doesn't have section prop show all variables without section prop
+          // and all variables with a section prop that does not match the list  shown in ClusterConfig (FORM_SECTIONS)
         } else {
-          return allVariableDefinitions.filter((v) => !v?.metadata?.annotations?.[ANNOTATIONS.SECTION]);
+          return allVariableDefinitions.filter((v) => !Object.values(FORM_SECTIONS).includes(v?.metadata?.annotations?.[ANNOTATIONS.SECTION]) || !v?.metadata?.annotations?.[ANNOTATIONS.SECTION]);
         }
       }
       const variableNames = this.machineScopedJsonPatches.reduce((names, patch) => {
@@ -186,6 +188,7 @@ export default {
     },
 
     // update the cluster's variables when the cluster class changes
+    // will not  be run when the component is used in machine context
     updateVariableDefaults(neu, old) {
       // remove or update variables from previous cc
       const out = [...this.value].reduce((acc, existingVar) => {
@@ -226,6 +229,7 @@ export default {
           newDefault = false;
         }
         if (newDefault !== undefined && !out.find((v) => v.name === def.name)) {
+          // console.log('adding new default', def.name, newDefault);
           out.push({ name: def.name, value: newDefault });
         }
       });
