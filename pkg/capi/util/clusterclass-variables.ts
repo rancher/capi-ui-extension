@@ -6,12 +6,14 @@ import KeyValue from '@shell/components/form/KeyValue.vue';
 import ArrayList from '@shell/components/form/ArrayList.vue';
 import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
 import YamlEditor from '@shell/components/YamlEditor';
+import ToggleSwitch from '@components/Form/ToggleSwitch/ToggleSwitch';
 
 export const VARIABLE_INPUT_NAMES = {
   TEXT:           'text-var',
-  BOOL:       'checkbox-var',
-  MAP:      'keyvalue-var',
-  MAP_YAML: 'keyvalue-yaml-var',
+  BOOL:        'checkbox-var',
+  BOOL_TOGGLE:       'toggle-var',
+  MAP:         'keyvalue-var',
+  MAP_YAML:    'keyvalue-yaml-var',
   ARRAY:          'arraylist-var',
   YAML:           'yamleditor-var'
 };
@@ -22,7 +24,7 @@ export const VARIABLE_INPUT_NAMES = {
  * @param schema <clusterclass>.spec.variables[].schema.openAPIV3Schema
  * @returns /{component: <input component>, name: string name of input component}
  */
-export const componentForType = (schema) => {
+export const componentForType = (schema, name) => {
   let out;
 
   let { type } = schema;
@@ -66,7 +68,11 @@ export const componentForType = (schema) => {
 
       break;
     case 'boolean':
-      out = { component: Checkbox, name: VARIABLE_INPUT_NAMES.BOOL };
+      if (name.includes('toggle')) {
+        out = { component: ToggleSwitch, name: VARIABLE_INPUT_NAMES.BOOL_TOGGLE };
+      } else {
+        out = { component: Checkbox, name: VARIABLE_INPUT_NAMES.BOOL };
+      }
 
       break;
     default:

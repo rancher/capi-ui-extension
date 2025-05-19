@@ -6,6 +6,7 @@ import YamlEditor from '@shell/components/YamlEditor';
 import { mapGetters } from 'vuex';
 import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
 import { componentForType, makeYamlPlaceholders, VARIABLE_INPUT_NAMES } from '../../util/clusterclass-variables';
+import { ANNOTATIONS } from '../../types/capi';
 
 export default {
   name: 'CCVariable',
@@ -63,7 +64,7 @@ export default {
     ...mapGetters({ t: 'i18n/t' }),
 
     componentForType() {
-      return componentForType(this.schema);
+      return componentForType(this.schema, this.variable.name);
     },
 
     schema() {
@@ -71,6 +72,7 @@ export default {
     },
 
     // options may be arrays or objects - stringify them to display in labeledselect
+    // TODO nb  add a placeholder to handle none opts eg cluster class may have '' as one of the enum values
     variableOptions() {
       const opts = this.schema?.enum;
 
@@ -169,15 +171,19 @@ export default {
 
     // if variable def has a toggled-by  label, check allVariables for the toggle's state and show/hide this variable accordingly
     toggled() {
-      const toggleLabel = this.variable?.metadata?.labels?.['turtles-capi.cattle.io/toggled-by'];
+      const toggleLabel = this.variable?.metadata?.annotations?.['turtles-capi.cattle.io/toggled-by'];
       const toggleVariable = (this.allVariables || []).find((v) => v.name === toggleLabel);
 
       if (toggleVariable) {
         return !!toggleVariable.value;
       }
 
-      return true;
+      return !toggleLabel;
     },
+
+    label() {
+      return this.variable?.metadata?.annotations?.[ANNOTATIONS.LABEL] || this.variable.name;
+    }
 
   },
 
@@ -231,7 +237,8 @@ export default {
       v-if="componentForType"
       :id="componentForType.name"
       :value="isYamlComponent ? yamlPlaceholder || value : value"
-      :label="variable.name"
+      :label="label"
+      :on-label="label"
       :placeholder="placeholder"
       :tooltip="schema.description"
       :required="variable.required && !isMachineScoped"

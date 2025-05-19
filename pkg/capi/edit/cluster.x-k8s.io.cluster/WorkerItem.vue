@@ -209,7 +209,6 @@ export default {
           </div>
 
           <div
-            v-if="removeAllowed"
             class="remove mt-30"
           >
             <button
