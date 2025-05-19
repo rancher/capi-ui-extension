@@ -37,7 +37,7 @@ export default {
       default: true,
     },
     defaultAddValue: {
-      type:    [String, Number, Object, Array],
+      type:    Object,
       default: ''
     },
     loading: {
@@ -107,7 +107,8 @@ export default {
         }
         this.lastUpdateWasFromValue = false;
       }
-    }
+    },
+
   },
   created() {
     this.queueUpdate = debounce(this.update, 50);
@@ -125,7 +126,8 @@ export default {
     },
     machineClassType() {
       return this.title.includes('Deployments') ? 'machineDeploymentClass' : 'machinePoolClass';
-    }
+    },
+
   },
 
   methods: {
@@ -151,6 +153,7 @@ export default {
       removeAt(this.rows, index);
       this.queueUpdate();
     },
+
     update() {
       if ( this.isView ) {
         return;
@@ -166,8 +169,15 @@ export default {
       }
       this.$emit('update:value', out);
     },
+
     valUpdate(val, key) {
       key.value.name = val.data;
+    },
+
+    needsName(row) {
+      const definitions = this.machineClassType === 'machineDeploymentClass' ? this.clusterClass.spec.workers.machineDeployments : this.clusterClass.spec.workers.machinePools;
+
+      return !(definitions || []).find((d) => d.class === row.value.class)?.namingStrategy;
     }
   }
 };
@@ -193,14 +203,15 @@ export default {
         class="box"
       >
         <div class="value row row-wi">
-          <div class="col-long mr-20 span-4 mt-20">
+          <div class="col-short mr-10 mt-20">
             <LabeledInput
-              ref="value"
-              v-model:value="row.value.name"
+              :value="row.value.replicas"
               :mode="mode"
               :disabled="false"
-              :label="t('capi.cluster.workers.name')"
-              required
+              :label="t('capi.cluster.workers.replicas')"
+              type="number"
+              placeholder="1"
+              @update:value="(val) => !!val ? row.value.replicas = parseInt(val) : row.value.replicas = null"
             />
           </div>
           <div class="col-long mr-20 span-4 mt-10">
@@ -212,15 +223,17 @@ export default {
               required
             />
           </div>
-          <div class="col-short mr-10 mt-10">
+          <div
+            v-if="needsName(row) && row.value.class"
+            class="col-long mr-20 span-4 mt-20"
+          >
             <LabeledInput
-              :value="row.value.replicas"
+              ref="value"
+              v-model:value="row.value.name"
               :mode="mode"
               :disabled="false"
-              :label="t('capi.cluster.workers.replicas')"
-              type="number"
-              placeholder="1"
-              @update:value="(val) => !!val ? row.value.replicas = parseInt(val) : row.value.replicas = null"
+              :label="t('capi.cluster.workers.name')"
+              required
             />
           </div>
 

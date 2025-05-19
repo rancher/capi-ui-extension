@@ -143,11 +143,11 @@ export default {
       credentialId:          '',
       credential:            null,
       versionInfo:           {},
-      defaultWorkerAddValue: {
-        name:      '',
-        class:     '',
-        variables: { overrides: [] }
-      },
+      // defaultWorkerAddValue: {
+      //   name:      '',
+      //   class:     '',
+      //   variables: { overrides: [] }
+      // },
       variablesReady:          true,
       clusterClassObj:         null,
       loading:                 true,
@@ -323,11 +323,11 @@ export default {
     },
 
     isk3s() {
-      return this.controlPlane === 'KThreesControlPlaneTemplate';
+      return this.clusterClassControlPlane === 'KThreesControlPlaneTemplate';
     },
 
     isRke2() {
-      return this.controlPlane === 'RKE2ControlPlaneTemplate';
+      return this.clusterClassControlPlane === 'RKE2ControlPlaneTemplate';
     },
 
     // if k3s or rke2 use release channel endpoint to get a list of version choices
@@ -342,7 +342,35 @@ export default {
       }
 
       return [];
-    }
+    },
+
+    defaultDeploymentAddValue() {
+      let cclass = '';
+
+      if (this.machineDeploymentOptions && this.machineDeploymentOptions.length === 1 ) {
+        cclass = this.machineDeploymentOptions[0];
+      }
+
+      return {
+        name:      '',
+        class:     cclass,
+        variables: { overrides: [] }
+      };
+    },
+
+    defaultPoolAddValue() {
+      let cclass = '';
+
+      if (this.machinePoolOptions && this.machinePoolOptions.length === 1 ) {
+        cclass = this.machinePoolOptions[0];
+      }
+
+      return {
+        name:      '',
+        class:     cclass,
+        variables: { overrides: [] }
+      };
+    },
   },
 
   methods: {
@@ -618,9 +646,9 @@ export default {
       <hr />
 
       <!-- GENERIC VARIABLES -->
-      <h2>
+      <!-- <h2>
         <t k="capi.cluster.variables.title" />
-      </h2>
+      </h2> -->
       <ClusterClassVariables
         v-model:value="value.spec.topology.variables"
         :cluster-class="clusterClassObj"
@@ -628,7 +656,7 @@ export default {
         @update:value="$emit('update:value', { k: 'spec.topology.variables', val: $event })"
       />
 
-      <hr />
+      <!-- <hr /> -->
 
       <!-- WORKERS -->
       <div class="col span-12 mt-20 mb-20">
@@ -654,8 +682,8 @@ export default {
               :global-variables="value.spec.topology.variables"
               :mode="mode"
               :title="t('capi.cluster.workers.machineDeployments.title')"
-              :default-add-value="defaultWorkerAddValue"
               :add-btn-title="t('capi.cluster.workers.machineDeployments.add')"
+              :default-add-value="defaultDeploymentAddValue"
               :class-options="machineDeploymentOptions"
               :initial-empty-row="true"
               component-testid="machine-deployments-item"
@@ -672,8 +700,8 @@ export default {
               :global-variables="value.spec.topology.variables"
               :mode="mode"
               :title="t('capi.cluster.workers.machinePools.title')"
-              :default-add-value="defaultWorkerAddValue"
               :add-btn-title="t('capi.cluster.workers.machinePools.add')"
+              :default-add-value="defaultPoolAddValue"
               :class-options="machinePoolOptions"
               :initial-empty-row="true"
               :cluster-class="clusterClassObj"

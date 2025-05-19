@@ -1,4 +1,5 @@
 <script>
+import { mapGetters } from 'vuex';
 import debounce from 'lodash/debounce';
 import { randomStr } from '@shell/utils/string';
 import Variable from './Variable.vue';
@@ -81,6 +82,8 @@ export default {
   },
 
   computed: {
+    ...mapGetters({ withFallback: 'i18n/withFallback' }),
+
     // is  the component being used for top  level cluster variables or machine overrides?
     isMachineScoped() {
       return this.machineClassName && this.machineClassType;
@@ -124,19 +127,63 @@ export default {
     // use variable metadata to add vars to groups
     // TODO nb perhaps a less silly way of keeping ungrouped at the end
     groupedVariableDefinitions() {
-      const out = { zzzungrouped: [] };
+      const out = { };
+
+      for (const section in this.sectionedVariableDefinitions) {
+        console.log('grouping section  ', section);
+        const grouped = { misc: [] };
+
+        this.sectionedVariableDefinitions[section].forEach((spec) => {
+          const group = spec?.metadata?.annotations?.[ANNOTATIONS.GROUP];
+
+          if (group) {
+            if (!grouped[group]) {
+              grouped[group] = [spec];
+            } else {
+              grouped[group].push(spec);
+            }
+          } else {
+            grouped.misc.push(spec);
+          }
+        });
+
+        out[section] = grouped;
+      }
+
+      // this.variableDefinitions.forEach((spec) => {
+      //   const group = spec?.metadata?.annotations?.[ANNOTATIONS.GROUP];
+
+      //   if (group) {
+      //     if (!out[group]) {
+      //       out[group] = [spec];
+      //     } else {
+      //       out[group].push(spec);
+      //     }
+      //   } else {
+      //     out.misc.push(spec);
+      //   }
+      // });
+
+      return out;
+    },
+
+    // group variables by section
+    // if this component has a section prop defined, this will return
+    // {misc: [], [this.section]: <this sections variables>[]}
+    sectionedVariableDefinitions() {
+      const out = { misc: [] };
 
       this.variableDefinitions.forEach((spec) => {
-        const group = spec?.metadata?.annotations?.[ANNOTATIONS.GROUP];
+        const section = spec?.metadata?.annotations?.[ANNOTATIONS.SECTION];
 
-        if (group) {
-          if (!out[group]) {
-            out[group] = [spec];
+        if (section) {
+          if (!out[section]) {
+            out[section] = [spec];
           } else {
-            out[group].push(spec);
+            out[section].push(spec);
           }
         } else {
-          out.zzzungrouped.push(spec);
+          out.misc.push(spec);
         }
       });
 
@@ -259,14 +306,90 @@ export default {
 </script>
 
 <template>
-  <template v-if="groupedVariableDefinitions">
+  <template v-if="groupedVariableDefinitions && Object.keys(groupedVariableDefinitions).length>1">
+    <div
+      v-for="(s, key) in groupedVariableDefinitions"
+      :key="key"
+    >
+      <h2 v-if="key!=='misc' && !section">
+        <span>{{ withFallback(`capi.variables.${key}`, null, key) }}</span>
+      </h2>
+      <h2 v-else-if="!section">
+        <t k="capi.cluster.variables.title" />
+      </h2>
+      <div
+        v-for="(group, label) in s"
+        :key="label"
+        class="mb-40"
+      >
+        <GroupPanel
+          v-if="label !== 'misc'"
+          class="ccvariable-group-panel"
+          :label="label"
+        >
+          <div class="variables-group">
+            <template
+              v-for="(variableDef, i) in group"
+
+              :key="`${variableDef.name}`"
+            >
+              <Variable
+                :ref="`${variableDef.name}-input`"
+                :all-variables="value"
+                :variable="variableDef"
+                :value="valueFor(variableDef)"
+                :is-machine-scoped="isMachineScoped"
+                :global-variables="globalVariables"
+                :validate-required="!machineDeploymentClass && !machinePoolClass"
+                @update:value="e=>updateVariables(e, variableDef)"
+                @validation-passed="updateErrors"
+              />
+              <div
+                v-if="newComponentType(variableDef, i)"
+                :key="`${i}-${rerenderKey}`"
+                class="force-newline"
+              />
+            </template>
+          </div>
+        </GroupPanel>
+        <div
+          v-else
+          class="variables-group"
+        >
+          <template
+            v-for="(variableDef, i) in group"
+
+            :key="`${variableDef.name}`"
+          >
+            <Variable
+              :ref="`${variableDef.name}-input`"
+              :global-variables="globalVariables"
+              :all-variables="value"
+              :variable="variableDef"
+              :value="valueFor(variableDef)"
+              :validate-required="!isMachineScoped"
+              :is-machine-scoped="isMachineScoped"
+              @update:value="e=>updateVariables(e, variableDef)"
+              @validation-passed="updateErrors"
+            />
+            <div
+              v-if="newComponentType(variableDef, i)"
+              :key="`${i}-${rerenderKey}`"
+              class="force-newline"
+            />
+          </template>
+        </div>
+      </div>
+    </div>
+  </template>
+  <!-- <template v-if="groupedVariableDefinitions">
     <div
       v-for="group in Object.keys(groupedVariableDefinitions).sort()"
       :key="group"
       class="mb-40"
     >
       <GroupPanel
-        v-if="group !== 'zzzungrouped'"
+        v-if="group !== 'misc'"
         :label="group"
       >
         <div class="variables-group">
@@ -299,7 +422,7 @@ export default {
         class="variables-group"
       >
         <template
-          v-for="(variableDef, i) in groupedVariableDefinitions.zzzungrouped"
+          v-for="(variableDef, i) in groupedVariableDefinitions.misc"
 
           :key="`${variableDef.name}`"
         >
@@ -322,13 +445,18 @@ export default {
         </template>
       </div>
     </div>
-  </template>
+  </template> -->
 </template>
 
 <style lang="scss" scoped>
 $standard-input: 23.25%;
 $wider-input: 48.25%;
 $widest-input: 98.25%;
+$group-indent: 5%;
+
+.ccvariable-group-panel {
+  margin: 0px $group-indent 0px 0px ;
+}
 
 .variables-group {
   margin-top: 5px;
