@@ -28,6 +28,13 @@ const defaultTopologyConfig = {
   workers: { machineDeployments: [], machinePools: [] }
 };
 
+export const FORM_SECTIONS = {
+  GENERAL:       'general',
+  CONTROL_PLANE: 'controlplane',
+  NETWORKING:    'networking',
+  MACHINES:      'machines'
+};
+
 export default {
   name:       'ClusterConfig',
   components: {
@@ -183,6 +190,10 @@ export default {
         port:      portValidator(this.t),
         cidr:      cidrValidator(this.t)
       };
+    },
+
+    formSections() {
+      return FORM_SECTIONS;
     },
 
     machineDeploymentsValid() {
@@ -538,7 +549,7 @@ export default {
       </div>
       <ClusterClassVariables
         v-model:value="value.spec.topology.variables"
-        section="general"
+        :section="formSections.GENERAL"
         :cluster-class="clusterClassObj"
         @validation-passed="e => variablesReady = e"
         @update:value="$emit('update:value', { k: 'spec.topology.variables', val: $event })"
@@ -571,7 +582,8 @@ export default {
       </div>
       <ClusterClassVariables
         v-model:value="value.spec.topology.variables"
-        section="controlplane"
+        :section="formSections.CONTROL_PLANE"
+
         :cluster-class="clusterClassObj"
         @validation-passed="e => variablesReady = e"
         @update:value="$emit('update:value', { k: 'spec.topology.variables', val: $event })"
@@ -598,7 +610,7 @@ export default {
       <ClusterClassVariables
         v-model:value="value.spec.topology.variables"
         :cluster-class="clusterClassObj"
-        section="networking"
+        :section="formSections.NETWORKING"
         @validation-passed="e => variablesReady = e"
         @update:value="$emit('update:value', { k: 'spec.topology.variables', val: $event })"
       />
@@ -624,6 +636,14 @@ export default {
           <t k="capi.cluster.workers.title" />
           <span class="required">*</span>
         </h2>
+        <!-- TODO nb style machine global vars -->
+        <ClusterClassVariables
+          v-model:value="value.spec.topology.variables"
+          :section="formSections.MACHINES"
+          :cluster-class="clusterClassObj"
+          @validation-passed="e => variablesReady = e"
+          @update:value="$emit('update:value', { k: 'spec.topology.variables', val: $event })"
+        />
         <div class="span-12">
           <div
             v-if="!!machineDeploymentOptions"

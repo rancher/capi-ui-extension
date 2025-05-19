@@ -61,7 +61,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters({ t: 'i18n/t' }),
+    ...mapGetters({ t: 'i18n/t', withFallback: 'i18n/withFallback' }),
 
     componentForType() {
       return componentForType(this.schema, this.variable.name);
@@ -237,7 +237,7 @@ export default {
       v-if="componentForType"
       :id="componentForType.name"
       :value="isYamlComponent ? yamlPlaceholder || value : value"
-      :label="label"
+      :label="withFallback(`capi.variables.${label}`, null, label)"
       :on-label="label"
       :placeholder="placeholder"
       :tooltip="schema.description"
