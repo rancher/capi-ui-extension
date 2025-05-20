@@ -5,7 +5,7 @@ import { clone } from '@shell/utils/object';
 import { _EDIT, _VIEW } from '@shell/config/query-params';
 import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
-import CCVariables from '../../components/CCVariables/index.vue';
+import CCVariables from '../../../components/CCVariables/index.vue';
 export default {
   components: {
     LabeledSelect, LabeledInput, CCVariables
@@ -20,25 +20,9 @@ export default {
       type:    String,
       default: _EDIT,
     },
-    title: {
-      type:     String,
-      required: true
-    },
     classOptions: {
       type:     Array,
       default:  null,
-    },
-    addAllowed: {
-      type:    Boolean,
-      default: true,
-    },
-    defaultAddValue: {
-      type:    Object,
-      default: ''
-    },
-    loading: {
-      type:    Boolean,
-      default: false
     },
     disabled: {
       type:    Boolean,
@@ -57,43 +41,22 @@ export default {
       }
     }
   },
-  data() {
-    const input = (this.value || [])?.slice();
-    const rows = [];
+  //   data() {
+  //     const input = (this.value || [])?.slice();
+  //     const rows = [];
 
-    for ( const value of input ) {
-      rows.push({ value });
-    }
-    if ( !rows.length ) {
-      const value = this.defaultAddValue ? clone(this.defaultAddValue) : '';
+  //     for ( const value of input ) {
+  //       rows.push({ value });
+  //     }
+  //     if ( !rows.length ) {
+  //       const value = this.defaultAddValue ? clone(this.defaultAddValue) : '';
 
-      rows.push({ value });
-    }
+  //       rows.push({ value });
+  //     }
 
-    return { rows, lastUpdateWasFromValue: false };
-  },
+  //     return { rows, };
+  //   },
 
-  watch:    {
-    value: {
-      deep: true,
-      handler() {
-        this.lastUpdateWasFromValue = true;
-        this.rows = (this.value || []).map((v) => ({ value: v }));
-      }
-    },
-    rows: {
-      deep: true,
-      handler() {
-        // lastUpdateWasFromValue is used to break a cycle where when rows are updated
-        // this was called which then forced rows to updated again
-        if (!this.lastUpdateWasFromValue) {
-          this.queueUpdate();
-        }
-        this.lastUpdateWasFromValue = false;
-      }
-    },
-
-  },
   created() {
     this.queueUpdate = debounce(this.update, 50);
   },
@@ -103,6 +66,7 @@ export default {
       return this.mode === _VIEW;
     },
 
+    // TODO nb prop
     isDeployments() {
       return this.title.includes('Deployments');
     },
@@ -122,45 +86,6 @@ export default {
   },
 
   methods: {
-    add() {
-      this.rows.push({ value: clone(this.defaultAddValue) });
-      if (this.defaultAddValue) {
-        this.queueUpdate();
-      }
-
-      return this.$nextTick(() => {
-        const inputs = this.$refs.value;
-
-        // if ( inputs && inputs.length > 0 ) {
-        //   inputs[inputs.length - 1].focus();
-        // }
-        this.$emit('add');
-      });
-    },
-    /**
-     * Remove item and emits removed row and its own index value
-     */
-    remove(row, index) {
-      this.$emit('remove', { row, index });
-      removeAt(this.rows, index);
-      this.queueUpdate();
-    },
-
-    update() {
-      if ( this.isView ) {
-        return;
-      }
-      const out = [];
-
-      for ( const row of this.rows ) {
-        const value = row.value;
-
-        if ( typeof value !== 'undefined' ) {
-          out.push(value);
-        }
-      }
-      this.$emit('update:value', out);
-    },
 
     valUpdate(val, key) {
       key.value.name = val.data;

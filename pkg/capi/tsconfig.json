@@ -43,7 +43,7 @@
   "include": [
     "**/*.ts",
     "**/*.d.ts",
-    "**/*.tsx",
+    "**/*.tsx", "util/schemas.js",
   ],
   "exclude": [
     "node_modules",

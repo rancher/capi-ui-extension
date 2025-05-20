@@ -5,7 +5,7 @@ import { clone } from '@shell/utils/object';
 import { _EDIT, _VIEW } from '@shell/config/query-params';
 import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
-import CCVariables from '../../components/CCVariables/index.vue';
+import CCVariables from '../../../components/CCVariables/index.vue';
 export default {
   components: {
     LabeledSelect, LabeledInput, CCVariables
@@ -206,75 +206,7 @@ export default {
     </div>
 
     <template v-if="rows.length">
-      <div
-        v-for="(row, idx) in rows"
-        :key="idx"
-        :data-testid="`array-list-box${ idx }`"
-        class="box"
-      >
-        <div
-          class="remove mt-30"
-        >
-          <button
-            type="button"
-            :disabled="isView"
-            class="btn role-link"
-            :data-testid="`remove-item-${idx}`"
-            @click="remove(row, idx)"
-          >
-            {{ removeLabel }}
-          </button>
-        </div>
-
-        <div class="value row row-wi">
-          <div class="col-short mr-10 mt-20">
-            <LabeledInput
-              :value="row.value.replicas"
-              :mode="mode"
-              :disabled="false"
-              :label="t('capi.cluster.workers.replicas')"
-              type="number"
-              placeholder="1"
-              @update:value="(val) => !!val ? row.value.replicas = parseInt(val) : row.value.replicas = null"
-            />
-          </div>
-          <div class="col-long mr-20 span-4 mt-20">
-            <LabeledSelect
-              v-model:value="row.value.class"
-              :mode="mode"
-              :options="classOptions"
-              label-key="capi.cluster.workers.class"
-              required
-            />
-          </div>
-          <div
-            v-if="needsName(row) && row.value.class"
-            class="col-long mr-20 span-4 mt-20"
-          >
-            <LabeledInput
-              ref="value"
-              v-model:value="row.value.name"
-              :mode="mode"
-              :disabled="false"
-              :label="t('capi.cluster.workers.name')"
-              required
-            />
-          </div>
-        </div>
-        <div
-          v-if="row.value.class"
-          class="machine-variables"
-        >
-          <CCVariables
-            v-model:value="row.value.variables.overrides"
-            :global-variables="globalVariables"
-            :cluster-class="clusterClass"
-            :mode="mode"
-            :machine-class-name="row.value.class"
-            :machine-class-type="machineClassType"
-          />
-        </div>
-      </div>
+      <!-- // workeritem componernt -->
     </template>
     <div
       v-else-if="mode==='view'"

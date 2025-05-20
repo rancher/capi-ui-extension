@@ -433,7 +433,7 @@ export default {
         </div>
         <div
           v-if="expanded || !isMachineScoped"
-          class="expandee"
+          :class="{'expandee':expanded}"
         >
           <div
             v-for="(group, label) in s"
@@ -524,7 +524,7 @@ padding: .5em;
 }
 
 .expandee {
-  margin: 0px calc($standard-input/4) 0px
+  margin: 0px  0px 0px calc($standard-input/2)
 }
 
 .variables-group {
