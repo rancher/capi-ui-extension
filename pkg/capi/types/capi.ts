@@ -8,10 +8,11 @@ export const LABELS = { AUTO_IMPORT: 'cluster-api.cattle.io/rancher-auto-import'
 
 export const ANNOTATIONS = {
   // clusterclass variable styling
-  GROUP:      'turtles-capi.cattle.io/group',
-  SECTION:    'turtles-capi.cattle.io/section',
-  TOGGLED_BY: 'turtles-capi.cattle.io/toggled-by',
-  LABEL:      'turtles-capi.cattle.io/label'
+  GROUP:        'turtles-capi.cattle.io/group', // group in a sub-section
+  SECTION:      'turtles-capi.cattle.io/section', // add to existing top-level section or insert new one
+  TOGGLED_BY:   'turtles-capi.cattle.io/toggled-by', // gate visibility on a boolean var - template responsible for grouping
+  TOGGLE_GROUP: 'turtles-capi.cattle.io/toggle-group', // use a boolean to toggle the visibility of a sub-section
+  LABEL:        'turtles-capi.cattle.io/label' // human-readable label
 
 };
 

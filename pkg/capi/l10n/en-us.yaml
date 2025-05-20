@@ -73,8 +73,10 @@ capi:
       replicas: Replicas
       machineDeployments:
         title: Machine Deployments
+        add: Add Machine Deployment
       machinePools:
         title: Machine Pools
+        add: Add Machine Pool
   clusterClassCard:
     title: "Cluster Class Name: {name}"
     controlPlaneName: Control Plane Name
