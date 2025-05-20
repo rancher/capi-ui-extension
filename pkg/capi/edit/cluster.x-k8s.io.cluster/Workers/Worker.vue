@@ -10,20 +10,25 @@ export default {
   components: {
     LabeledSelect, LabeledInput, CCVariables
   },
-  emits:      ['add', 'remove', 'update:value'],
+
+  emits:      ['remove', 'update:value'],
+
   props:      {
     value: {
       type:     Array,
       default:  null,
     },
+
     mode: {
       type:    String,
       default: _EDIT,
     },
+
     classOptions: {
       type:     Array,
       default:  null,
     },
+
     disabled: {
       type:    Boolean,
       default: false,
@@ -41,21 +46,6 @@ export default {
       }
     }
   },
-  //   data() {
-  //     const input = (this.value || [])?.slice();
-  //     const rows = [];
-
-  //     for ( const value of input ) {
-  //       rows.push({ value });
-  //     }
-  //     if ( !rows.length ) {
-  //       const value = this.defaultAddValue ? clone(this.defaultAddValue) : '';
-
-  //       rows.push({ value });
-  //     }
-
-  //     return { rows, };
-  //   },
 
   created() {
     this.queueUpdate = debounce(this.update, 50);
@@ -75,10 +65,6 @@ export default {
       return this.$store.getters['i18n/t']('generic.remove');
     },
 
-    addLabel() {
-      return this.isDeployments ? this.t('capi.cluster.workers.machineDeployments.add') : this.t('capi.cluster.workers.machinePools.add');
-    },
-
     machineClassType() {
       return this.isDeployments ? 'machineDeploymentClass' : 'machinePoolClass';
     },
@@ -86,7 +72,6 @@ export default {
   },
 
   methods: {
-
     valUpdate(val, key) {
       key.value.name = val.data;
     },
@@ -104,38 +89,15 @@ export default {
   }
 };
 </script>
-<template>
-  <div class="span-12">
-    <div
-      v-if="title"
-      class="clearfix"
-    >
-      <div
-        v-if=" !isView"
-        class="footer mt-20"
-      >
-        <button
-          type="button"
-          class="btn role-tertiary add"
-          :disabled="loading"
-          data-testid="array-list-button"
-          @click="add()"
-        >
-          <i
-            v-if="loading"
-            class="mr-5 icon icon-spinner icon-spin icon-lg"
-          />
-          {{ addLabel }}
-        </button>
-      </div>
-    </div>
 
+<template>
+  <div class="row ">
     <template v-if="rows.length">
       <div
         v-for="(row, idx) in rows"
         :key="idx"
         :data-testid="`array-list-box${ idx }`"
-        class="box"
+        class="col span-12 box"
       >
         <div
           class="remove mt-30"
@@ -211,6 +173,9 @@ export default {
     </div>
   </div>
 </template>
+
+
+
 <style lang="scss" scoped>
 @media screen and (max-width: 1000px) {
     .row-wi {
