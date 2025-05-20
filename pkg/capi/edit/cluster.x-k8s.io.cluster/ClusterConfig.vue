@@ -675,7 +675,7 @@ export default {
         open-initially
         :title="t(`capi.cluster.section.${formSections.WORKERS}`)"
       >
-        <div class="col span-12 mt-20 mb-20">
+        <div class="col span-12 mb-20">
           <!-- TODO nb mark workers required -->
           <!-- <h2>
             <t k="capi.cluster.workers.title" />

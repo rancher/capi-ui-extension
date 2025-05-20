@@ -118,14 +118,21 @@ export default {
     isView() {
       return this.mode === _VIEW;
     },
+
+    isDeployments() {
+      return this.title.includes('Deployments');
+    },
+
     removeLabel() {
       return this.$store.getters['i18n/t']('generic.remove');
     },
+
     addLabel() {
-      return this.$store.getters['i18n/t']('capi.cluster.workers.add');
+      return this.isDeployments ? this.t('capi.cluster.workers.machineDeployments.add') : this.t('capi.cluster.workers.machinePools.add');
     },
+
     machineClassType() {
-      return this.title.includes('Deployments') ? 'machineDeploymentClass' : 'machinePoolClass';
+      return this.isDeployments ? 'machineDeploymentClass' : 'machinePoolClass';
     },
 
   },
@@ -136,7 +143,8 @@ export default {
       if (this.defaultAddValue) {
         this.queueUpdate();
       }
-      this.$nextTick(() => {
+
+      return this.$nextTick(() => {
         const inputs = this.$refs.value;
 
         if ( inputs && inputs.length > 0 ) {
@@ -175,24 +183,38 @@ export default {
     },
 
     needsName(row) {
-      const definitions = this.machineClassType === 'machineDeploymentClass' ? this.clusterClass.spec.workers.machineDeployments : this.clusterClass.spec.workers.machinePools;
+      const definitions = this.isDeployments ? this.clusterClass.spec.workers.machineDeployments : this.clusterClass.spec.workers.machinePools;
 
       return !(definitions || []).find((d) => d.class === row.value.class)?.namingStrategy;
-    }
+    },
+
   }
 };
 </script>
 <template>
-  <div class="span-9">
+  <div class="span-12">
     <div
       v-if="title"
       class="clearfix"
     >
-      <slot name="title">
-        <h3>
-          {{ title }}
-        </h3>
-      </slot>
+      <div
+        v-if=" !isView"
+        class="footer mt-20"
+      >
+        <button
+          type="button"
+          class="btn role-tertiary add"
+          :disabled="loading"
+          data-testid="array-list-button"
+          @click="add()"
+        >
+          <i
+            v-if="loading"
+            class="mr-5 icon icon-spinner icon-spin icon-lg"
+          />
+          {{ addLabel }}
+        </button>
+      </div>
     </div>
 
     <template v-if="rows.length">
@@ -273,31 +295,6 @@ export default {
       &mdash;
     </div>
     <div v-else>
-      <slot name="empty" />
-    </div>
-    <div
-      v-if="addAllowed && !isView"
-      class="footer mt-30"
-    >
-      <slot
-        v-if="addAllowed"
-        name="add"
-        :add="add"
-      >
-        <button
-          type="button"
-          class="btn role-tertiary add"
-          :disabled="loading"
-          :data-testid="`${componentTestid}-button`"
-          @click="add()"
-        >
-          <i
-            v-if="loading"
-            class="mr-5 icon icon-spinner icon-spin icon-lg"
-          />
-          {{ addBtnTitle }}
-        </button>
-      </slot>
     </div>
   </div>
 </template>
@@ -313,5 +310,23 @@ export default {
     .col-short {
         width: 50%
     }
+}
+
+.machine-variables {
+  margin: 0px 16px 16px;
+  // :deep() .accordion-container {
+  // border-image: linear-gradient( var(--primary-banner-bg), var(--body-bg));
+  //  border-image-slice: 1;
+  //  border-style: solid;
+  // }
+}
+
+.box {
+  // border-image: linear-gradient( var(--primary-banner-bg), var(--body-bg));
+  //  border-image-slice: 1;
+  margin-top: 20px;
+  //  border-style: solid;
+  padding: 0px 16px 16px;
+  // border: 1px solid var(--border);
 }
 </style>
