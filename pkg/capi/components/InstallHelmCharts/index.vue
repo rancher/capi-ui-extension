@@ -6,6 +6,7 @@ import { CATALOG, MANAGEMENT } from '@shell/config/types';
 import { SETTING } from '@shell/config/settings';
 import { WINDOWS, LINUX } from '@shell/store/catalog';
 import { CATALOG as CATALOG_ANNOTATIONS } from '@shell/config/labels-annotations';
+import Banner from '@components/Banner/Banner.vue';
 
 import AsyncButton from '@shell/components/AsyncButton';
 import { isPrerelease } from '@shell/utils/version';
@@ -45,10 +46,12 @@ const RETRY_WAIT = 500;
 export default {
   name: 'InstallHelmCharts',
 
-  components: { AsyncButton },
+  components: { AsyncButton, Banner },
+
+  emits: ['done'],
 
   props: {
-    // vuex store (probably want management or cluster)
+    // vuex store  management or cluster
     store: {
       type:    String,
       default: 'cluster'
@@ -86,7 +89,19 @@ export default {
       default: () => {
         return {};
       }
+    },
+
+    // how long in ms to show a done/success label between each step
+    delay: {
+      type:     Number,
+      default: 1000
+    },
+
+    displayName: {
+      type:    String,
+      default: null
     }
+
   },
 
   async fetch() {
@@ -116,52 +131,61 @@ export default {
 
   data() {
     return {
-      serverUrlSetting:       null,
-      debouncedRefreshCharts: null,
-      versionInfo:            null,
-      versionInfoError:       null,
-      userValues:             {},
+      serverUrlSetting:          null,
+      debouncedRefreshCharts:    null,
+      versionInfo:               null,
+      versionInfoError:          null,
+      userValues:                {},
       // payload for 'install' action on clusterrepo resource
       // contains array of chart install info as well as some helm install opts that are set by default in the regular chart install ui
-      installCmd:             { charts: [], ...defaultCmdOpts },
+      installCmd:                { charts: [], ...defaultCmdOpts },
+      // 'operation' is crd used to view helm install logs
+      // name and ns returned from 'install' api call
+      installOperationName:      '',
+      installOperationNamespace: '',
+      operation:                 {},
+      logsReady:                 false,
+
       // TODO nb localize
       stages:                 {
         addRepo:           {
-          label:        'Add Respository',
-          loadingLabel:   'Adding repository...',
+          actionLabel:        `Install ${ this.displayName || this.chartName }`,
+          waitingLabel:  `Adding ${ this.repoName } repository...`,
+          successLabel: 'Repository Added',
+          errorLabel:   `Error Adding ${ this.repoName } repository`,
           loading:      false,
           done:         false,
           errors:       []
         },
         loadCharts:        {
-          label:        'Fetch repository chart(s)',
-          loadingLabel:   'Fetching respository chart(s)...',
+          actionLabel:        `Fetch ${ this.repoName } repository chart(s)`,
+          waitingLabel:   `Fetching ${ this.repoName } respository chart(s)...`,
+          successLabel: 'Charts found',
+          errorLabel:   'Chart not found - Try Again',
           loading:      false,
           done:         false,
           errors:       []
         },
-        // checkRequirements: {
-        //   label:        'Verify system requirements',
-        //   loadingLabel:   'Verifying system requirements...',
-        //   loading:      false,
-        //   done:         false,
-        //   errors:       []
-        // },
         configureChart:    {
-          label:   'Configure Installation Options',
-          // loadingLabel:   'Configure Installation Options',
+          actionLabel:        `Install ${ this.displayName || this.chartName }`,
+          waitingLabel:   `Installing ${ this.displayName || this.chartName }...`,
+          successLabel: 'Installed',
+          errorLabel:   'Error Installing Chart',
           loading:      false,
           done:         false,
           errors:       []
         },
         installChart:      {
-          label:        'Install Chart',
-          loadingLabel:   'Installing chart...',
+          actionLabel:        `Install ${ this.displayName || this.chartName }`,
+          waitingLabel:   `Installing ${ this.displayName || this.chartName }...`,
+          successLabel: `${ this.displayName || this.chartName } Installation Initialized`,
+          errorLabel:   `Error Installing ${ this.displayName || this.chartName }...`,
           loading:      false,
           done:         false,
           errors:       []
         }
       },
+      btnCb: () => {}
     };
   },
 
@@ -216,7 +240,7 @@ export default {
   },
 
   methods: {
-    async addRepository(btnCb) {
+    async addRepository() {
       this.stages.addRepo.loading = true;
       this.stages.addRepo.error = null;
 
@@ -236,23 +260,23 @@ export default {
 
           this.stages.addRepo.error = e;
 
-          btnCb(false);
+          this.btnCb(false);
 
           return;
         }
 
         this.stages.addRepo.loading = false;
         this.stages.addRepo.done = true;
+        this.stages.loadCharts.loading = true;
+        this.stages.loadCharts.error = '';
         await nextTick();
         this.debouncedRefreshCharts();
-
-        btnCb(true);
       } catch (e) {
         this.$store.dispatch('growl/fromError', { err: e });
         this.stages.addRepo.loading = false;
 
         this.stages.addRepo.error = e;
-        btnCb(false);
+        this.btnCb(false);
       }
     },
 
@@ -273,8 +297,8 @@ export default {
           }
           await new Promise((resolve) => setTimeout(resolve, RETRY_WAIT));
         } catch (err) {
-          // TODO nb growl?
-          // some errors here are expected; should we show them so prominently?
+          // some errors here are expected
+          // we only show error state when while block finishes and still no chart found
           console.error(err);
         }
       }
@@ -283,16 +307,17 @@ export default {
 
       // tried all our tries and the chart still isn't found - tell users something has gone wrong
       if (!this.chart) {
-        this.stages.loadCharts.error = `Unable to locate the ${ this.chartName } chart in the ${ this.repoName } repository`;
+        this.btnCb(false);
 
-        // this.$store.dispatch('growl/fromError', { err: `Unable to locate the ${ this.chartName } chart in the ${ this.repoName } repository` });
+        this.stages.loadCharts.error = `Unable to locate the ${ this.chartName } chart in the ${ this.repoName } repository`;
       } else {
+        this.btnCb(true);
+
         this.stages.loadCharts.done = true;
       }
     },
 
     async fetchVersionInfo() {
-      // this.stages.checkRequirements.loading = true;
       try {
         // assume we want the latest non-prerelease version
         const targetVersion = (this.chart?.versions || []).find((v) => v.version && !isPrerelease(v.version))?.version;
@@ -312,8 +337,6 @@ export default {
 
         console.error('Unable to fetch VersionInfo: ', e); // eslint-disable-line no-console
       }
-      // this.stages.checkRequirements.loading = false;
-      // this.stages.checkRequirements.done = true;
     },
 
     getGlobalValues() {
@@ -357,7 +380,16 @@ export default {
       return values;
     },
 
-    async installChart() {
+    async installChart(btnCb = () => {}) {
+      this.stages.installChart.loading = true;
+
+      if (this.stages.installChart.done) {
+        this.stages.installChart.loading = false;
+
+        this.stages.installChart.error = 'Chart already installed';
+
+        return;
+      }
       let res;
 
       try {
@@ -365,18 +397,55 @@ export default {
       } catch (err) {
         // TODO nb growl?
         console.error(err);
+        this.btnCb(false);
+
+        this.stages.installChart.loading = false;
+
+        this.stages.installChart.error = err;
       }
 
-      console.log('*** chart install response: ', res);
-
+      // this.btnCb(true);
+      this.stages.installChart.loading = false;
+      this.stages.installChart.done = true;
       this.installOperationName = res.operationName;
       this.installOperationNamespace = res.operationNamespace;
+
+      await this.waitForLogs();
+      this.btnCb(true);
+
+      setTimeout(() => this.$emit('done', { namespace: res.operationNamespace, name: res.operationName }), this.delay);
     },
 
     setValue(key, val) {
       console.log('set ', key, ' to ', val);
       set(this.userValues, key, val);
-    }
+    },
+
+    // find the helm operation and check if logs  are available
+    async waitForLogs() {
+      const { installOperationName, installOperationNamespace } = this;
+      const operationId = `${ installOperationNamespace }/${ installOperationName }`;
+
+      // Non-admins without a cluster won't be able to fetch operations immediately
+      await this.targetRepo.waitForOperation(operationId);
+
+      // Dynamically use store decided when loading catalog (covers standard user case when there's not cluster)
+      this.operation = await this.$store.dispatch(`${ this.store }/find`, {
+        type: CATALOG.OPERATION,
+        id:   operationId
+      });
+
+      try {
+        await this.operation.waitForLink('logs');
+        this.logsReady = true;
+      } catch (e) {
+        // The wait times out eventually, move on...
+      }
+    },
+
+    openLogs() {
+      this.operation.openLogs();
+    },
   },
 
   computed: {
@@ -423,76 +492,171 @@ export default {
       return this.$store.getters['catalog/repo']({ repoType: this.repoType, repoName: this.repoName });
     },
 
-  }
-};
+    // label the async button depending on form stage
+    /** set button currentPhase to one of xLabel
+     *   actionLabel: {
+      type:    String,
+      default: null,
+    },
+    waitingLabel: {
+      type:    String,
+      default: null,
+    },
+    successLabel: {
+      type:    String,
+      default: null,
+    },
+    errorLabel: {
+      type:    String,
+      default: null,
+    },
+
+     */
+    buttonLabel() {
+      const {
+        addRepo, loadCharts, configureChart, installChart
+      } = this.stages;
+
+      const pStages = [installChart, configureChart, loadCharts, addRepo];
+
+      // start w/ add repo label
+      const out = {
+        actionLabel:  addRepo.actionLabel,
+        waitingLabel: addRepo.waitingLabel,
+        successLabel: addRepo.successLabel,
+        errorLabel:   addRepo.errorLabel,
+        phase:        'action',
+        action:       this.addRepository
+
+      };
+
+      const errorStage = pStages.find((s) => s?.error && s?.error?.length);
+
+      if (errorStage) {
+        out.phase = 'error';
+        out.waitingLabel = errorStage.errorLabel;
+        out.errorLabel = errorStage.errorLabel;
+        out.error = errorStage.error;
+
+        if (errorStage === loadCharts) {
+          out.action = () => {
+            if (!this.chart) {
+              this.fetchRepoCharts();
+            } else {
+              this.fetchVersionInfo();
+            }
+          };
+        }
+
+        return out;
+      }
+
+      // Find latest loading stage
+      const loadingStage = pStages.find((s) => s?.loading);
+
+      if (loadingStage) {
+        out.phase = 'waiting';
+        out.waitingLabel = loadingStage.waitingLabel;
+        out.actionLabel = loadingStage.waitingLabel;
+        out.successLabel = loadingStage.successLabel;
+
+        return out;
+      }
+
+      const nextStageI = pStages.findIndex((s) => s?.done) - 1;
+
+      if (nextStageI >= 0 && pStages[nextStageI]) {
+        const nextStage = pStages[nextStageI];
+
+        out.phase = 'action';
+        out.actionLabel = nextStage.actionLabel;
+        out.waitingLabel = nextStage.waitingLabel;
+        out.successLabel = nextStage.successLabel;
+
+        if (nextStage === configureChart || nextStage === installChart) {
+          out.action = this.installChart;
+
+          return out;
+        }
+        if (nextStage === loadCharts) {
+          out.phase = 'waiting';
+          out.action = () => {
+            if (!this.chart) {
+              this.fetchRepoCharts();
+            } else {
+              this.fetchVersionInfo();
+            }
+          };
+        }
+
+        return out;
+        // nothing is in error, nothing is loading, nothing is done - show first step
+      } else {
+        return {
+          actionLabel:  addRepo.actionLabel,
+          waitingLabel: addRepo.waitingLabel,
+          successLabel: addRepo.successLabel,
+          errorLabel:   addRepo.errorLabel,
+          phase:        'action',
+          action:       this.addRepository
+
+        };
+      }
+    },
+
+    errors() {
+      return this.buttonLabel.errors;
+    },
+
+  },
+
+}
+;
 </script>
 
 <template>
   <Loading v-if="$fetchState.pending" />
-
+  <div v-if=" stages.installChart.done">
+    <button
+      class="btn btn-sm role-secondary"
+      type="button"
+      @click="openLogs"
+    >
+      view helm logs
+    </button>
+  </div>
   <div v-else>
-    <ul class="stages">
-      <li
-        v-for="stage in stages"
-        :key="stage.label"
-      >
-        <i
-          v-if="stage.loading"
-          class="icon icon-spinner icon-spin"
-        />
-        <i
-          v-else-if="stage.errors.length"
-          class="icon icon-error text-error"
-        />
-        <i
-          v-else-if="stage.done"
-          class="icon icon-checkmark text-success"
-        />
-        <span
-          v-else
-          class="text-muted"
-        > &mdash;</span>
-
-        <label> {{ stage.loading ? stage.loadingLabel : stage.label }} </label>
-        <span
-          v-if="stage.error"
-          class="text-error"
-        >{{ stage.error }}</span>
-      </li>
-    </ul>
-    <div v-if="stages.loadCharts.done && chart">
+    <div v-if="stages.loadCharts.done && chart && !( stages.installChart.loading || stages.installChart.done )">
+      <!-- shown when a chart is ready to be installed, and installation has not yet begun -->
       <slot
         :set-value="setValue"
         :values="userValues"
         name="values"
       />
     </div>
+    <div v-if="errors">
+      <slot
+        :errors="errors"
+        name="errors"
+      >
+        <Banner
+          color="error"
+          :label="errors"
+        />
+      </slot>
+    </div>
+    <!-- click event's callback function is stored in a data prop to be triggerd by different component methods -->
+    <!-- 'current phase' sets color, enabled/disabled, spinner -->
     <AsyncButton
-      v-if="!targetRepo"
+      :current-phase="buttonLabel.phase"
+      :action-label="buttonLabel.actionLabel"
+      :waiting-label="buttonLabel.waitingLabel"
+      :success-label="buttonLabel.successLabel"
+      :error-label="buttonLabel.errorLabel"
+      :delay="delay"
       type="button"
       class="btn role-primary"
-      mode="install"
-      @click="addRepository"
+      @click="cb=>{btnCb=cb;buttonLabel.action()}"
     />
-
-    <div v-if="targetRepo">
-      <div v-if="!chart">
-        no chart :(
-      </div>
-      <div v-else>
-        <AsyncButton
-          type="button"
-          class="btn role-primary"
-          mode="install"
-          @click="installChart"
-        />
-      </div>
-    </div>
   </div>
 </template>
-
-<style lang="scss" scoped>
-.stages {
-  list-style-type: none;
-}
-</style>

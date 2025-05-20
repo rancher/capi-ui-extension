@@ -61,8 +61,9 @@ export default {
         class="description"
         v-html="t('capi.installation.description', {}, true)"
       />
-      <Banner color="warning">
-        <div>
+
+      <Banner color="info">
+        <div class="row">
           <t
             v-if="!hasClusterClassSchema"
             k="capi.installation.turtlesNeeded"
@@ -70,32 +71,32 @@ export default {
           />
         </div>
       </Banner>
+      <div class="row">
+        <InstallHelmCharts
+          display-name="Rancher Turtles"
+          store="management"
+          chart-name="rancher-turtles"
+          repo-name="turtles"
+          repo-url="https://rancher.github.io/turtles"
+          :extra-values="{rancherTurtles: {features:{default: false}}}"
+        >
+          <template #values="{setValue, values}">
+            <Checkbox
+              label="Install cert-manager"
+              :value="values?.['cluster-api-operator']?.['cert-manager']?.enabled"
+              @update:value="e=>setValue(`'cluster-api-operator'.'cert-manager'.enabled`, e)"
+            />
+          </template>
+        </InstallHelmCharts>
+      </div>
+      <div class="row mt-5">
+        <t
+          raw
+          k="capi.installation.docs"
+        />
+      </div>
     </div>
-    <!-- <div v-if="!willInstall">
-      <button
-        type="button"
-        class="btn role-primary"
-        @click="()=>willInstall=true"
-      >
-        install turts
-      </button>
-    </div> -->
     <div>
-      <InstallHelmCharts
-        store="management"
-        chart-name="rancher-turtles"
-        repo-name="turtles"
-        repo-url="https://rancher.github.io/turtles"
-        :extra-values="{rancherTurtles: {features:{default: false}}}"
-      >
-        <template #values="{setValue, values}">
-          <Checkbox
-            label="also cert manager"
-            :value="values?.['cluster-api-operator']?.['cert-manager']?.enabled"
-            @update:value="e=>setValue(`'cluster-api-operator'.'cert-manager'.enabled`, e)"
-          />
-        </template>
-      </InstallHelmCharts>
     </div>
   </div>
 </template>
@@ -116,6 +117,8 @@ export default {
 
   .banner {
     width: auto;
+    display: flex;
+    flex-direction: column;
   }
 }
 </style>

@@ -2,9 +2,10 @@ action:
   createCluster: Create Cluster
 capi:
   installation:
+    docs: <a aria-label="Read how to install the Rancher Turtles operator" href="https://turtles.docs.rancher.com/turtles/next/en/getting-started/install-rancher-turtles/using_rancher_dashboard.html" target="_blank" rel="noopener noreferrer nofollow">Rancher Turtles Installation documentation</a>
     title: Rancher Turtles
     description: The Rancher Turtles operator allows users to import CAPI-provisioned clusters into Rancher.
-    turtlesNeeded: Either the user doesn't have permission to run the Turtles extension or the Turtles operator isn't installed. To learn how to install the Rancher Turtles extension, read the <a aria-label="Read how to install the Rancher Turtles operator" href="https://turtles.docs.rancher.com/turtles/next/en/getting-started/install-rancher-turtles/using_rancher_dashboard.html" target="_blank" rel="noopener noreferrer nofollow">documentation.</a>
+    turtlesNeeded: Either the user doesn't have permission to run the Turtles extension or the Turtles operator isn't installed.
   autoImport:
     label: CAPI Auto-Import
     checkbox:
