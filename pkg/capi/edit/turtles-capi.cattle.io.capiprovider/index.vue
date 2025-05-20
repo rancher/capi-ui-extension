@@ -7,6 +7,8 @@ import { CAPI, PROVIDER_TYPES } from '../../types/capi';
 import ProviderConfig from './ProviderConfig.vue';
 import { set } from '@shell/utils/object';
 
+const CUSTOM = 'custom';
+
 export default {
   name: 'CreateProvider',
 
@@ -37,23 +39,20 @@ export default {
   },
   async beforeMount() {
     this.capiProviders = await this.$store.dispatch('management/findAll', { type: CAPI.PROVIDER });
-    const name = this.value.spec?.name;
+    const name = this.value.spec?.name || this.value.metadata?.name;
 
     if (!name) {
       return;
     }
     if (this.value.spec?.fetchConfig && !this.subTypes.find(({ id }) => id === name)) {
-      this.selectType('custom');
+      this.selectType(CUSTOM);
     } else {
       this.selectType(name);
     }
   },
 
   data() {
-    const route = this.$route;
-    const subType = route?.query[SUB_TYPE] || null;
-
-    return { subType, capiProviders: [] };
+    return { subType: null, capiProviders: [] };
   },
 
   computed: {
@@ -100,7 +99,7 @@ export default {
       return this.capiProviders.reduce((types, p) => {
         const { name } = p?.spec || {};
 
-        if (!types.includes(name) && name !== 'custom') {
+        if (!types.includes(name) && name !== CUSTOM) {
           types.push(name);
         }
 

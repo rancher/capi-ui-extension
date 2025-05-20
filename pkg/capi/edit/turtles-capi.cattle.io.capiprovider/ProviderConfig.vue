@@ -15,7 +15,7 @@ import KeyValue from '@shell/components/form/KeyValue.vue';
 import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
 import Banner from '@components/Banner/Banner.vue';
-import { _EDIT } from '@shell/config/query-params';
+import { _EDIT, _CREATE } from '@shell/config/query-params';
 import { allHash } from '@shell/utils/promise';
 import { PROVIDER_TYPES, RANCHER_TURTLES_SYSTEM_NAMESPACE, RANCHER_TURTLES_SYSTEM_NAME } from '../../types/capi';
 import { providerNameValidator, providerVersionValidator, urlValidator } from '../../util/validators';
@@ -114,11 +114,14 @@ export default {
       });
     },
     showForm() {
-      return !!this.value.spec.credentials.rancherCloudCredentialNamespaceName || !this.credentialComponent;
+      return !!this.value?.spec?.credentials?.rancherCloudCredentialNamespaceName || !this.credentialComponent;
     },
 
     isEdit() {
       return this.mode === _EDIT;
+    },
+    isCreate() {
+      return this.mode === _CREATE;
     },
     hasFeatures() {
       return !!this.value?.spec?.features;
@@ -133,7 +136,10 @@ export default {
       return this.isEdit && (this.hasFeatures || this.hasVariables);
     },
     waitingForCredential() {
-      return this.credentialComponent && !this.value.spec.credentials.rancherCloudCredentialNamespaceName;
+      return this.credentialComponent && !this.value.spec.credentials?.rancherCloudCredentialNamespaceName;
+    },
+    rancherCloudCredentialNamespaceName() {
+      return this.value.spec?.credentials?.rancherCloudCredentialNamespaceName || '';
     }
   },
   methods:  {
@@ -148,7 +154,7 @@ export default {
           set(this.value, 'spec', { ...clone(customProviderSpec), ...defaultsFromCoreProvider });
         }
       }
-      if (!this.value.spec.configSecret.name) {
+      if (this.isCreate && !this.value.spec.configSecret?.name) {
         set(this.value.spec.configSecret, 'name', this.generateName(this.provider)); // Defines the name of the secret that will be created or adjusted based on the content of the spec.features and spec.variables.
       }
     },
@@ -326,7 +332,7 @@ export default {
         <t k="capi.provider.cloudCredential.title" />
       </h3>
       <SelectCredential
-        v-model:value="value.spec.credentials.rancherCloudCredentialNamespaceName"
+        v-model:value="rancherCloudCredentialNamespaceName"
         :mode="mode"
         :provider="credentialComponent"
         :cancel="cancelCredential"
