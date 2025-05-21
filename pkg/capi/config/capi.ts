@@ -1,10 +1,10 @@
 import { CAPI as RANCHER_CAPI } from '@shell/config/types';
 import { CAPI as TURTLES_CAPI } from '../types/capi';
-
 const CLUSTER_MGMT_PRODUCT = 'manager';
 
 export function init($plugin: any, store: any) {
   const {
+    product,
     basicType,
     weightType,
     weightGroup,
@@ -12,23 +12,42 @@ export function init($plugin: any, store: any) {
     // headers,
   } = $plugin.DSL(store, CLUSTER_MGMT_PRODUCT);
 
+
+  // product({
+  //   ifHaveType:              RANCHER_CAPI.CAPI_CLUSTER,
+  //   label:       'CAPI Turtles',
+  //   icon:        'gear',
+  //   svg:          require('../assets/images/icon.svg'),
+  //   name:        'capi',
+  //   namespaced:  false,
+  //   inStore:               'management',
+  //   to:                  {
+  //     name:   `c-cluster-capi`,
+  //     params: { cluster: '_' }
+  //   },
+  //   removable:             false,
+  //   showClusterSwitcher:   false,
+  //   // overview: true,
+  //   // exact:    true,
+  // });
+
+
   virtualType({
     label:       'CAPI Turtles',
     icon:        'gear',
+    svg:          require('../assets/images/icon.svg'),
     name:        'capi-dashboard',
     namespaced:  false,
     weight:      99,
     route:                  {
-      name:   `c-cluster-${ CLUSTER_MGMT_PRODUCT }-capi`,
+      name:   `c-cluster-${CLUSTER_MGMT_PRODUCT}-capi`,
       params: { cluster: '_' }
     },
     overview: true,
     exact:    true,
   });
 
-  // Interestingly, types can only appear in one place, so by adding machine deployment
-  // and others here, they will no longer show up in the Advanced section, which is
-  // quite nice for this use case
+
   basicType([
     'capi-dashboard',
     RANCHER_CAPI.CAPI_CLUSTER,
@@ -38,10 +57,9 @@ export function init($plugin: any, store: any) {
     // RANCHER_CAPI.MACHINE,
     RANCHER_CAPI.MACHINE_SET,
     RANCHER_CAPI.MACHINE_DEPLOYMENT,
-  ], 'CAPITurtles');
+  ], 'CAPI');
 
   weightType(RANCHER_CAPI.CAPI_CLUSTER, 10, true);
 
-  // Ensure CAPI group appears before the Advanced group
-  weightGroup('CAPITurtles', 10, true);
+
 }

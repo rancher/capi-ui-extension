@@ -7,13 +7,14 @@ import { mapGetters } from 'vuex';
 import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
 import { componentForType, makeYamlPlaceholders, VARIABLE_INPUT_NAMES } from '../../util/clusterclass-variables';
 import { ANNOTATIONS } from '../../types/capi';
+import VariableHighlight from './VariableHighlight.vue';
 
 export default {
   name: 'CCVariable',
 
   emits: ['validation-passed', 'update:value'],
 
-  components: { YamlEditor },
+  components: { YamlEditor, VariableHighlight },
 
   props: {
     variable: {
@@ -44,6 +45,12 @@ export default {
     globalVariables: {
       type:    Array,
       default: () => []
+    },
+
+    // show/hide all info boxes
+    willOpen: {
+      type:    Boolean,
+      default: true
     }
 
   },
@@ -64,7 +71,7 @@ export default {
     ...mapGetters({ t: 'i18n/t', withFallback: 'i18n/withFallback' }),
 
     componentForType() {
-      return componentForType(this.schema, this.variable.name);
+      return componentForType(this.variable);
     },
 
     schema() {
@@ -171,19 +178,44 @@ export default {
 
     // if variable def has a toggled-by  label, check allVariables for the toggle's state and show/hide this variable accordingly
     toggled() {
-      const toggleLabel = this.variable?.metadata?.annotations?.['turtles-capi.cattle.io/toggled-by'];
-      const toggleVariable = (this.allVariables || []).find((v) => v.name === toggleLabel);
+      try {
+        const toggleLabels = (this.variable?.metadata?.annotations?.[ANNOTATIONS.TOGGLED_BY] || '').split(',').map((n) => n.replace(' ', ''));
+        const toggleVariables = (this.allVariables || []).filter((v) => toggleLabels.includes(v.name));
 
-      if (toggleVariable) {
-        return !!toggleVariable.value;
+        console.log('toggle variables', toggleVariables);
+        console.log('toggle labels', toggleLabels);
+
+        if (toggleVariables && toggleVariables.length) {
+          const toggleFalse = !!toggleVariables.find((v) => !v.value);
+
+          console.log('toggle false ', toggleFalse);
+
+          return !toggleFalse;
+        }
+
+        return true;
+      } catch (err) {
+        console.log(err);
+
+        return true;
       }
-
-      return !toggleLabel;
     },
 
     label() {
       return this.variable?.metadata?.annotations?.[ANNOTATIONS.LABEL] || this.variable.name;
-    }
+    },
+
+    highlighted() {
+      return !!this.variable?.metadata?.annotations?.[ANNOTATIONS.HIGHLIGHT];
+    },
+
+    isSearchComponent() {
+      return this.componentForType.name === VARIABLE_INPUT_NAMES.SEARCH_TYPE;
+    },
+
+    resourceType() {
+      return this.variable?.metadata?.annotations?.[ANNOTATIONS.SEARCH_TYPE];
+    },
 
   },
 
@@ -219,63 +251,71 @@ export default {
   <div
     v-if="componentForType"
     v-show="toggled"
-    :class="{'wider': isListComponent, 'widest': isYamlKeyValueComponent || isYamlComponent, 'align-center': componentForType?.name==='checkbox-var', [`${componentForType.name}`]: true}"
+    :class="{'wider': isListComponent, 'widest': isYamlKeyValueComponent || isYamlComponent || highlighted || isSearchComponent, 'align-center': componentForType?.name==='checkbox-var', [`${componentForType.name}`]: true}"
   >
-    <label
-      v-if="isYamlComponent"
-      :for="componentForType.name"
-      class="text-label"
+    <VariableHighlight
+      :mode="mode"
+      :variable="variable"
+      :will-open="willOpen"
     >
-      {{ variable.name }}
-      <span
-        v-if="variable.required"
-        class="text-error"
-      >*</span>
-    </label>
-    <component
-      :is="componentForType.component"
-      v-if="componentForType"
-      :id="componentForType.name"
-      :value="isYamlComponent ? yamlPlaceholder || value : value"
-      :label="withFallback(`capi.variables.${label}`, null, label)"
-      :on-label="label"
-      :placeholder="placeholder"
-      :tooltip="schema.description"
-      :required="variable.required && !isMachineScoped"
-      :title="variable.name"
-      :options="variableOptions"
-      :rules="!isListComponent ? validationRules : []"
-      :type="schema.type === 'number' || schema.type === 'integer' ? 'number' : 'text'"
-      :as-map="true"
-      @update:value="setValue"
-    >
-      <template #title>
-        <div class="input-label">
-          <span>{{ variable.name }}
-            <i
-              v-if="schema.description"
-              v-clean-tooltip="schema.description"
-              class="icon icon-sm icon-info"
-            />
-            <i
-              v-if="!isValid"
-              v-clean-tooltip="validationErrors.join(' ')"
-              class="icon icon-warning"
-            />
-          </span>
-        </div>
-      </template>
-      <template
-        v-if="isYamlKeyValueComponent && yamlPlaceholder"
-        #value="{queueUpdate, row}"
+      <label
+        v-if="isYamlComponent"
+        :for="componentForType.name"
+        class="text-label"
       >
-        <YamlEditor
-          :value="yamlPlaceholder || row"
-          @update:value="e=>setYamlMapValue(e, row, queueUpdate)"
-        />
-      </template>
-    </component>
-    <div class="flexbox-newline" />
+        {{ variable.name }}
+        <span
+          v-if="variable.required"
+          class="text-error"
+        >*</span>
+      </label>
+      <component
+        :is="componentForType.component"
+        v-if="componentForType"
+        :id="componentForType.name"
+        :aria-label="withFallback(`capi.variables.${label}`, null, label)"
+        :value="isYamlComponent ? yamlPlaceholder || value : value"
+        :label="!variable?.metadata?.annotations?.['turtles-capi.cattle.io/highlight'] ? withFallback(`capi.variables.${label}`, null, label) : ' '"
+        :on-label="label"
+        :placeholder="placeholder"
+        :tooltip="!variable?.metadata?.annotations?.['turtles-capi.cattle.io/highlight'] ? schema.description : ''"
+        :required="variable.required && !isMachineScoped"
+        :title="variable.name"
+        :options="variableOptions"
+        :rules="!isListComponent ? validationRules : []"
+        :type="schema.type === 'number' || schema.type === 'integer' ? 'number' : 'text'"
+        :as-map="true"
+        :resource-type="resourceType"
+        @update:value="setValue"
+      >
+        <template #title>
+          <div class="input-label">
+            <span>{{ variable.name }}
+              <i
+                v-if="schema.description"
+                v-clean-tooltip="schema.description"
+                class="icon icon-sm icon-info"
+              />
+              <i
+                v-if="!isValid"
+                v-clean-tooltip="validationErrors.join(' ')"
+                class="icon icon-warning"
+              />
+            </span>
+          </div>
+        </template>
+        <template
+          v-if="isYamlKeyValueComponent && yamlPlaceholder"
+          #value="{queueUpdate, row}"
+        >
+          <YamlEditor
+            :value="yamlPlaceholder || row"
+            @update:value="e=>setYamlMapValue(e, row, queueUpdate)"
+          />
+        </template>
+      </component>
+      <div class="flexbox-newline" />
+    </VariableHighlight>
   </div>
 </template>
 <style lang="scss" scoped>

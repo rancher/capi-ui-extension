@@ -182,6 +182,16 @@ asyncButton:
     resourceGroup: Resource Group
     subscriptionID: Subscription ID
     vmSize: Virtual Machine Size
+
+
+
+asyncButton:
+  saveGitRepo:
+    action: Save GitRepo
+    waiting: Saving...
+    success: Saved
+
+
 nav:
   group:
     CAPITurtles: CAPI

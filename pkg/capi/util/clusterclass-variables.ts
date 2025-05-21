@@ -5,8 +5,10 @@ import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
 import KeyValue from '@shell/components/form/KeyValue.vue';
 import ArrayList from '@shell/components/form/ArrayList.vue';
 import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
-import YamlEditor from '@shell/components/YamlEditor';
-import ToggleSwitch from '@components/Form/ToggleSwitch/ToggleSwitch';
+import YamlEditor from '@shell/components/YamlEditor.vue';
+import ToggleSwitch from '@components/Form/ToggleSwitch/ToggleSwitch.vue';
+import ResourceVariable from '../components/CCVariables/ResourceVariable.vue';
+import { ANNOTATIONS } from '../types/capi';
 
 export const VARIABLE_INPUT_NAMES = {
   TEXT:           'text-var',
@@ -15,7 +17,8 @@ export const VARIABLE_INPUT_NAMES = {
   MAP:         'keyvalue-var',
   MAP_YAML:    'keyvalue-yaml-var',
   ARRAY:          'arraylist-var',
-  YAML:           'yamleditor-var'
+  YAML:           'yamleditor-var',
+  SEARCH_TYPE: 'resourcevariable-var'
 };
 
 /**
@@ -24,9 +27,10 @@ export const VARIABLE_INPUT_NAMES = {
  * @param schema <clusterclass>.spec.variables[].schema.openAPIV3Schema
  * @returns /{component: <input component>, name: string name of input component}
  */
-export const componentForType = (schema, name) => {
+export const componentForType = (variable) => {
   let out;
-
+  const schema = variable?.schema?.openAPIV3Schema || {};
+  const name = variable.name;
   let { type } = schema;
 
   const hasEnum = schema?.enum && schema?.enum?.length;
@@ -57,7 +61,11 @@ export const componentForType = (schema, name) => {
       }
       break;
     case 'string':
-      out = { component: LabeledInput, name: VARIABLE_INPUT_NAMES.TEXT };
+      if (variable?.metadata?.annotations?.[ANNOTATIONS.SEARCH_TYPE]) {
+        out = { component: ResourceVariable, name: VARIABLE_INPUT_NAMES.SEARCH_TYPE };
+      } else {
+        out = { component: LabeledInput, name: VARIABLE_INPUT_NAMES.TEXT };
+      }
       break;
     case 'integer':
       out = { component: LabeledInput, name: VARIABLE_INPUT_NAMES.TEXT };
