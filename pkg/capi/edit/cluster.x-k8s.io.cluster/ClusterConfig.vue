@@ -133,20 +133,23 @@ export default {
         { path: 'spec.clusterNetwork.pods.cidrBlocks', rules: ['cidr'] },
         { path: 'spec.clusterNetwork.services.cidrBlocks', rules: ['cidr'] }
       ],
-      credentialId:          '',
-      credential:            null,
-      versionInfo:           {},
+      credentialId:              '',
+      credential:                null,
+      versionInfo:               {},
       // defaultWorkerAddValue: {
       //   name:      '',
       //   class:     '',
       //   variables: { overrides: [] }
       // },
       // TODO nb rename/make each validator work the same
-      variablesReady:  true,
-      clusterClassObj: null,
-      loading:         true,
-      k3sVersions:     [],
-      rke2Versions:    []
+      variablesReady:            true,
+      clusterClassObj:           null,
+      loading:                   true,
+      k3sVersions:               [],
+      rke2Versions:              [],
+      configHighlightOpen:       true,
+      controlPlaneHighlightOpen:  true,
+      networkingHighlightOpen:   true,
     };
   },
 
@@ -503,10 +506,22 @@ export default {
     </template>
     <template #stepConfiguration>
       <Accordion
-        class="mt-20"
+        class="mt-20 section-accordion"
         open-initially
         :title="t(`capi.cluster.section.${formSections.GENERAL}`)"
       >
+        <div class="icon-toggles">
+          <i
+            class="icon icon-show icon-lg"
+            :class="{'active': configHighlightOpen}"
+            @click="()=>configHighlightOpen = true"
+          />
+          <i
+            class="icon icon-hide icon-lg"
+            :class="{'active': !configHighlightOpen}"
+            @click="()=>configHighlightOpen = false"
+          />
+        </div>
         <!-- GENERAL CONFIGURATION -->
         <NameNsDescription
           v-if="!isView"
@@ -545,6 +560,7 @@ export default {
           </div>
         </div>
         <ClusterClassVariables
+          :will-open="configHighlightOpen"
           :value="value.spec.topology.variables"
           :section="formSections.GENERAL"
           :cluster-class="clusterClassObj"
@@ -554,10 +570,22 @@ export default {
       </Accordion>
 
       <Accordion
-        class="mt-20"
+        class="mt-20 section-accordion"
         open-initially
         :title="t(`capi.cluster.section.${formSections.CONTROL_PLANE}`)"
       >
+        <div class="icon-toggles">
+          <i
+            class="icon icon-show icon-lg"
+            :class="{'active': controlPlaneHighlightOpen}"
+            @click="()=>controlPlaneHighlightOpen = true"
+          />
+          <i
+            class="icon icon-hide icon-lg"
+            :class="{'active': !controlPlaneHighlightOpen}"
+            @click="()=>controlPlaneHighlightOpen = false"
+          />
+        </div>
         <!-- CONTROL PLANE CONFIGURATION -->
         <div class="row span-12 row-config">
           <div class="col span-6 mt-20">
@@ -576,6 +604,7 @@ export default {
           </div>
         </div>
         <ClusterClassVariables
+          :will-open="controlPlaneHighlightOpen"
           :value="value.spec.topology.variables"
           :section="formSections.CONTROL_PLANE"
           :cluster-class="clusterClassObj"
@@ -589,6 +618,18 @@ export default {
         open-initially
         :title="t(`capi.cluster.section.${formSections.NETWORKING}`)"
       >
+        <div class="icon-toggles">
+          <i
+            class="icon icon-show icon-lg"
+            :class="{'active': networkingHighlightOpen}"
+            @click="()=>networkingHighlightOpen = true"
+          />
+          <i
+            class="icon icon-hide icon-lg"
+            :class="{'active': !networkingHighlightOpen}"
+            @click="()=>networkingHighlightOpen = false"
+          />
+        </div>
         <!-- NETWORKING CONFIGURATION -->
         <div class="col span-6 mt-20">
           <NetworkSection
@@ -603,6 +644,7 @@ export default {
           />
         </div>
         <ClusterClassVariables
+          :will-open="networkingHighlightOpen"
           :value="value.spec.topology.variables"
           :cluster-class="clusterClassObj"
           :section="formSections.NETWORKING"
@@ -627,7 +669,7 @@ export default {
 
       <!-- WORKERS -->
       <Accordion
-        class="mt-20"
+        class="mt-20 section-accordion"
         open-initially
         :title="t(`capi.cluster.section.${formSections.WORKERS}`)"
       >
@@ -683,7 +725,7 @@ export default {
       </Accordion>
 
       <Accordion
-        class="mt-20"
+        class="mt-20 section-accordion"
         :title="t(`capi.cluster.section.${formSections.LABELS}`)"
       >
         <Labels

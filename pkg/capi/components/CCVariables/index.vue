@@ -55,6 +55,12 @@ export default {
       type:    String,
       default: ''
     },
+
+    // open/close all info panels
+    willOpen: {
+      type:    Boolean,
+      default: true
+    }
   },
 
   data() {
@@ -241,9 +247,9 @@ export default {
       return (this.value.find((variable) => variable.name === variableDef.name) || {}).value;
     },
 
-    // if a group contains a toggle var, return it
-    toggleVariableFor(group) {
-      return group.find((v) => {
+    // if a group contains toggle vars, return them
+    toggleVariablesFor(group) {
+      return group.filter((v) => {
         return v?.metadata?.annotations[ANNOTATIONS.TOGGLE_GROUP];
       });
     },
@@ -322,11 +328,46 @@ export default {
       }
     },
 
-    newComponentType(variableDef, i) {
-      const nextVariableDef = this.variableDefinitions[i + 1];
+    forceNewLine(variableDef, i, variableDefs) {
+      // // always force a new line
+      // const nextVariableDef = variableDefs[i + 1];
+
+      // if (nextVariableDef) {
+      //   return true;
+      // }
+
+      // check if next variable is a different component
+      // if it is, force a new line
+      const nextVariableDef = variableDefs[i + 1];
+
+      if (nextVariableDef && componentForType(variableDef)?.name !== componentForType(nextVariableDef)?.name) {
+        return true;
+      }
+
+      // check if previous var is the same component
+      // if it is force a new line
+      // this combined with last if block ensures there are never more than 2 components on a line
+      const prevVariableDef = variableDefs[i - 1];
+
+      if (prevVariableDef && componentForType(variableDef)?.name === componentForType(prevVariableDef)?.name) {
+        return true;
+      }
 
       if (nextVariableDef) {
-        return componentForType(variableDef?.schema?.openAPIV3Schema, variableDef?.name)?.name !== componentForType(nextVariableDef?.schema?.openAPIV3Schema, variableDef?.name)?.name;
+      // always give toggles their own line
+        const toggledByThis = variableDefs.find((v) => {
+          const toggleBys = (v.metadata?.annotations?.[ANNOTATIONS.TOGGLED_BY] || '').split(',').map((toggleBy) => toggleBy.trim());
+
+          return toggleBys.includes(nextVariableDef?.name);
+        });
+
+        if (toggledByThis) {
+          return true;
+        }
+
+        if ((nextVariableDef?.name || '').includes('toggle') ) {
+          return true;
+        }
       }
     }
   },
@@ -339,10 +380,11 @@ export default {
     <div
       v-for="(s, key) in groupedVariableDefinitions"
       :key="key"
+      class="var-group"
     >
       <Accordion
         v-if="!section && !isMachineScoped"
-        class="mt-20"
+        class="mt-20 "
         :class="{'machine-group':isMachineScoped}"
         :title="withFallback(`capi.variables.${key}`, null, key)"
         :open-initially="!isMachineScoped"
@@ -358,7 +400,7 @@ export default {
           :key="label"
           class="mb-40"
         >
-          <GroupPanel
+          <div
             v-if="label !== 'misc'"
             class="ccvariable-group-panel"
             :label="label"
@@ -366,11 +408,11 @@ export default {
             <div class="variables-group">
               <template
                 v-for="(variableDef, i) in group"
-
                 :key="`${variableDef.name}`"
               >
                 <Variable
                   :ref="`${variableDef.name}-input`"
+                  :will-open="willOpen"
                   :all-variables="value"
                   :variable="variableDef"
                   :value="valueFor(variableDef)"
@@ -381,13 +423,13 @@ export default {
                   @validation-passed="updateErrors"
                 />
                 <div
-                  v-if="newComponentType(variableDef, i)"
+                  v-if="forceNewLine(variableDef, i, group)"
                   :key="`${i}-${rerenderKey}`"
                   class="force-newline"
                 />
               </template>
             </div>
-          </GroupPanel>
+          </div>
           <div
             v-else
             class="variables-group"
@@ -399,6 +441,7 @@ export default {
             >
               <Variable
                 :ref="`${variableDef.name}-input`"
+                :will-open="willOpen"
                 :global-variables="globalVariables"
                 :all-variables="value"
                 :variable="variableDef"
@@ -409,7 +452,7 @@ export default {
                 @validation-passed="updateErrors"
               />
               <div
-                v-if="newComponentType(variableDef, i)"
+                v-if="forceNewLine(variableDef, i, group)"
                 :key="`${i}-${rerenderKey}`"
                 class="force-newline"
               />
@@ -440,7 +483,7 @@ export default {
             :key="label"
             class="mb-40"
           >
-            <GroupPanel
+            <div
               v-if="label !== 'misc'"
               class="ccvariable-group-panel"
               :label="label"
@@ -453,6 +496,7 @@ export default {
                 >
                   <Variable
                     :ref="`${variableDef.name}-input`"
+                    :will-open="willOpen"
                     :all-variables="value"
                     :variable="variableDef"
                     :value="valueFor(variableDef)"
@@ -463,13 +507,13 @@ export default {
                     @validation-passed="updateErrors"
                   />
                   <div
-                    v-if="newComponentType(variableDef, i)"
+                    v-if="forceNewLine(variableDef, i, group)"
                     :key="`${i}-${rerenderKey}`"
                     class="force-newline"
                   />
                 </template>
               </div>
-            </GroupPanel>
+            </div>
             <div
               v-else
               class="variables-group"
@@ -481,6 +525,7 @@ export default {
               >
                 <Variable
                   :ref="`${variableDef.name}-input`"
+                  :will-open="willOpen"
                   :global-variables="globalVariables"
                   :all-variables="value"
                   :variable="variableDef"
@@ -491,7 +536,7 @@ export default {
                   @validation-passed="updateErrors"
                 />
                 <div
-                  v-if="newComponentType(variableDef, i)"
+                  v-if="forceNewLine(variableDef, i, group)"
                   :key="`${i}-${rerenderKey}`"
                   class="force-newline"
                 />
@@ -508,10 +553,14 @@ export default {
 $standard-input: 23.25%;
 $wider-input: 48.25%;
 $widest-input: 98.25%;
-$group-indent: 5%;
+
+// $standard-input: $wider-input;
+
+$group-indent: calc($standard-input/4);
 
 .ccvariable-group-panel {
-  margin: 0px $group-indent 0px 0px ;
+  // margin: 0px $group-indent 0px 0px ;
+  border-top: 1px solid var(--border);
 }
 
 .machine-group {
@@ -524,7 +573,10 @@ padding: .5em;
 }
 
 .expandee {
-  margin: 0px  0px 0px calc($standard-input/2)
+  margin: 0px  0px 0px $group-indent;
+}
+:not(.expandee) .mb-40 .variables-group {
+  // width: 50%;
 }
 
 .variables-group {
