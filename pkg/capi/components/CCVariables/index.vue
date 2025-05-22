@@ -330,12 +330,12 @@ export default {
 
     // decide how to group variables
     forceNewLine(variableDef, i, variableDefs) {
-      // // always force a new line
-      // const nextVariableDef = variableDefs[i + 1];
+      // always force a new line
+      let nextVariableDef = variableDefs[i + 1];
 
-      // if (nextVariableDef) {
-      //   return true;
-      // }
+      if (nextVariableDef) {
+        return true;
+      }
 
       // check if variable is visible and dont force new line if not
       const varRef = this.$refs[`${ variableDef.name }-input`]?.[0];
@@ -352,7 +352,7 @@ export default {
 
       // check if next variable is a different component
       // if it is, force a new line
-      const nextVariableDef = variableDefs[i + 1];
+      nextVariableDef = variableDefs[i + 1];
 
       if (nextVariableDef && componentForType(variableDef)?.name !== componentForType(nextVariableDef)?.name) {
         return true;
@@ -406,7 +406,6 @@ export default {
         <div
           v-for="(group, label) in s"
           :key="label"
-          class="mb-40"
         >
           <div
             v-if="label !== 'misc'"
@@ -491,7 +490,6 @@ export default {
           <div
             v-for="(group, label) in s"
             :key="label"
-            class="mb-40"
           >
             <div
               v-if="label !== 'misc'"
@@ -562,17 +560,23 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-$standard-input: 23.25%;
+// $standard-input: 23.25%;
+// $standard-input: 33%;
+
 $wider-input: 48.25%;
+
 $widest-input: 98.25%;
 
-// $standard-input: $wider-input;
+$standard-input: $wider-input;
 
-$group-indent: calc($standard-input/2);
+// $group-indent: calc($standard-input/2);
+$group-indent: 5%;
 
 .ccvariable-group-panel {
-  // margin: 0px $group-indent 0px 0px ;
-  border-top: 1px solid var(--border);
+  // margin: 0px 0px 0px $group-indent;
+  margin: 0px 0px 20px 0px;
+
+  // border-top: 1px solid var(--border);
 }
 
 .machine-group {
@@ -606,16 +610,49 @@ padding: .5em;
 
   &>*{
     flex: 0 1 $standard-input;
-    margin: 0 1.75% 10px 0;
+    margin: 0 0 10px 0;
     max-width: $standard-input;
-    &::v-deep.wider{
+
+    &.wider:deep(){
       flex: 0 1 $wider-input;
       max-width: $wider-input;
     }
 
-    &::v-deep.widest{
+    &.widest:deep() {
+      margin: 0 0 10px 0;
       flex: 0 1 $widest-input;
       max-width: $widest-input;
+    }
+
+    &.depth-1:deep(){
+      margin: 0 0 0 $group-indent;
+      // flex: 0 1 calc($standard-input - (0.5 * $group-indent));
+      // max-width: calc($standard-input - (0.5 * $group-indent));
+
+      &.wider {
+      flex: 0 1 calc($wider-input - (0.5 * $group-indent));
+      max-width: calc($wider-input - (0.5 * $group-indent));
+      }
+      &.widest {
+      flex: 0 1 calc($widest-input - (0.5 * $group-indent));
+      max-width: calc($widest-input - (0.5 * $group-indent));
+      }
+    }
+
+    &.depth-2:deep(){
+      margin: 0 0 0 calc($group-indent * 2);
+      // flex: 0 1 calc($standard-input - (0.5 * $group-indent * 2));
+      // max-width: calc($standard-input - (0.5 * $group-indent * 2));
+
+      //TODO nb why are these 2 not selecting anything?
+      &.wider {
+        flex: 0 1 calc($wider-input - ($group-indent * 2));
+        max-width: calc($wider-input - (0.5 * $group-indent * 2));
+      }
+      &.widest {
+        flex: 0 1 calc($widest-input - (0.5 * $group-indent * 2));
+        max-width: calc($widest-input - (0.5 * $group-indent * 2));
+      }
     }
 
   }

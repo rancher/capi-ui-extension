@@ -239,7 +239,7 @@ export default {
 
         <div class="value row row-wi">
           <!-- TODO nb type number -->
-          <div class="col-short mr-10 mt-20">
+          <div class="col-short mr-10 mt-20 span-2">
             <LabeledInput
               :value="row.value.replicas"
               :mode="mode"
@@ -249,7 +249,7 @@ export default {
               @update:value="(val) => !!val ? row.value.replicas = parseInt(val) : row.value.replicas = null"
             />
           </div>
-          <div class="col-long mr-20 span-4 mt-10">
+          <div class="col-long mr-20 span-5 mt-20">
             <LabeledSelect
               v-model:value="row.value.class"
               :mode="mode"
@@ -260,7 +260,7 @@ export default {
           </div>
           <div
             v-if="row.value.class"
-            class="col-long mr-20 span-4 mt-20"
+            class="col-long mr-20 span-5 mt-20"
           >
             <LabeledInput
               ref="value"
@@ -332,7 +332,7 @@ export default {
 
     & button{
       position: absolute;
-      right: .5em;
+      left: -80px;
       top: 2em;
     }
   }

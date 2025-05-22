@@ -9,6 +9,9 @@ import { componentForType, isToggle, makeYamlPlaceholders, VARIABLE_INPUT_NAMES 
 import { ANNOTATIONS } from '../../types/capi';
 import VariableHighlight from './VariableHighlight.vue';
 
+// how many indentation levels the ui will display
+const MAX_DEPTH = 3;
+
 export default {
   name: 'CCVariable',
 
@@ -76,10 +79,6 @@ export default {
   computed: {
     ...mapGetters({ t: 'i18n/t', withFallback: 'i18n/withFallback' }),
 
-    componentForType() {
-      return componentForType(this.variable);
-    },
-
     schema() {
       return this.variable?.schema?.openAPIV3Schema;
     },
@@ -140,6 +139,14 @@ export default {
       }, []);
     },
 
+    /**
+     * Computed props about which input component to show
+     */
+
+    componentForType() {
+      return componentForType(this.variable, this.allDefinitions);
+    },
+
     isListComponent() {
       return this.componentForType?.name === VARIABLE_INPUT_NAMES.ARRAY || this.componentForType?.name === VARIABLE_INPUT_NAMES.MAP || this.componentForType?.name === VARIABLE_INPUT_NAMES.MAP_YAML;
     },
@@ -168,6 +175,31 @@ export default {
       return '';
     },
 
+    /**
+     * Compute how to display variable
+     * 2-per-row or full row
+     * how far indented
+     */
+
+    displayClasses() {
+      const out = {
+        wider:  this.isListComponent,
+        widest: this.isYamlKeyValueComponent || this.isYamlComponent || this.highlighted || this.isSearchComponent,
+        center: this.componentForType.name === VARIABLE_INPUT_NAMES.BOOL || this.componentForType.name === VARIABLE_INPUT_NAMES.BOOL_TOGGLE
+      };
+
+      const toggleLabels = (this.variable?.metadata?.annotations?.[ANNOTATIONS.TOGGLED_BY] || '').split(',').map((n) => n.replace(' ', ''));
+      const toggleDepth = (this.allVariables || []).filter((v) => toggleLabels.includes(v.name))?.length;
+
+      if (toggleDepth <= MAX_DEPTH) {
+        out.depth = `depth-${ toggleDepth }`;
+      } else {
+        out.depth = `depth-max`;
+      }
+
+      return out;
+    },
+
     // if mahcine variable, use global value as placeholder
     // otherwise use cluster class's variable definition
     placeholder() {
@@ -188,13 +220,8 @@ export default {
         const toggleLabels = (this.variable?.metadata?.annotations?.[ANNOTATIONS.TOGGLED_BY] || '').split(',').map((n) => n.replace(' ', ''));
         const toggleVariables = (this.allVariables || []).filter((v) => toggleLabels.includes(v.name));
 
-        console.log('toggle variables', toggleVariables);
-        console.log('toggle labels', toggleLabels);
-
         if (toggleVariables && toggleVariables.length) {
           const toggleFalse = !!toggleVariables.find((v) => !v.value);
-
-          console.log('toggle false ', toggleFalse);
 
           return !toggleFalse;
         }
@@ -266,7 +293,12 @@ export default {
   <div
     v-if="componentForType"
     v-show="toggled"
-    :class="{'wider': isListComponent, 'widest': isYamlKeyValueComponent || isYamlComponent || highlighted || isSearchComponent, 'align-center': componentForType?.name==='checkbox-var', [`${componentForType.name}`]: true}"
+    :class="{'wider': displayClasses.wider,
+             'widest': displayClasses.widest,
+             'align-center': displayClasses.center,
+             [`${componentForType.name}`]: true,
+             [`${displayClasses.depth}`]: true
+    }"
   >
     <VariableHighlight
       :mode="mode"
@@ -275,58 +307,6 @@ export default {
       :will-open="willOpen"
       :is-toggle="isToggle"
     >
-      <!-- <template
-        v-if="isToggle"
-        #header="{toggle}"
-      >
-        <component
-          :is="componentForType.component"
-          v-if="componentForType"
-          :id="componentForType.name"
-          :aria-label="withFallback(`capi.variables.${label}`, null, label)"
-          :value="isYamlComponent ? yamlPlaceholder || value : value"
-          :label="!variable?.metadata?.annotations?.['turtles-capi.cattle.io/highlight'] && !isToggle ? withFallback(`capi.variables.${label}`, null, label) : ' '"
-          :on-label="!variable?.metadata?.annotations?.['turtles-capi.cattle.io/highlight'] && !isToggle ? label : ''"
-          :placeholder="placeholder"
-          :tooltip="!variable?.metadata?.annotations?.['turtles-capi.cattle.io/highlight'] ? schema.description : ''"
-          :required="variable.required && !isMachineScoped"
-          :title="variable.name"
-          :options="variableOptions"
-          :rules="!isListComponent ? validationRules : []"
-          :type="schema.type === 'number' || schema.type === 'integer' ? 'number' : 'text'"
-          :as-map="true"
-          :resource-type="resourceType"
-          @update:value="e=>{setValue(e); toggle(e)}"
-        >
-          <template #title>
-            <div class="input-label">
-              <span>{{ variable.name }}
-                <i
-                  v-if="schema.description"
-                  v-clean-tooltip="schema.description"
-                  class="icon icon-sm icon-info"
-                />
-                <i
-                  v-if="!isValid"
-                  v-clean-tooltip="validationErrors.join(' ')"
-                  class="icon icon-warning"
-                />
-              </span>
-            </div>
-          </template>
-          <template
-            v-if="isYamlKeyValueComponent && yamlPlaceholder"
-            #value="{queueUpdate, row}"
-          >
-            <YamlEditor
-              :value="yamlPlaceholder || row"
-              @update:value="e=>setYamlMapValue(e, row, queueUpdate)"
-            />
-          </template>
-        </component>
-      </template> -->
-      <!-- <template v-if="!isToggle"> -->
-      <!-- <template> -->
       <template #highlight="{toggleOpen}">
         <label
           v-if="isYamlComponent"

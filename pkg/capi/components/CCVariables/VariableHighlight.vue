@@ -165,7 +165,7 @@ export default {
 
 <style lang='scss' scoped>
 $container-top-padding: 10px;
-$container-margin-top-bottom: 50px;
+$container-margin-top-bottom: 15px;
 $header-offset: -30px;
 $animate-duration: 300ms;
 $left-basis: 50%;
@@ -175,7 +175,7 @@ $header-height: 3em;  // position info text below header
 .ccvar-highlight-container{
     margin-top: $container-margin-top-bottom;
     padding-top: $container-top-padding;
-    padding-right: 1em;
+    // padding-right: 1em;
     position: relative;
     display:flex;
     justify-content: space-between;
