@@ -1,8 +1,8 @@
 <script>
 import debounce from 'lodash/debounce';
-
 import { randomStr } from '@shell/utils/string';
 import Variable from './Variable.vue';
+import { componentForType } from '../../util/clusterclass-variables';
 
 export default {
   name: 'ClusterClassVariables',
@@ -110,7 +110,8 @@ export default {
       });
 
       return out;
-    }
+    },
+
   },
 
   methods: {
@@ -188,15 +189,11 @@ export default {
     },
 
     newComponentType(variableDef, i) {
-      const refs = this.$refs;
-      const inputEl = refs[`${ variableDef.name }-input`]?.[0]?.$el;
-      const nextInputEl = refs[`${ this.variableDefinitions[i + 1]?.name }-input`]?.[0]?.$el;
+      const nextVariableDef = this.variableDefinitions[i + 1];
 
-      if (!nextInputEl) {
-        return false;
+      if (nextVariableDef) {
+        return componentForType(variableDef?.schema?.openAPIV3Schema)?.name !== componentForType(nextVariableDef?.schema?.openAPIV3Schema)?.name;
       }
-
-      return inputEl?._prevClass !== nextInputEl._prevClass;
     }
   },
 
@@ -231,6 +228,7 @@ export default {
 <style lang="scss" scoped>
 $standard-input: 23.25%;
 $wider-input: 48.25%;
+$widest-input: 98.25%;
 
 .variables {
   display: flex;
@@ -244,6 +242,11 @@ $wider-input: 48.25%;
     &::v-deep.wider{
       flex: 0 1 $wider-input;
       max-width: $wider-input;
+    }
+
+    &::v-deep.widest{
+      flex: 0 1 $widest-input;
+      max-width: $widest-input;
     }
 
   }
