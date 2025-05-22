@@ -253,6 +253,7 @@ export default {
       :namespaced="true"
       :namespace-options="allNamespaces"
       :namespace-new-allowed="true"
+      :create-namespace-override="true"
       name-label="capi.provider.name.label"
       name-placeholder="capi.provider.name.placeholder"
       description-label="capi.provider.description.label"
