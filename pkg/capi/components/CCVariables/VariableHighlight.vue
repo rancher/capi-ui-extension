@@ -79,7 +79,10 @@ export default {
     :class="{open:open, closed:!open, toggle:isToggle, ['info']: highlightColor === 'info', ['warning']: highlightColor === 'warning',['error']: highlightColor === 'error'}"
   >
     <div class="left-container">
-      <div class="header">
+      <div
+        v-if="!isToggle"
+        class="header"
+      >
         <!-- <div class="toggle-input-container">
         <slot
           :toggle="e=>open=!!e"
@@ -118,7 +121,7 @@ export default {
           <i
             class="icon"
             :class="{['icon-question-mark']: highlightColor === 'info', ['icon-warning']: highlightColor === 'warning',['icon-error']: highlightColor === 'error',}"
-            @click="()=>open=!open"
+            @click="!isToggle ? ()=>open=!open : ()=>{}"
           >
           </i>
           {{ highlight }}
@@ -160,7 +163,8 @@ $header-height: 3em;  // position info text below header
 
     .right-container {
         flex-basis: $right-basis;
-        padding-top:$header-height;
+        // padding-top:$header-height;
+        padding-top: 5px;
 
         color: var(--disabled-text);
     }
@@ -182,6 +186,8 @@ $header-height: 3em;  // position info text below header
 
     .highlight {
         text-align: end;
+        padding-left: 4em;
+        padding-bottom: 1em;
          i {
             display: block;
          }
@@ -193,53 +199,60 @@ $header-height: 3em;  // position info text below header
         }
     }
 
-    &.open.info {
-
-        .highlight {
-            // padding-right: 3px;
-            // border-right: 3px solid var(--info);
-            //     // border-color:  var(--info);
-            //                     background-image: linear-gradient(to left, var(--info-banner-bg), var(--body-bg));
-            //  transition:    background-image linear-gradient(to left, var(--info-banner-bg), var(--body-bg)) 1s;
+    &.warning {
+        i {
+            color: var(--warning);
         }
+    }
+
+    &.open.info {
 
         .right-container {
             padding-right: 3px;
             border-right: 3px solid var(--info);
-                // border-color:  var(--info);
-                                background-image: linear-gradient(to left, var(--info-banner-bg), var(--body-bg));
-             transition:    background-image linear-gradient(to left, var(--info-banner-bg), var(--body-bg)) 1s;
+            background-image: linear-gradient(to left, var(--info-banner-bg), var(--body-bg));
+            transition:    background-image linear-gradient(to left, var(--info-banner-bg), var(--body-bg)) 1s;
         }
     }
 
-    //coloration when open
-    .open {
-        &.info {
-            & .highlight{
-                // background-image: linear-gradient(var(--info-banner-bg), var(--body-bg));
-            //  transition:    background-image linear-gradient(var(--info-banner-bg), var(--body-bg)) 1s;
-                transition: opacity $animate-duration ease-in;
-                // border-color:  var(--info);
-                border-image-slice: 100% 0%;
-            }
+    &.open.warning {
 
-             i {
-                color: var(--info);
-            }
-        }
-
-        &.warning {
-                & .highlight{
-                    // background-image: linear-gradient(var(--warning-banner-bg), var(--body-bg));
-                    // border-color:  var(--warning);
-                    border-image-slice: 100% 0%;
-                }
-
-            .highlight .icon {
-                color: var(--warning);
-            }
+        .right-container {
+            padding-right: 3px;
+            border-right: 3px solid var(--warning);
+            background-image: linear-gradient(to left, var(--warning-banner-bg), var(--body-bg));
+            transition:    background-image linear-gradient(to left, var(--warning-banner-bg), var(--body-bg)) 1s;
         }
     }
+
+    // //coloration when open
+    // .open {
+    //     &.info {
+    //         & .highlight{
+    //             // background-image: linear-gradient(var(--info-banner-bg), var(--body-bg));
+    //         //  transition:    background-image linear-gradient(var(--info-banner-bg), var(--body-bg)) 1s;
+    //             transition: opacity $animate-duration ease-in;
+    //             // border-color:  var(--info);
+    //             border-image-slice: 100% 0%;
+    //         }
+
+    //          i {
+    //             color: var(--info);
+    //         }
+    //     }
+
+    //     &.warning {
+    //             & .highlight{
+    //                 // background-image: linear-gradient(var(--warning-banner-bg), var(--body-bg));
+    //                 // border-color:  var(--warning);
+    //                 border-image-slice: 100% 0%;
+    //             }
+
+    //         .highlight .icon {
+    //             color: var(--warning);
+    //         }
+    //     }
+    // }
 
 }
 </style>
