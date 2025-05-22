@@ -5,7 +5,7 @@ import jsyaml from 'js-yaml';
 import YamlEditor from '@shell/components/YamlEditor';
 import { mapGetters } from 'vuex';
 import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
-import { componentForType, makeYamlPlaceholders, VARIABLE_INPUT_NAMES } from '../../util/clusterclass-variables';
+import { componentForType, isToggle, makeYamlPlaceholders, VARIABLE_INPUT_NAMES } from '../../util/clusterclass-variables';
 import { ANNOTATIONS } from '../../types/capi';
 import VariableHighlight from './VariableHighlight.vue';
 
@@ -51,6 +51,12 @@ export default {
     willOpen: {
       type:    Boolean,
       default: true
+    },
+
+    // all variable definitions in this section
+    allDefinitions: {
+      type:    Array,
+      default: () => []
     }
 
   },
@@ -201,6 +207,11 @@ export default {
       }
     },
 
+    // does this variable toggle others in the section
+    isToggle() {
+      return isToggle(this.variable, this.allDefinitions);
+    },
+
     label() {
       return this.variable?.metadata?.annotations?.[ANNOTATIONS.LABEL] || this.variable.name;
     },
@@ -257,7 +268,60 @@ export default {
       :mode="mode"
       :variable="variable"
       :will-open="willOpen"
+      :is-toggle="isToggle"
     >
+      <!-- <template
+        v-if="isToggle"
+        #header="{toggle}"
+      >
+        <component
+          :is="componentForType.component"
+          v-if="componentForType"
+          :id="componentForType.name"
+          :aria-label="withFallback(`capi.variables.${label}`, null, label)"
+          :value="isYamlComponent ? yamlPlaceholder || value : value"
+          :label="!variable?.metadata?.annotations?.['turtles-capi.cattle.io/highlight'] && !isToggle ? withFallback(`capi.variables.${label}`, null, label) : ' '"
+          :on-label="!variable?.metadata?.annotations?.['turtles-capi.cattle.io/highlight'] && !isToggle ? label : ''"
+          :placeholder="placeholder"
+          :tooltip="!variable?.metadata?.annotations?.['turtles-capi.cattle.io/highlight'] ? schema.description : ''"
+          :required="variable.required && !isMachineScoped"
+          :title="variable.name"
+          :options="variableOptions"
+          :rules="!isListComponent ? validationRules : []"
+          :type="schema.type === 'number' || schema.type === 'integer' ? 'number' : 'text'"
+          :as-map="true"
+          :resource-type="resourceType"
+          @update:value="e=>{setValue(e); toggle(e)}"
+        >
+          <template #title>
+            <div class="input-label">
+              <span>{{ variable.name }}
+                <i
+                  v-if="schema.description"
+                  v-clean-tooltip="schema.description"
+                  class="icon icon-sm icon-info"
+                />
+                <i
+                  v-if="!isValid"
+                  v-clean-tooltip="validationErrors.join(' ')"
+                  class="icon icon-warning"
+                />
+              </span>
+            </div>
+          </template>
+          <template
+            v-if="isYamlKeyValueComponent && yamlPlaceholder"
+            #value="{queueUpdate, row}"
+          >
+            <YamlEditor
+              :value="yamlPlaceholder || row"
+              @update:value="e=>setYamlMapValue(e, row, queueUpdate)"
+            />
+          </template>
+        </component>
+      </template> -->
+      <!-- <template v-if="!isToggle"> -->
+      <!-- <template> -->
       <label
         v-if="isYamlComponent"
         :for="componentForType.name"
@@ -315,6 +379,7 @@ export default {
         </template>
       </component>
       <div class="flexbox-newline" />
+      <!-- </template> -->
     </VariableHighlight>
   </div>
 </template>
