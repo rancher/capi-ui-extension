@@ -337,6 +337,19 @@ export default {
       //   return true;
       // }
 
+      // check if variable is visible and dont force new line if not
+      const varRef = this.$refs[`${ variableDef.name }-input`]?.[0];
+
+      if (varRef) {
+        console.log('*** checking ref visibility...');
+
+        if (varRef.toggled === false) {
+          console.log('*** ref not visible; skipping line break');
+
+          return;
+        }
+      }
+
       // check if next variable is a different component
       // if it is, force a new line
       const nextVariableDef = variableDefs[i + 1];
@@ -390,12 +403,6 @@ export default {
         :title="withFallback(`capi.variables.${key}`, null, key)"
         :open-initially="!isMachineScoped"
       >
-        <!-- <template
-          v-if="isMachineScoped"
-          #header
-        >
-          <h3>Override Variables</h3>
-        </template> -->
         <div
           v-for="(group, label) in s"
           :key="label"
@@ -561,7 +568,7 @@ $widest-input: 98.25%;
 
 // $standard-input: $wider-input;
 
-$group-indent: calc($standard-input/4);
+$group-indent: calc($standard-input/2);
 
 .ccvariable-group-panel {
   // margin: 0px $group-indent 0px 0px ;
@@ -579,9 +586,16 @@ padding: .5em;
 
 .expandee {
   margin: 0px  0px 0px $group-indent;
-}
-:not(.expandee) .mb-40 .variables-group {
-  // width: 50%;
+
+  // make machine pool vars fill space horizontally
+  // these dont have right-side info panels
+  .variables-group {
+    &>*{
+      flex: 0 1 $wider-input;
+      max-width: $wider-input;
+
+    }
+  }
 }
 
 .variables-group {

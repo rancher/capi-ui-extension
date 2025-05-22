@@ -187,11 +187,6 @@ export default {
 
       return !(definitions || []).find((d) => d.class === row.value.class)?.namingStrategy;
     },
-
-    expanded(row) {
-
-    }
-
   }
 };
 </script>
@@ -229,7 +224,7 @@ export default {
         class="box"
       >
         <div
-          class="remove mt-30"
+          class="remove"
         >
           <button
             type="button"
@@ -243,13 +238,13 @@ export default {
         </div>
 
         <div class="value row row-wi">
+          <!-- TODO nb type number -->
           <div class="col-short mr-10 mt-20">
             <LabeledInput
               :value="row.value.replicas"
               :mode="mode"
               :disabled="false"
               :label="t('capi.cluster.workers.replicas')"
-              type="number"
               placeholder="1"
               @update:value="(val) => !!val ? row.value.replicas = parseInt(val) : row.value.replicas = null"
             />
@@ -264,7 +259,7 @@ export default {
             />
           </div>
           <div
-            v-if="needsName(row) && row.value.class"
+            v-if="row.value.class"
             class="col-long mr-20 span-4 mt-20"
           >
             <LabeledInput
@@ -273,10 +268,11 @@ export default {
               :mode="mode"
               :disabled="false"
               :label="t('capi.cluster.workers.name')"
-              required
+              :required="needsName(row)"
             />
           </div>
         </div>
+
         <div
           v-if="row.value.class"
           class="machine-variables"
@@ -303,45 +299,42 @@ export default {
   </div>
 </template>
 <style lang="scss" scoped>
-@media screen and (max-width: 1100px) {
-    .row-wi {
-        flex-direction: column;
-        width: 100%
-    }
-    .col-long {
-        width: 130%
-    }
-    .col-short {
-        width: 50%
-    }
+@media screen and (max-width: 1000px) {
+  .row-wi {
+      flex-direction: column;
+      width: 100%
+  }
+  .col-long {
+      width: 100%
+  }
+  .col-short {
+      width: 75%
+  }
 }
 
 .machine-variables {
-  margin: 0px 16px 16px;
-  // :deep() .accordion-container {
-  // border-image: linear-gradient( var(--primary-banner-bg), var(--body-bg));
-  //  border-image-slice: 1;
-  //  border-style: solid;
-  // }
+  margin: 1em  0px 1em 1em;
 }
 
 .box {
+    // border: 1px solid var(--border);
+
+    margin: 10px 0px 10px 5%;
+    padding: 0px 0px 0px 16px;
+
+    // padding-right: 3px;
+    // border-right: 3px solid var(--info);
+    // background-image: linear-gradient(to left, var(--info-banner-bg), var(--body-bg));
+    // transition:    background-image linear-gradient(to left, var(--info-banner-bg)s, var(--body-bg)) 1s;
+
   &>.remove {
-    border-bottom: 1px solid var(--border);
+    position: relative;
+
     & button{
       position: absolute;
-      top:-2.5em;
       right: .5em;
-
+      top: 2em;
     }
   }
-
-  position: relative;
-  // border-image: linear-gradient( var(--primary-banner-bg), var(--body-bg));
-  //  border-image-slice: 1;
-  margin-top: 20px;
-  //  border-style: solid;
-  padding: 0px 16px 16px;
-  // border: 1px solid var(--border);
 }
 </style>

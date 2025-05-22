@@ -241,7 +241,7 @@ export default {
 
       }
     },
-    setValue(e) {
+    setValue(e, toggleOpen) {
       let out = e;
 
       if (this.isYamlComponent) {
@@ -250,6 +250,10 @@ export default {
         } catch (err) {
           // the yamleditor component will show an error icon if the user has entered invalid yaml + focuses away
         }
+      }
+      if (this.isToggle) {
+        // open the info highlight when toggle switch is enabled
+        toggleOpen(e);
       }
 
       this.$emit('update:value', out);
@@ -266,7 +270,8 @@ export default {
   >
     <VariableHighlight
       :mode="mode"
-      :variable="variable"
+      :variable-def="variable"
+      :variable-value="value"
       :will-open="willOpen"
       :is-toggle="isToggle"
     >
@@ -322,64 +327,65 @@ export default {
       </template> -->
       <!-- <template v-if="!isToggle"> -->
       <!-- <template> -->
-      <label
-        v-if="isYamlComponent"
-        :for="componentForType.name"
-        class="text-label"
-      >
-        {{ variable.name }}
-        <span
-          v-if="variable.required"
-          class="text-error"
-        >*</span>
-      </label>
-      <component
-        :is="componentForType.component"
-        v-if="componentForType"
-        :id="componentForType.name"
-        :aria-label="withFallback(`capi.variables.${label}`, null, label)"
-        :value="isYamlComponent ? yamlPlaceholder || value : value"
-        :label="!variable?.metadata?.annotations?.['turtles-capi.cattle.io/highlight'] ? withFallback(`capi.variables.${label}`, null, label) : ' '"
-        :on-label="label"
-        :placeholder="placeholder"
-        :tooltip="!variable?.metadata?.annotations?.['turtles-capi.cattle.io/highlight'] ? schema.description : ''"
-        :required="variable.required && !isMachineScoped"
-        :title="variable.name"
-        :options="variableOptions"
-        :rules="!isListComponent ? validationRules : []"
-        :type="schema.type === 'number' || schema.type === 'integer' ? 'number' : 'text'"
-        :as-map="true"
-        :resource-type="resourceType"
-        @update:value="setValue"
-      >
-        <template #title>
-          <div class="input-label">
-            <span>{{ variable.name }}
-              <i
-                v-if="schema.description"
-                v-clean-tooltip="schema.description"
-                class="icon icon-sm icon-info"
-              />
-              <i
-                v-if="!isValid"
-                v-clean-tooltip="validationErrors.join(' ')"
-                class="icon icon-warning"
-              />
-            </span>
-          </div>
-        </template>
-        <template
-          v-if="isYamlKeyValueComponent && yamlPlaceholder"
-          #value="{queueUpdate, row}"
+      <template #highlight="{toggleOpen}">
+        <label
+          v-if="isYamlComponent"
+          :for="componentForType.name"
+          class="text-label"
         >
-          <YamlEditor
-            :value="yamlPlaceholder || row"
-            @update:value="e=>setYamlMapValue(e, row, queueUpdate)"
-          />
-        </template>
-      </component>
-      <div class="flexbox-newline" />
-      <!-- </template> -->
+          {{ variable.name }}
+          <span
+            v-if="variable.required"
+            class="text-error"
+          >*</span>
+        </label>
+        <component
+          :is="componentForType.component"
+          v-if="componentForType"
+          :id="componentForType.name"
+          :aria-label="withFallback(`capi.variables.${label}`, null, label)"
+          :value="isYamlComponent ? yamlPlaceholder || value : value"
+          :label="!variable?.metadata?.annotations?.['turtles-capi.cattle.io/highlight'] ? withFallback(`capi.variables.${label}`, null, label) : ' '"
+          :on-label="label"
+          :placeholder="placeholder"
+          :tooltip="!variable?.metadata?.annotations?.['turtles-capi.cattle.io/highlight'] ? schema.description : ''"
+          :required="variable.required && !isMachineScoped"
+          :title="variable.name"
+          :options="variableOptions"
+          :rules="!isListComponent ? validationRules : []"
+          :type="schema.type === 'number' || schema.type === 'integer' ? 'number' : 'text'"
+          :as-map="true"
+          :resource-type="resourceType"
+          @update:value="e=>setValue(e, toggleOpen)"
+        >
+          <template #title>
+            <div class="input-label">
+              <span>{{ variable.name }}
+                <i
+                  v-if="schema.description"
+                  v-clean-tooltip="schema.description"
+                  class="icon icon-sm icon-info"
+                />
+                <i
+                  v-if="!isValid"
+                  v-clean-tooltip="validationErrors.join(' ')"
+                  class="icon icon-warning"
+                />
+              </span>
+            </div>
+          </template>
+          <template
+            v-if="isYamlKeyValueComponent && yamlPlaceholder"
+            #value="{queueUpdate, row}"
+          >
+            <YamlEditor
+              :value="yamlPlaceholder || row"
+              @update:value="e=>setYamlMapValue(e, row, queueUpdate)"
+            />
+          </template>
+        </component>
+        <div class="flexbox-newline" />
+      </template>
     </VariableHighlight>
   </div>
 </template>

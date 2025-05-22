@@ -1,14 +1,22 @@
 <script>
 import { ANNOTATIONS } from '../../types/capi';
 export default {
-  name: 'CCVariableHighlightWrapper',
+  name: 'CCvariableDefHighlightWrapper',
 
   props: {
-    // clusterclass variable object
-    variable: {
+    // clusterclass variableDef object
+    variableDef: {
       type:     Object,
       required: true
     },
+
+    // variable value as set in cluster spec
+    // OR machine overrides depending on where this component is used
+    variableValue: {
+      type:    [Object, String, Number, Array, Boolean],
+      default: null
+    },
+
     mode: {
       type:    String,
       default: 'create'
@@ -27,12 +35,21 @@ export default {
   },
 
   data() {
-    return { open: this.willOpen };
+    // if this is a toggle switch, show info when it is open
+    // error highlights are shown initially no matter what
+    return { open: this.isToggle ? !!this.variableValue : this.willOpen };
   },
 
   watch: {
+
     willOpen(neu) {
       this.open = neu;
+    },
+
+    variableValue(neu) {
+      if (this.isToggle && neu) {
+        this.open = neu;
+      }
     },
 
     highlightColor: {
@@ -45,29 +62,36 @@ export default {
     }
   },
 
+  methods: {
+    toggleOpen(o) {
+      this.open = o;
+    },
+  },
+
   computed: {
     highlightColor() {
-      const annotationColor = this.variable?.metadata?.annotations?.[ANNOTATIONS.HIGHLIGHT];
-      const searchType = this.variable?.metadata?.annotations?.[ANNOTATIONS.SEARCH_TYPE] || '';
+      const annotationColor = this.variableDef?.metadata?.annotations?.[ANNOTATIONS.HIGHLIGHT];
+      const searchType = this.variableDef?.metadata?.annotations?.[ANNOTATIONS.SEARCH_TYPE] || '';
 
       return annotationColor || searchType ? 'info' : '';
     },
 
     highlight() {
-      return this.variable?.schema?.openAPIV3Schema?.description;
+      return this.variableDef?.schema?.openAPIV3Schema?.description;
     },
 
     searchType() {
-      return this.variable?.metadata?.annotations?.[ANNOTATIONS.SEARCH_TYPE] || '';
+      return this.variableDef?.metadata?.annotations?.[ANNOTATIONS.SEARCH_TYPE] || '';
     },
 
     displayName() {
-      return this.$store.getters['i18n/withFallback'](`capi.variables.${ this.variable.name }`, null, this.variable.name);
+      return this.$store.getters['i18n/withFallback'](`capi.variableDefs.${ this.variableDef.name }`, null, this.variableDef.name);
     },
 
     required() {
-      return this.variable?.required;
+      return this.variableDef?.required;
     },
+
   }
 };
 </script>
@@ -94,7 +118,7 @@ export default {
           <i
             class="icon"
             :class="{['icon-question-mark']: highlightColor === 'info', ['icon-warning']: highlightColor === 'warning',['icon-error']: highlightColor === 'error',}"
-            @click="()=>open=!open"
+            @click="toggleOpen(!open)"
           >
           </i>
           {{ displayName }}  <span
@@ -109,7 +133,10 @@ export default {
         <Label v-else />
       </div>
       <div class="var-input">
-        <slot />
+        <slot
+          name="highlight"
+          :toggle-open="toggleOpen"
+        />
       </div>
     </div>
     <div class="right-container">
@@ -121,7 +148,7 @@ export default {
           <i
             class="icon"
             :class="{['icon-question-mark']: highlightColor === 'info', ['icon-warning']: highlightColor === 'warning',['icon-error']: highlightColor === 'error',}"
-            @click="!isToggle ? ()=>open=!open : ()=>{}"
+            @click="!isToggle ? toggleOpen : ()=>{}"
           >
           </i>
           {{ highlight }}
@@ -129,7 +156,11 @@ export default {
       </Transition>
     </div>
   </div>
-  <slot v-else />
+  <slot
+    v-else
+    name="highlight"
+    :toggle-open="toggleOpen"
+  />
 </template>
 
 <style lang='scss' scoped>
