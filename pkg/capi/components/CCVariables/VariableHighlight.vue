@@ -19,6 +19,11 @@ export default {
       default: true
     },
 
+    isToggle: {
+      type:    Boolean,
+      default: false
+    },
+
   },
 
   data() {
@@ -68,40 +73,58 @@ export default {
 </script>
 
 <template>
-  <!-- TODO nb slot in header to use variable component when toggle -->
   <div
     v-if="!!highlightColor"
-    class="ccvar-highlight-container row"
-    :class="{open:open, closed:!open, ['info']: highlightColor === 'info', ['warning']: highlightColor === 'warning',['error']: highlightColor === 'error'}"
+    class="ccvar-highlight-container"
+    :class="{open:open, closed:!open, toggle:isToggle, ['info']: highlightColor === 'info', ['warning']: highlightColor === 'warning',['error']: highlightColor === 'error'}"
   >
-    <div class="header">
-      <h4 class="name">
-        {{ displayName }}  <span
-          v-if="required"
-          class="text-error"
-        >*</span>
+    <div class="left-container">
+      <div class="header">
+        <!-- <div class="toggle-input-container">
+        <slot
+          :toggle="e=>open=!!e"
+          name="header"
+        >
+        </slot>
+      </div> -->
+        <h4 class="name">
+          <i
+            class="icon"
+            :class="{['icon-question-mark']: highlightColor === 'info', ['icon-warning']: highlightColor === 'warning',['icon-error']: highlightColor === 'error',}"
+            @click="()=>open=!open"
+          >
+          </i>
+          {{ displayName }}  <span
+            v-if="required"
+            class="text-error"
+          >*</span>
+        </h4>
         <label
           v-if="searchType"
           class="type"
-        > | {{ searchType }}</label>
+        > {{ searchType }}</label>
         <Label v-else />
-      </h4>
-      <i
-        class="icon icon-lg"
-        :class="{['icon-question-mark']: highlightColor === 'info', ['icon-warning']: highlightColor === 'warning',['icon-error']: highlightColor === 'error',}"
-        @click="()=>open=!open"
-      >
-      </i>
+      </div>
+      <div class="var-input">
+        <slot />
+      </div>
     </div>
-    <div class="col span-6">
-      <slot />
+    <div class="right-container">
+      <Transition name="fade">
+        <div
+          v-show="open"
+          class="highlight"
+        >
+          <i
+            class="icon"
+            :class="{['icon-question-mark']: highlightColor === 'info', ['icon-warning']: highlightColor === 'warning',['icon-error']: highlightColor === 'error',}"
+            @click="()=>open=!open"
+          >
+          </i>
+          {{ highlight }}
+        </div>
+      </Transition>
     </div>
-    <Transition name="fade">
-      <span
-        v-show="open"
-        class="highlight col span-6"
-      >{{ highlight }}</span>
-    </Transition>
   </div>
   <slot v-else />
 </template>
@@ -111,13 +134,17 @@ $container-top-padding: 10px;
 $container-margin-top-bottom: 50px;
 $header-offset: -30px;
 $animate-duration: 300ms;
+$left-basis: 50%;
+$right-basis: 50%;
+$header-height: 3em;  // position info text below header
 
 .ccvar-highlight-container{
-    // border-top: 1px solid var(--border);
     margin-top: $container-margin-top-bottom;
     padding-top: $container-top-padding;
     padding-right: 1em;
     position: relative;
+    display:flex;
+    justify-content: space-between;
 
     .fade-enter-active, .fade-leave-active {
         transition: opacity $animate-duration ease;
@@ -127,62 +154,92 @@ $animate-duration: 300ms;
         opacity: 0;
     }
 
-    &.open {
-        border-top: 1px solid var(--border);
+    .left-container {
+        flex-basis: $left-basis;
+    }
 
+    .right-container {
+        flex-basis: $right-basis;
+        padding-top:$header-height;
+
+        color: var(--disabled-text);
+    }
+
+    .header {
+        padding-bottom: calc($header-height/3);
+        display: flex;
+        justify-content: flex-start;
+        align-items: end;
+
+        .name {
+            margin-bottom: 0px;
+        }
+        .type  {
+            margin-bottom: 0px;
+            padding-left: 5px;
+        }
+    }
+
+    .highlight {
+        text-align: end;
+         i {
+            display: block;
+         }
     }
 
     &.info {
-
-        &.open{
-            background-image: linear-gradient(var(--info-banner-bg), var(--body-bg));
-        //  transition:    background-image linear-gradient(var(--info-banner-bg), var(--body-bg)) 1s;
-            transition: opacity $animate-duration ease-in;
-            border-color:  var(--info);
-            border-image-slice: 100% 0%;
-        }
-
-        .icon {
+        i {
             color: var(--info);
         }
     }
 
-        &.warning {
-            &.open{
-                background-image: linear-gradient(var(--warning-banner-bg), var(--body-bg));
-                border-color:  var(--warning);
-                border-image-slice: 100% 0%;
-            }
+    &.open.info {
 
-        .icon {
-            color: var(--warning);
+        .highlight {
+            // padding-right: 3px;
+            // border-right: 3px solid var(--info);
+            //     // border-color:  var(--info);
+            //                     background-image: linear-gradient(to left, var(--info-banner-bg), var(--body-bg));
+            //  transition:    background-image linear-gradient(to left, var(--info-banner-bg), var(--body-bg)) 1s;
+        }
+
+        .right-container {
+            padding-right: 3px;
+            border-right: 3px solid var(--info);
+                // border-color:  var(--info);
+                                background-image: linear-gradient(to left, var(--info-banner-bg), var(--body-bg));
+             transition:    background-image linear-gradient(to left, var(--info-banner-bg), var(--body-bg)) 1s;
         }
     }
 
-    .name {
-        position: absolute;
-        top: $header-offset;
-        // left: .25em;
-        left: 2em;
+    //coloration when open
+    .open {
+        &.info {
+            & .highlight{
+                // background-image: linear-gradient(var(--info-banner-bg), var(--body-bg));
+            //  transition:    background-image linear-gradient(var(--info-banner-bg), var(--body-bg)) 1s;
+                transition: opacity $animate-duration ease-in;
+                // border-color:  var(--info);
+                border-image-slice: 100% 0%;
+            }
 
-    }
-    .header .icon {
-        cursor-style: pointer;
-        position: absolute;
-        top: calc($header-offset  + 8px);
-        // top: 5px;
-        // right: 0.25em;
-        left: 0.25em;
+             i {
+                color: var(--info);
+            }
+        }
 
+        &.warning {
+                & .highlight{
+                    // background-image: linear-gradient(var(--warning-banner-bg), var(--body-bg));
+                    // border-color:  var(--warning);
+                    border-image-slice: 100% 0%;
+                }
+
+            .highlight .icon {
+                color: var(--warning);
+            }
+        }
     }
 
-    &:nth-child(2) {
-        width: 50%;
-    }
-
-    .highlight {
-        color: var(--text-muted);
-        text-align: end;
-    }
 }
 </style>

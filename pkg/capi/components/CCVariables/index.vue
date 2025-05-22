@@ -3,7 +3,7 @@ import { mapGetters } from 'vuex';
 import debounce from 'lodash/debounce';
 import { randomStr } from '@shell/utils/string';
 import Variable from './Variable.vue';
-import { componentForType } from '../../util/clusterclass-variables';
+import { componentForType, isToggle } from '../../util/clusterclass-variables';
 import { LABELS, ANNOTATIONS } from '../../types/capi';
 import GroupPanel from '@shell/components/GroupPanel';
 import { FORM_SECTIONS } from '../../edit/cluster.x-k8s.io.cluster/ClusterConfig.vue';
@@ -328,6 +328,7 @@ export default {
       }
     },
 
+    // decide how to group variables
     forceNewLine(variableDef, i, variableDefs) {
       // // always force a new line
       // const nextVariableDef = variableDefs[i + 1];
@@ -412,6 +413,7 @@ export default {
               >
                 <Variable
                   :ref="`${variableDef.name}-input`"
+                  :all-definitions="variableDefinitions"
                   :will-open="willOpen"
                   :all-variables="value"
                   :variable="variableDef"
@@ -441,6 +443,7 @@ export default {
             >
               <Variable
                 :ref="`${variableDef.name}-input`"
+                :all-definitions="variableDefinitions"
                 :will-open="willOpen"
                 :global-variables="globalVariables"
                 :all-variables="value"
@@ -496,6 +499,7 @@ export default {
                 >
                   <Variable
                     :ref="`${variableDef.name}-input`"
+                    :all-definitions="variableDefinitions"
                     :will-open="willOpen"
                     :all-variables="value"
                     :variable="variableDef"
@@ -525,6 +529,7 @@ export default {
               >
                 <Variable
                   :ref="`${variableDef.name}-input`"
+                  :all-definitions="variableDefinitions"
                   :will-open="willOpen"
                   :global-variables="globalVariables"
                   :all-variables="value"

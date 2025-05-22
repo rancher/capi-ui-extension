@@ -22,15 +22,24 @@ export const VARIABLE_INPUT_NAMES = {
 };
 
 /**
+ *
+ * @param variable  <clusterclass>.spec.variables[]
+ * @param all variables[]
+ * @returns bool true if a variable in all has a toggle annotation that includes this variable's name
+ */
+export const isToggle = (variable, all) => {
+  return !!(all || []).filter((v) => (v?.metadata?.annotations?.[ANNOTATIONS.TOGGLED_BY] || '').split(',').map((n) => n.replace(' ', '')).includes(variable.name)).length || variable.name.includes('toggle');
+};
+/**
  * Accepts a clusterclass variable schema and determines which input component would best represent that variable
  * The 'name' field of the output is used by the component containing all variable inputs, to position inputs dependent on their type
- * @param schema <clusterclass>.spec.variables[].schema.openAPIV3Schema
+ * @param variable <clusterclass>.spec.variables[]
+ * @param all variables[] (optional - used to decide whether or not is toggle)
  * @returns /{component: <input component>, name: string name of input component}
  */
-export const componentForType = (variable) => {
+export const componentForType = (variable, all) => {
   let out;
   const schema = variable?.schema?.openAPIV3Schema || {};
-  const name = variable.name;
   let { type } = schema;
 
   const hasEnum = schema?.enum && schema?.enum?.length;
@@ -76,7 +85,7 @@ export const componentForType = (variable) => {
 
       break;
     case 'boolean':
-      if (name.includes('toggle')) {
+      if (isToggle(variable, all)) {
         out = { component: ToggleSwitch, name: VARIABLE_INPUT_NAMES.BOOL_TOGGLE };
       } else {
         out = { component: Checkbox, name: VARIABLE_INPUT_NAMES.BOOL };
