@@ -118,6 +118,8 @@ capi:
         label: Runtime Extension
       core:
         label: Core
+      custom:
+        label: Custom
     version:
       label: Version
       placeholder: eg. v1.0.0
@@ -141,7 +143,9 @@ capi:
       reuse: Use core provider secret
       data: Data
       label: Secret Name
-
+cluster:
+  provider:
+    kubeadm: Kubeadm
 nav:
   group:
     CAPITurtles: CAPI
