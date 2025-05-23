@@ -24,30 +24,36 @@ export const CREDENTIALS_NOT_REQUIRED = ['docker'];
 
 export const PROVIDER_TYPES = [
   {
-    name: 'aws', types: ['infrastructure'], disabled: false, credential: 'aws'
+    name: 'aws', type: 'infrastructure', disabled: false, credential: 'aws'
   },
   {
-    name: 'azure', types: ['infrastructure'], disabled: false, credential: 'azure'
+    name: 'azure', type: 'infrastructure', disabled: false, credential: 'azure'
   },
   {
-    name: 'digitalocean', types: ['infrastructure'], disabled: false, credential: 'digitalocean'
+    name: 'digitalocean', type: 'infrastructure', disabled: false, credential: 'digitalocean'
   },
   {
-    name: 'docker', types: ['infrastructure'], disabled: false
+    name: 'docker', type: 'infrastructure', disabled: false
   },
   {
-    name: 'gcp', types: ['infrastructure'], disabled: false, credential: 'gcp'
+    name: 'gcp', type: 'infrastructure', disabled: false, credential: 'gcp'
   },
   {
-    name: 'vsphere', types: ['infrastructure'], disabled: false, credential: 'vmwarevsphere'
+    name: 'vsphere', type: 'infrastructure', disabled: false, credential: 'vmwarevsphere'
   },
   {
-    name: 'rke2', types: ['bootstrap', 'controlPlane'], disabled: false
+    name: 'rke2', type: 'bootstrap', disabled: false
   },
   {
-    name: 'kubeadm', types: ['bootstrap', 'controlPlane'], disabled: false
+    name: 'rke2', type: 'controlPlane', disabled: false
   },
   {
-    name: 'custom', types: ['custom'], disabled: false
+    name: 'kubeadm', type: 'bootstrap', disabled: false
+  },
+  {
+    name: 'kubeadm', type: 'controlPlane', disabled: false
+  },
+  {
+    name: 'custom', type: 'custom', disabled: false
   },
 ];

@@ -143,7 +143,9 @@ capi:
       reuse: Use core provider secret
       data: Data
       label: Secret Name
-
+cluster:
+  provider:
+    kubeadm: Kubeadm
 nav:
   group:
     CAPITurtles: CAPI

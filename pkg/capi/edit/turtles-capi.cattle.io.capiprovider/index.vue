@@ -65,25 +65,21 @@ export default {
   },
 
   computed: {
-
     subTypes() {
       const out = [];
       const getters = this.$store.getters;
 
       PROVIDER_TYPES?.forEach((provider) => {
-        provider.types.forEach((category) => {
-          const name = provider.name;
-          const id = `${ name }-${ category }`;
-          const disabled = provider.disabled || (!!this.enabledProviderTypes[provider.name] && this.enabledProviderTypes[provider.name].includes(category));
+        const id = this.makeProviderId(provider.name, provider.type);
+        const disabled = provider.disabled || this.enabledProviderTypes.includes(id);
 
-          addType(id, name, category, disabled);
-        });
+        addType(id, provider.name, provider.type, disabled);
       });
 
       return out;
 
       function addType(id, name, category, disabled = false) {
-        const label = getters['i18n/withFallback'](`cluster.provider.${ name }`, null, name);
+        const label = getters['i18n/withFallback'](`cluster.provider."${ name }"`, null, name);
         let icon;
 
         try {
@@ -102,13 +98,12 @@ export default {
           category,
           label,
           icon,
-          disabled,
+          disabled
         };
 
         out.push(providerType);
       }
     },
-
     groupedSubTypes() {
       const out = {};
 
@@ -139,23 +134,24 @@ export default {
     },
 
     enabledProviderTypes() {
-      return this.capiProviders.reduce((types, p) => {
+      return this.capiProviders.reduce((existing, p) => {
         const { name, type } = p?.spec || p?.metadata || {};
+        const id = this.makeProviderId(name, type);
 
-        if (name !== CUSTOM ) {
-          if (!types[name]) {
-            types[name] = [];
-          }
-          types[name].push(type);
+        if (!existing.includes(id) && name !== CUSTOM) {
+          existing.push(id);
         }
 
-        return types;
-      }, {});
+        return existing;
+      }, []);
     }
   },
 
   methods: {
     set,
+    makeProviderId(name, type) {
+      return `${ name }-${ type }`;
+    },
     clickedType(obj) {
       const name = obj.name;
       const category = obj.category;
