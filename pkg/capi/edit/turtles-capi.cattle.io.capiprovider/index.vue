@@ -3,9 +3,18 @@ import CreateEditView from '@shell/mixins/create-edit-view';
 import CruResource from '@shell/components/CruResource.vue';
 import SelectIconGrid from '@shell/components/SelectIconGrid.vue';
 import { SUB_TYPE } from '@shell/config/query-params';
+import { PROVIDER_TYPE } from '../../config/query-params';
 import { CAPI, PROVIDER_TYPES } from '../../types/capi';
 import ProviderConfig from './ProviderConfig.vue';
 import { set } from '@shell/utils/object';
+import { sortBy } from '@shell/utils/sort';
+
+const SORT_GROUPS = {
+  infrastructure:  1,
+  bootstrap:       2,
+  controlPlane:    3,
+  custom:          4,
+};
 
 const CUSTOM = 'custom';
 
@@ -56,28 +65,32 @@ export default {
   },
 
   computed: {
+
     subTypes() {
       const out = [];
       const getters = this.$store.getters;
 
       PROVIDER_TYPES?.forEach((provider) => {
-        const disabled = provider.disabled || this.enabledProviderTypes.includes(provider.id);
+        provider.types.forEach((category) => {
+          const name = provider.name;
+          const id = `${ name }-${ category }`;
+          const disabled = provider.disabled || (!!this.enabledProviderTypes[provider.name] && this.enabledProviderTypes[provider.name].includes(category));
 
-        addType(provider.id, disabled);
+          addType(id, name, category, disabled);
+        });
       });
 
       return out;
 
-      function addType(id, disabled = false) {
-        const label = getters['i18n/withFallback'](`cluster.provider."${ id }"`, null, id);
-        const description = getters['i18n/withFallback'](`cluster.providerDescription."${ id }"`, null, '');
+      function addType(id, name, category, disabled = false) {
+        const label = getters['i18n/withFallback'](`cluster.provider.${ name }`, null, name);
         let icon;
 
         try {
-          icon = require(`~shell/assets/images/providers/${ id }.svg`);
+          icon = require(`~shell/assets/images/providers/${ name }.svg`);
         } catch (e) {
           try {
-            icon = require(`../../assets/images/providers/${ id }.svg`);
+            icon = require(`../../assets/images/providers/${ name }.svg`);
           } catch (e) {
             icon = require('~shell/assets/images/generic-driver.svg');
           }
@@ -85,41 +98,77 @@ export default {
 
         const providerType = {
           id,
+          name,
+          category,
           label,
-          description,
           icon,
-          disabled
+          disabled,
         };
 
         out.push(providerType);
       }
     },
 
+    groupedSubTypes() {
+      const out = {};
+
+      for ( const provider of this.subTypes ) {
+        const category = provider.category;
+
+        let entry = out[category];
+
+        if ( !entry ) {
+          entry = {
+            category,
+            label: this.$store.getters['i18n/withFallback'](`capi.provider.type.${ category }.label`, null, category),
+            items: [],
+            sort:  SORT_GROUPS[category],
+          };
+
+          out[category] = entry;
+        }
+
+        entry.items.push(provider);
+      }
+
+      for ( const k in out ) {
+        out[k].items = sortBy(out[k].items, 'label');
+      }
+
+      return sortBy(Object.values(out), 'sort');
+    },
+
     enabledProviderTypes() {
       return this.capiProviders.reduce((types, p) => {
-        const { name } = p?.spec || {};
+        const { name, type } = p?.spec || p?.metadata || {};
 
-        if (!types.includes(name) && name !== CUSTOM) {
-          types.push(name);
+        if (name !== CUSTOM ) {
+          if (!types[name]) {
+            types[name] = [];
+          }
+          types[name].push(type);
         }
 
         return types;
-      }, []);
+      }, {});
     }
   },
 
   methods: {
     set,
     clickedType(obj) {
-      const id = obj.id;
+      const name = obj.name;
+      const category = obj.category;
 
-      this.$router?.applyQuery({ [SUB_TYPE]: id });
-      this.selectType(id);
+      this.$router?.applyQuery({ [SUB_TYPE]: name, [PROVIDER_TYPE]: category });
+      this.selectType(name, category);
     },
 
-    selectType(type) {
-      this.subType = type;
-      this.$emit('set-subtype', this.$store.getters['i18n/withFallback'](`cluster.provider."${ type }"`, null, type));
+    selectType(name, category) {
+      this.subType = name;
+      this.category = category;
+
+      this.$emit('set-subtype', this.$store.getters['i18n/withFallback'](`cluster.provider."${ name }"`, null, name));
     },
   },
 };
@@ -143,11 +192,16 @@ export default {
   >
     <template #subtypes>
       <div
-        class="mb-20"
+        v-for="(obj, i) in groupedSubTypes"
+        :key="i"
+        :class="{'mt-5': i === 0, 'mt-20': i !== 0 }"
         style="width: 100%;"
       >
+        <h4>
+          {{ obj.label }}
+        </h4>
         <SelectIconGrid
-          :rows="subTypes"
+          :rows="obj.items"
           key-field="id"
           name-field="label"
           side-label-field="tag"
@@ -162,6 +216,7 @@ export default {
       :live-value="liveValue"
       :mode="mode"
       :provider="subType"
+      :category="category"
       @update:value="set(value, $event.k, $event.val)"
     />
 

@@ -118,6 +118,8 @@ capi:
         label: Runtime Extension
       core:
         label: Core
+      custom:
+        label: Custom
     version:
       label: Version
       placeholder: eg. v1.0.0
