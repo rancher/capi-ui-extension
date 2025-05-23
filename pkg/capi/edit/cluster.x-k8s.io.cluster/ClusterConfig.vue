@@ -65,8 +65,7 @@ export default {
     }
   },
   beforeMount() {
-    this.initSpecs().then((namespaces) => {
-      this.allNamespaces = namespaces || [];
+    this.initSpecs().then(() => {
     }).catch((err) => {
       this.errors.push(err);
       this.loading = false;
@@ -346,7 +345,7 @@ export default {
         namespaces = await this.$store.dispatch(`${ inStore }/findAll`, { type: NAMESPACE });
       }
 
-      return namespaces;
+      this.allNamespaces = namespaces || [];
     },
     cancelCredential() {
       if (this.$refs.cruresource) {
