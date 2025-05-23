@@ -112,6 +112,7 @@ export default {
           :value-placeholder="t('capi.cluster.networking.cidrplaceholder')"
           :rules="rules.pods"
           :add-label="t('capi.cluster.networking.pods.add')"
+          component-testid="pods-cidr"
           @update:value="updateNetwork"
         />
       </div>
@@ -124,6 +125,7 @@ export default {
           :value-placeholder="t('capi.cluster.networking.cidrplaceholder')"
           :rules="rules.services"
           :add-label="t('capi.cluster.networking.services.add')"
+          component-testid="services-cidr"
           @update:value="updateNetwork"
         />
       </div>

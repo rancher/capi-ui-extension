@@ -464,6 +464,7 @@ export default {
               :add-btn-title="t('capi.cluster.workers.machineDeployments.add')"
               :class-options="machineDeploymentOptions"
               :initial-empty-row="true"
+              component-testid="machine-deployments-item"
               @update:value="$emit('update:value', { k: 'spec.topology.workers.machineDeployments', val: $event })"
             />
           </div>
@@ -479,6 +480,7 @@ export default {
               :add-btn-title="t('capi.cluster.workers.machinePools.add')"
               :class-options="machinePoolOptions"
               :initial-empty-row="true"
+              component-testid="machine-pools-item"
               @update:value="$emit('update:value', { k: 'spec.topology.workers.machinePools', val: $event })"
             />
           </div>
