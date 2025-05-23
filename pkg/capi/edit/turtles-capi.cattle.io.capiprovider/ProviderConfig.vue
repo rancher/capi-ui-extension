@@ -41,6 +41,7 @@ const customProviderSpec = {
 };
 
 const providerTypes = ['infrastructure', 'bootstrap', 'controlPlane', 'addon', 'ipam', 'runtimeextension', 'core'];
+const CUSTOM = 'custom';
 
 export default {
   name:       'ProviderConfig',
@@ -90,7 +91,6 @@ export default {
       loading:            true,
       fvFormRuleSets:          [
         { path: 'metadata.name', rules: ['name'] },
-        { path: 'spec.name', rules: ['required'] },
         { path: 'spec.version', rules: ['version'] },
         { path: 'spec.fetchConfig.url', rules: ['url'] },
       ],
@@ -130,13 +130,13 @@ export default {
       return !!this.value?.spec?.variables;
     },
     isCustom() {
-      return this.provider === 'custom';
+      return this.provider === CUSTOM;
     },
     shouldShowBanner() {
       return this.isEdit && (this.hasFeatures || this.hasVariables);
     },
     waitingForCredential() {
-      return this.credentialComponent && !this.value.spec.credentials?.rancherCloudCredentialNamespaceName;
+      return this.credentialComponent && !this.value?.spec?.credentials?.rancherCloudCredentialNamespaceName;
     },
     rancherCloudCredentialNamespaceName() {
       return this.value.spec?.credentials?.rancherCloudCredentialNamespaceName || '';
@@ -147,9 +147,9 @@ export default {
       if ( !this.value.spec ) {
         const defaultsFromCoreProvider = this.getSpecFromCoreSecret();
 
-        if ( this.provider !== 'custom') {
+        if ( this.provider !== CUSTOM) {
           set(this.value, 'spec', { ...clone(defaultSpec), ...defaultsFromCoreProvider });
-          set(this.value.spec, 'name', this.provider); // Defines the provider kind to provision.
+          set(this.value.metadata, 'name', this.provider);
         } else {
           set(this.value, 'spec', { ...clone(customProviderSpec), ...defaultsFromCoreProvider });
         }
@@ -247,21 +247,21 @@ export default {
     @cancel="done"
     @error="e=>errors=e"
   >
-    <NameNsDescription
-      :value="value"
-      :mode="mode"
-      :namespaced="true"
-      :namespace-options="allNamespaces"
-      :namespace-new-allowed="true"
-      :create-namespace-override="true"
-      name-label="capi.provider.name.label"
-      name-placeholder="capi.provider.name.placeholder"
-      description-label="capi.provider.description.label"
-      description-placeholder="capi.provider.description.placeholder"
-      :rules="{name:fvGetAndReportPathRules('metadata.name')}"
-      @update:value="$emit('update:value', {k: 'metadata', val: $event.metadata })"
-    />
-    <div v-if="isCustom">
+  <div v-if="isCustom">
+      <NameNsDescription
+        :value="value"
+        :mode="mode"
+        :namespaced="true"
+        :namespace-options="allNamespaces"
+        :namespace-new-allowed="true"
+        :name-required="false"
+        name-label="capi.provider.name.label"
+        name-placeholder="capi.provider.name.placeholder"
+        description-label="capi.provider.description.label"
+        description-placeholder="capi.provider.description.placeholder"
+        :rules="{name:fvGetAndReportPathRules('metadata.name')}"
+        @update:value="$emit('update:value', {k: 'metadata', val: $event.metadata })"
+      />
       <div class="row mb-20">
         <div
           class="col span-3"
@@ -318,9 +318,24 @@ export default {
         </div>
       </div>
     </div>
+    <div v-else>
+      <NameNsDescription
+        :value="value"
+        :mode="mode"
+        :namespaced="true"
+        :namespace-options="allNamespaces"
+        :namespace-new-allowed="true"
+        :name-hidden="true"
+        name-label="capi.provider.name.label"
+        name-placeholder="capi.provider.name.placeholder"
+        description-label="capi.provider.description.label"
+        description-placeholder="capi.provider.description.placeholder"
+        @update:value="$emit('update:value', {k: 'metadata', val: $event.metadata })"
+      />
+    </div>
     <div
       v-if="credentialComponent"
-      class="mb-40"
+      class="mb-10"
     />
     <h2
       v-if="hasFeatures || hasVariables"

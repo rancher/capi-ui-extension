@@ -256,7 +256,7 @@ export const providerVersionValidator = function (t: Translation): Validator {
 
 export const providerNameValidator = function (t: Translation): Validator {
   return (val: string) =>
-    !val ||
+    val &&
     !val.match(
       /^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/
     )
