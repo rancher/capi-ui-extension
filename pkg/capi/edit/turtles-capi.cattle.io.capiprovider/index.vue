@@ -79,7 +79,7 @@ export default {
       return out;
 
       function addType(id, name, category, disabled = false) {
-        const label = getters['i18n/withFallback'](`cluster.provider."${ name }"`, null, name);
+        const label = getters['i18n/withFallback'](`capi.provider.providerDisplayNames."${ name }"`, null, name);
         let icon;
 
         try {
@@ -164,7 +164,7 @@ export default {
       this.subType = name;
       this.category = category;
 
-      this.$emit('set-subtype', this.$store.getters['i18n/withFallback'](`cluster.provider."${ name }"`, null, name));
+      this.$emit('set-subtype', this.$store.getters['i18n/withFallback'](`capi.provider.providerDisplayNames."${ name }"`, null, name));
     },
   },
 };
