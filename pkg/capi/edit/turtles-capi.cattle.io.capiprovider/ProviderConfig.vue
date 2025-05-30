@@ -371,7 +371,6 @@ export default {
       <t k="capi.provider.secret.title" />
     </h2>
 
-    <!-- <div v-if="!waitingForCredential"> -->
     <div class="mb-20">
       <Banner
         v-if="shouldShowBanner"
