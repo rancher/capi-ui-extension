@@ -40,7 +40,7 @@ const customProviderSpec = {
   fetchConfig:  { url: '' },
 };
 
-const providerTypes = ['infrastructure', 'bootstrap', 'controlPlane', 'addon', 'ipam', 'runtimeextension', 'core'];
+const CATEGORIES = ['infrastructure', 'bootstrap', 'controlPlane', 'addon', 'ipam', 'runtimeextension', 'core'];
 
 export default {
   name:       'ProviderConfig',
@@ -69,6 +69,10 @@ export default {
     provider: {
       type:     String,
       required: true,
+    },
+    category: {
+      type:     String,
+      default: 'infrastructure',
     }
   },
   beforeMount() {
@@ -84,7 +88,8 @@ export default {
     });
   },
   data() {
-    const providerDetails = PROVIDER_TYPES.find((p) => p.id === this.provider) || { disabled: false, id: '0' };
+    const name = this.provider;
+    const providerDetails = PROVIDER_TYPES.find((p) => p.name === name) || { disabled: false, id: '0' };
 
     return {
       loading:            true,
@@ -109,7 +114,7 @@ export default {
       };
     },
     typeOptions() {
-      return providerTypes.map((type) => {
+      return CATEGORIES.map((type) => {
         return { label: this.t(`capi.provider.type.${ type }.label`), value: type };
       });
     },
@@ -150,6 +155,7 @@ export default {
         if ( this.provider !== 'custom') {
           set(this.value, 'spec', { ...clone(defaultSpec), ...defaultsFromCoreProvider });
           set(this.value.spec, 'name', this.provider); // Defines the provider kind to provision.
+          set(this.value.spec, 'type', this.category);
         } else {
           set(this.value, 'spec', { ...clone(customProviderSpec), ...defaultsFromCoreProvider });
         }
