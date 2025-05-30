@@ -8,7 +8,8 @@ export default {
   name: 'ClusterClassVariables',
 
   components: { Variable },
-  emits:      ['validation-passed', 'update:value'],
+  // error is emitted when an error occurs parsing or generating yaml. validation-passed corresponds to validation defined in the clusterclass spec
+  emits:      ['validation-passed', 'update:value', 'error'],
 
   props: {
     clusterClass: {
@@ -214,6 +215,7 @@ export default {
           :validate-required="!machineDeploymentClass && !machinePoolClass"
           @update:value="e=>updateVariables(e, variableDef)"
           @validation-passed="updateErrors"
+          @error="e=>$emit('error', e)"
         />
         <div
           v-if="newComponentType(variableDef, i)"

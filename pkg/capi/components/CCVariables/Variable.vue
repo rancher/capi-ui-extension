@@ -8,9 +8,9 @@ import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
 import { componentForType, makeYamlPlaceholders, VARIABLE_INPUT_NAMES } from '../../util/clusterclass-variables';
 
 export default {
-  name: 'CCVariable',
-
-  emits: ['validation-passed', 'update:value'],
+  name:  'CCVariable',
+  // error is emitted when an error occurs parsing or generating yaml. validation-passed corresponds to validation defined in the clusterclass spec
+  emits: ['validation-passed', 'update:value', 'error'],
 
   components: { YamlEditor },
 
@@ -133,7 +133,7 @@ export default {
       } catch (err) {
         const msg = this.t('error.yamlPlaceholderError', { variable: this.variable.name }) + err;
 
-        console.error(msg);
+        this.$emit('error', msg);
       }
 
       return '';
@@ -151,7 +151,7 @@ export default {
       } catch (err) {
         const msg = this.t('error.yamlParseError', { variable: this.variable.name }) + err;
 
-        console.error(msg);
+        this.$emit('error', msg);
       }
     },
 
