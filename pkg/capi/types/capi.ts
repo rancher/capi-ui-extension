@@ -25,23 +25,22 @@ export const CREDENTIALS_NOT_REQUIRED = ['docker'];
 
 export const PROVIDER_TYPES = [
   {
-<<<<<<< HEAD
-    name: 'aws', type: 'infrastructure', disabled: false, credential: 'aws'
+    name: 'aws', type: 'infrastructure', disabled: false, credential: 'aws', credentialRequired: true
   },
   {
-    name: 'azure', type: 'infrastructure', disabled: false, credential: 'azure'
+    name: 'azure', type: 'infrastructure', disabled: false, credential: 'azure', credentialRequired: false
   },
   {
-    name: 'digitalocean', type: 'infrastructure', disabled: false, credential: 'digitalocean'
+    name: 'digitalocean', type: 'infrastructure', disabled: false, credential: 'digitalocean', credentialRequired: true
   },
   {
     name: 'docker', type: 'infrastructure', disabled: false
   },
   {
-    name: 'gcp', type: 'infrastructure', disabled: false, credential: 'gcp'
+    name: 'gcp', type: 'infrastructure', disabled: false, credential: 'gcp', credentialRequired: true
   },
   {
-    name: 'vsphere', type: 'infrastructure', disabled: false, credential: 'vmwarevsphere'
+    name: 'vsphere', type: 'infrastructure', disabled: false, credential: 'vmwarevsphere', credentialRequired: true
   },
   {
     name: 'rke2', type: 'bootstrap', disabled: false
@@ -57,21 +56,5 @@ export const PROVIDER_TYPES = [
   },
   {
     name: 'custom', type: 'custom', disabled: false
-=======
-    id: 'aws', disabled: false, credential: 'aws', credentialRequired: true
-  },
-  {
-    id: 'azure', disabled: false, credential: 'azure', credentialRequired: false
-  },
-  {
-    id: 'digitalocean', disabled: false, credential: 'digitalocean', credentialRequired: true
-  },
-  { id: 'docker', disabled: false },
-  {
-    id: 'gcp', disabled: false, credential: 'gcp', credentialRequired: true
-  },
-  {
-    id: 'vsphere', disabled: false, credential: 'vmwarevsphere', credentialRequired: true
->>>>>>> a3ded77b0 (make credentials mandatory for all but azure)
   },
 ];

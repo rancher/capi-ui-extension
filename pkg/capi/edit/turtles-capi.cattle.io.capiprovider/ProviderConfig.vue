@@ -117,6 +117,15 @@ export default {
     };
   },
 
+  watch: {
+    // if a user toggles off credentials, clear them from the spec
+    useCredential(neu) {
+      if (!neu && !this.credentialRequired) {
+        this.value.spec.credentials.rancherCloudCredentialNamespaceName = '';
+      }
+    }
+  },
+
   computed: {
     ...mapGetters(['namespaces']),
 
@@ -134,16 +143,14 @@ export default {
       });
     },
 
-    showForm() {
-      return !!this.value?.spec?.credentials?.rancherCloudCredentialNamespaceName || !this.credentialComponent;
-    },
-
     isEdit() {
       return this.mode === _EDIT;
     },
+
     isCreate() {
       return this.mode === _CREATE;
     },
+
     hasFeatures() {
       return !!this.value?.spec?.features;
     },
@@ -164,12 +171,11 @@ export default {
       return this.credentialComponent && !this.value.spec.credentials?.rancherCloudCredentialNamespaceName;
     },
     rancherCloudCredentialNamespaceName() {
-      // return this.value.spec?.credentials?.rancherCloudCredentialNamespaceName || '';
-      return this.useCredential && this.credentialComponent && !this.value.spec.credentials.rancherCloudCredentialNamespaceName;
+      return this.useCredential && this.credentialComponent && !this.value.spec?.credentials?.rancherCloudCredentialNamespaceName;
     },
 
     providerDisplayName() {
-      return this.t(`capi.provider.providers.${ this.provider }`) || this.provider;
+      return this.t(`capi.provider.providerDisplayNames.${ this.provider }`) || this.provider;
     }
   },
 
@@ -255,8 +261,12 @@ export default {
     },
 
     cancelCredential() {
-      if ( this.$refs.providercruresource ) {
-        this.$refs.providercruresource.emitOrRoute();
+      if (this.credentialRequired) {
+        if ( this.$refs.providercruresource ) {
+          this.$refs.providercruresource.emitOrRoute();
+        }
+      } else {
+        this.useCredential = false;
       }
     }
   }
@@ -362,7 +372,7 @@ export default {
     </h2>
 
     <!-- <div v-if="!waitingForCredential"> -->
-    <div>
+    <div class="mb-20">
       <Banner
         v-if="shouldShowBanner"
         color="info"
@@ -417,9 +427,12 @@ export default {
       v-if="credentialComponent"
       class="credential-container"
     >
+      <h3 class="mt-20">
+        <t k="capi.provider.cloudCredential.title" />
+      </h3>
       <div
         v-if="!credentialRequired"
-        class="row mt-20"
+        class="row mt-10"
       >
         <ToggleSwitch
           v-model:value="useCredential"
@@ -429,22 +442,19 @@ export default {
       </div>
 
       <template v-if="useCredential">
-        <h3 class="mt-20 mb-20">
-          <t k="capi.provider.cloudCredential.title" />
-        </h3>
         <SelectCredential
           v-model:value="value.spec.credentials.rancherCloudCredentialNamespaceName"
           :mode="mode"
           :provider="credentialComponent"
           :cancel="cancelCredential"
-          :showing-form="showForm"
+          :showing-form="!credentialRequired"
           class="credential"
           @update:value="$emit('update:value', {k: 'spec.credentials.rancherCloudCredentialNamespaceName', val: $event})"
         />
       </template>
     </div>
     <template
-      v-if="waitingForCredential"
+      v-if="waitingForCredential && useCredential"
       #form-footer
     >
       <div><!-- Hide the outer footer --></div>

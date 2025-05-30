@@ -143,21 +143,17 @@ capi:
       create: Create new secret
       reuse: Use core provider secret
       data: Data
-      label: Secret Name
-<<<<<<< HEAD
-cluster:
-  provider:
-    kubeadm: Kubeadm
-=======
-    providers:
+      label: Secret Name    
+    providerDisplayNames:
       digitalocean: Digital Ocean
       aws: Amazon
       azure: Azure
       docker: Docker
       gcp: Google Cloud Platform
       vsphere: vSphere
+      kubeadm: Kubeadm
+      rke2: RKE2
 
->>>>>>> a3ded77b0 (make credentials mandatory for all but azure)
 nav:
   group:
     CAPITurtles: CAPI
