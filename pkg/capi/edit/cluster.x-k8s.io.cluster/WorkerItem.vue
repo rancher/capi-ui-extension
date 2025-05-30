@@ -50,6 +50,10 @@ export default {
       type:    Boolean,
       default: false,
     },
+    componentTestid: {
+      type:    String,
+      default: 'worker-item',
+    }
   },
   data() {
     const input = (this.value || [])?.slice();
@@ -159,7 +163,7 @@ export default {
       <div
         v-for="(row, idx) in rows"
         :key="idx"
-        :data-testid="`array-list-box${ idx }`"
+        :data-testid="`${componentTestid}-box${ idx }`"
         class="box"
       >
         <div class="value row row-wi">
@@ -201,7 +205,7 @@ export default {
               type="button"
               :disabled="isView"
               class="btn role-link"
-              :data-testid="`remove-item-${idx}`"
+              :data-testid="`${componentTestid}-remove-item-${idx}`"
               @click="remove(row, idx)"
             >
               {{ removeLabel }}
@@ -232,7 +236,7 @@ export default {
           type="button"
           class="btn role-tertiary add"
           :disabled="loading"
-          data-testid="array-list-button"
+          :data-testid="`${componentTestid}-button`"
           @click="add()"
         >
           <i
