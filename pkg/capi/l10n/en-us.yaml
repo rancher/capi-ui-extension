@@ -186,3 +186,5 @@ validation:
   url: '"Value" must be a valid URL.'
 error:
   clusterClassNotFound: Could not find corresponding cluster class. Please check that cluster class exists and is valid.
+  yamlPlaceholderError: 'Error generating a yaml template for {variable}: '
+  yamlParseError: 'Error parsing yaml in {variable}: '

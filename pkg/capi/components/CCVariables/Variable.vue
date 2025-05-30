@@ -131,7 +131,9 @@ export default {
 
         return out || '';
       } catch (err) {
+        const msg = this.t('error.yamlPlaceholderError', { variable: this.variable.name }) + err;
 
+        console.error(msg);
       }
 
       return '';
@@ -147,9 +149,12 @@ export default {
         row.value = out;
         queueUpdate();
       } catch (err) {
+        const msg = this.t('error.yamlParseError', { variable: this.variable.name }) + err;
 
+        console.error(msg);
       }
     },
+
     setValue(e) {
       let out = e;
 
@@ -172,17 +177,17 @@ export default {
     v-if="componentForType"
     :class="{'wider': isListComponent, 'widest': isYamlKeyValueComponent || isYamlComponent, 'align-center': componentForType?.name==='checkbox-var', [`${componentForType.name}`]: true}"
   >
-    <label
+    <div
       v-if="isYamlComponent"
       :for="componentForType.name"
-      class="text-label"
+      class="input-label"
     >
       {{ variable.name }}
       <span
         v-if="variable.required"
         class="text-error"
       >*</span>
-    </label>
+    </div>
     <component
       :is="componentForType.component"
       v-if="componentForType"

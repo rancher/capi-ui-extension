@@ -126,7 +126,6 @@ export const makeSchemas = function(openSchema, id = 'ccvariable') {
         if (SIMPLE_TYPES.includes(def.items.type)) {
           mockSchema.resourceFields[key] = { type: 'array', subtype: def.items.type };
         } else {
-        // heh
           const subSchemaSubSchemas = makeSchemas(properties[key], subtypeId);
 
           schemas.push(...subSchemaSubSchemas);

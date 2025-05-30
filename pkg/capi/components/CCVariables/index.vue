@@ -239,12 +239,12 @@ $widest-input: 98.25%;
     flex: 0 1 $standard-input;
     margin: 0 1.75% 10px 0;
     max-width: $standard-input;
-    &::v-deep.wider{
+    &.wider:deep(){
       flex: 0 1 $wider-input;
       max-width: $wider-input;
     }
 
-    &::v-deep.widest{
+    &.widest:deep(){
       flex: 0 1 $widest-input;
       max-width: $widest-input;
     }
