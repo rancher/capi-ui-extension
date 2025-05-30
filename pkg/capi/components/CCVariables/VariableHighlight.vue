@@ -73,7 +73,7 @@ export default {
       const annotationColor = this.variableDef?.metadata?.annotations?.[ANNOTATIONS.HIGHLIGHT];
       const searchType = this.variableDef?.metadata?.annotations?.[ANNOTATIONS.SEARCH_TYPE] || '';
 
-      return annotationColor || searchType ? 'info' : '';
+      return annotationColor || searchType ? annotationColor || 'info' : '';
     },
 
     highlight() {
@@ -145,13 +145,13 @@ export default {
           v-show="open"
           class="highlight"
         >
+          {{ highlight }}
           <i
             class="icon"
             :class="{['icon-question-mark']: highlightColor === 'info', ['icon-warning']: highlightColor === 'warning',['icon-error']: highlightColor === 'error',}"
             @click="!isToggle ? toggleOpen : ()=>{}"
           >
           </i>
-          {{ highlight }}
         </div>
       </Transition>
     </div>
@@ -194,10 +194,14 @@ $header-height: 3em;  // position info text below header
 
     .right-container {
         flex-basis: $right-basis;
-        // padding-top:$header-height;
         padding-top: 5px;
-
         color: var(--disabled-text);
+        // align-content: center;
+    }
+
+    &.toggle .right-container  {
+        flex-basis: calc($right-basis * 3);
+
     }
 
     .header {
@@ -217,16 +221,21 @@ $header-height: 3em;  // position info text below header
 
     .highlight {
         text-align: end;
-        padding-left: 4em;
-        padding-bottom: 1em;
+        padding: 10px 0 2em 4em;
+        // padding-left: 4em;
+        // padding-bottom: 1em;
          i {
             display: block;
+            position: absolute;
+            right: 5px;
+            bottom: 5px;
          }
     }
 
     &.info {
         i {
             color: var(--info);
+
         }
     }
 

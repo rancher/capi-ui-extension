@@ -565,7 +565,8 @@ export default {
 
 $wider-input: 48.25%;
 
-$widest-input: 98.25%;
+// $widest-input: 98.25%;
+$widest-input: 100%;
 
 $standard-input: $wider-input;
 
@@ -626,32 +627,33 @@ padding: .5em;
 
     &.depth-1:deep(){
       margin: 0 0 0 $group-indent;
-      // flex: 0 1 calc($standard-input - (0.5 * $group-indent));
-      // max-width: calc($standard-input - (0.5 * $group-indent));
+      flex: 0 1 calc($widest-input - $group-indent);
 
       &.wider {
-      flex: 0 1 calc($wider-input - (0.5 * $group-indent));
-      max-width: calc($wider-input - (0.5 * $group-indent));
+      flex: 0 1 calc($wider-input - calc(0.5 * $group-indent));
+      max-width: calc($wider-input - calc(0.5 * $group-indent));
       }
       &.widest {
-      flex: 0 1 calc($widest-input - (0.5 * $group-indent));
-      max-width: calc($widest-input - (0.5 * $group-indent));
+      flex: 0 1 calc($widest-input - calc(0.5 * $group-indent));
+      max-width: calc($widest-input - calc(0.5 * $group-indent));
       }
     }
 
     &.depth-2:deep(){
-      margin: 0 0 0 calc($group-indent * 2);
-      // flex: 0 1 calc($standard-input - (0.5 * $group-indent * 2));
-      // max-width: calc($standard-input - (0.5 * $group-indent * 2));
+      $group-indent-2: calc($group-indent * 2);
+      $max-width-2: calc($widest-input - $group-indent-2);
 
-      //TODO nb why are these 2 not selecting anything?
+      margin: 0 0 0 calc($group-indent * 2);
+      // flex: 0 1 calc($standard-input - $group-indent-2);
+      // max-width: calc($standard-input - $group-indent-2);
+
       &.wider {
-        flex: 0 1 calc($wider-input - ($group-indent * 2));
-        max-width: calc($wider-input - (0.5 * $group-indent * 2));
+        flex: 0 1 calc($wider-input - $group-indent-2);
+        max-width: calc($widest-input - $group-indent-2);
       }
       &.widest {
-        flex: 0 1 calc($widest-input - (0.5 * $group-indent * 2));
-        max-width: calc($widest-input - (0.5 * $group-indent * 2));
+        flex: 0 1 calc($widest-input - $group-indent-2);
+        max-width: calc($widest-input - $group-indent-2);
       }
     }
 

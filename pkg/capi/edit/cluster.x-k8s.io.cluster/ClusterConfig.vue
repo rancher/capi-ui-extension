@@ -555,7 +555,7 @@ export default {
         open-initially
         :title="t(`capi.cluster.section.${formSections.GENERAL}`)"
       >
-        <div class="icon-toggles">
+        <!--  <div class="icon-toggles">
           <i
             class="icon icon-show icon-lg"
             :class="{'active': configHighlightOpen}"
@@ -566,7 +566,7 @@ export default {
             :class="{'active': !configHighlightOpen}"
             @click="()=>configHighlightOpen = false"
           />
-        </div>
+        </div> -->
         <!-- GENERAL CONFIGURATION -->
         <NameNsDescription
           v-if="!isView"
@@ -619,7 +619,7 @@ export default {
         open-initially
         :title="t(`capi.cluster.section.${formSections.CONTROL_PLANE}`)"
       >
-        <div class="icon-toggles">
+        <!--   <div class="icon-toggles">
           <i
             class="icon icon-show icon-lg"
             :class="{'active': controlPlaneHighlightOpen}"
@@ -630,7 +630,7 @@ export default {
             :class="{'active': !controlPlaneHighlightOpen}"
             @click="()=>controlPlaneHighlightOpen = false"
           />
-        </div>
+        </div> -->
         <!-- CONTROL PLANE CONFIGURATION -->
         <div class="row span-12 row-config">
           <div class="col span-6 mt-20">
@@ -663,7 +663,7 @@ export default {
         open-initially
         :title="t(`capi.cluster.section.${formSections.NETWORKING}`)"
       >
-        <div class="icon-toggles">
+        <!--   <div class="icon-toggles">
           <i
             class="icon icon-show icon-lg"
             :class="{'active': networkingHighlightOpen}"
@@ -674,7 +674,7 @@ export default {
             :class="{'active': !networkingHighlightOpen}"
             @click="()=>networkingHighlightOpen = false"
           />
-        </div>
+        </div> -->
         <!-- NETWORKING CONFIGURATION -->
         <div class="col span-6 mt-20">
           <NetworkSection
@@ -719,12 +719,6 @@ export default {
         :title="t(`capi.cluster.section.${formSections.WORKERS}`)"
       >
         <div class="col span-12 mb-20">
-          <!-- TODO nb mark workers required -->
-          <!-- <h2>
-            <t k="capi.cluster.workers.title" />
-            <span class="required">*</span>
-          </h2> -->
-          <!-- TODO nb style machine global vars -->
           <ClusterClassVariables
             :value="value.spec.topology.variables"
             :section="formSections.WORKERS"

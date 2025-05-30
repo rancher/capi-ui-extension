@@ -84,23 +84,7 @@ export default {
         console.error(err);
       }
       this.loading = false;
-    },
-
-    // TODO nb search by ns
-    // async fetchResource() {
-    //   this.loading = true;
-    //   try {
-    //     const res = await this.$store.dispatch('management/findMatching', {
-    //       type: this.resourceType, namespace: this.namespace, opt: { force: true }
-    //     });
-
-    //     this.resource = res;
-    //   } catch (err) {
-    //     this.resource = [];
-    //     console.error(err);
-    //   }
-    //   this.loading = false;
-    // }
+    }
   },
 
   computed: {
@@ -124,7 +108,6 @@ export default {
       class="col span-6"
     >
       <LabeledSelect
-
         label="Namespace"
         :mode="mode"
         :value="namespace"
@@ -135,10 +118,13 @@ export default {
     </div>
     <div class="col span-6">
       <LabeledSelect
+        :value="value"
         :loading="loading"
         label="Name"
         :options="resourceNames || []"
         :mode="mode"
+        taggable
+        @selecting="e=>$emit('update:value', e)"
       />
     </div>
   </div>

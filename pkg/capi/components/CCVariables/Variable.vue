@@ -282,7 +282,6 @@ export default {
         // open the info highlight when toggle switch is enabled
         toggleOpen(e);
       }
-
       this.$emit('update:value', out);
     }
   },
