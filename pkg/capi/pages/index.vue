@@ -84,21 +84,14 @@ export default {
         >
           <template #values="{setValue, values}">
             <Checkbox
-              label="Install cert-manager"
+            class="mb-10"
+              :label="t('capi.installation.includeCertManager')"
               :value="values?.['cluster-api-operator']?.['cert-manager']?.enabled"
               @update:value="e=>setValue(`'cluster-api-operator'.'cert-manager'.enabled`, e)"
             />
           </template>
         </InstallHelmCharts>
       </div>
-      <div class="row mt-5">
-        <t
-          raw
-          k="capi.installation.docs"
-        />
-      </div>
-    </div>
-    <div>
     </div>
   </div>
 </template>
