@@ -2,7 +2,7 @@
 import { CAPI as RANCHER_CAPI, SCHEMA } from '@shell/config/types';
 import Banner from '@components/Banner/Banner.vue';
 import { CAPI } from '../types/capi.ts';
-import InstallHelmCharts from '../components/InstallHelmCharts/index.vue';
+// import InstallHelmCharts from '@shell/components/InstallHelmCharts.vue';
 import { Checkbox } from '@rancher/components';
 
 export default {
@@ -36,7 +36,9 @@ export default {
   },
 
   components: {
-    Banner, InstallHelmCharts, Checkbox
+    Banner,
+    // InstallHelmCharts,
+    Checkbox
   },
 
   computed: {
@@ -72,7 +74,7 @@ export default {
         </div>
       </Banner>
       <div class="row">
-        <InstallHelmCharts
+        <!-- <InstallHelmCharts
           display-name="Rancher Turtles"
           store="management"
           chart-name="rancher-turtles"
@@ -87,7 +89,7 @@ export default {
               @update:value="e=>setValue(`'cluster-api-operator'.'cert-manager'.enabled`, e)"
             />
           </template>
-        </InstallHelmCharts>
+        </InstallHelmCharts> -->
       </div>
       <div class="row mt-5">
         <t
