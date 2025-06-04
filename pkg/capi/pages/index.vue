@@ -43,7 +43,9 @@ export default {
 
   computed: {
     hasClusterClassSchema() {
-      return !!this.$store.getters['management/schemaFor'](CAPI.CLUSTER_CLASS);
+      //TODO nb undo
+      // return !!this.$store.getters['management/schemaFor'](CAPI.CLUSTER_CLASS);
+      return false
     },
   }
 
@@ -75,7 +77,8 @@ export default {
       </Banner>
       <div class="row">
         <InstallHelmCharts
-          display-name="Rancher Turtles"
+          :repo-display-name="t('capi.installation.title')"
+          :chart-display-name="t('capi.installation.title')"
           store="management"
           chart-name="rancher-turtles"
           repo-name="turtles"
