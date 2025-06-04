@@ -147,20 +147,19 @@ export default {
     // if this component has a section prop defined, this will return
     // {misc: [], [this.section]: <this sections variables>[]}
     sectionedVariableDefinitions() {
-      const out = { misc: [] };
+      const out = { };
+
 
       this.variableDefinitions.forEach((spec) => {
-        const section = spec?.metadata?.annotations?.[ANNOTATIONS.SECTION];
+        const section = spec?.metadata?.annotations?.[ANNOTATIONS.SECTION] || 'misc';
 
-        if (section) {
+
           if (!out[section]) {
             out[section] = [spec];
           } else {
             out[section].push(spec);
           }
-        } else {
-          out.misc.push(spec);
-        }
+
       });
 
       return out;
@@ -173,20 +172,18 @@ export default {
       const startWith = this.isMachineScoped ? { misc: this.variableDefinitions } : this.sectionedVariableDefinitions;
 
       for (const section in startWith) {
-        const grouped = { misc: [] };
+        const grouped = { };
+
 
         startWith[section].forEach((spec) => {
-          const group = spec?.metadata?.annotations?.[ANNOTATIONS.GROUP];
+          const group = spec?.metadata?.annotations?.[ANNOTATIONS.GROUP]|| 'misc';
 
-          if (group) {
             if (!grouped[group]) {
               grouped[group] = [spec];
             } else {
               grouped[group].push(spec);
             }
-          } else {
-            grouped.misc.push(spec);
-          }
+
         });
 
         out[section] = grouped;

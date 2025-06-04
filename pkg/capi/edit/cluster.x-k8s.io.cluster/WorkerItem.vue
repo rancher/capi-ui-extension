@@ -182,11 +182,6 @@ export default {
       key.value.name = val.data;
     },
 
-    needsName(row) {
-      const definitions = this.isDeployments ? this.clusterClass.spec.workers.machineDeployments : this.clusterClass.spec.workers.machinePools;
-
-      return !(definitions || []).find((d) => d.class === row.value.class)?.namingStrategy;
-    },
   }
 };
 </script>
@@ -238,7 +233,6 @@ export default {
         </div>
 
         <div class="value row row-wi">
-          <!-- TODO nb type number -->
           <div class="col-short mr-10 mt-20 span-2">
             <LabeledInput
               :value="row.value.replicas"
@@ -268,7 +262,7 @@ export default {
               :mode="mode"
               :disabled="false"
               :label="t('capi.cluster.workers.name')"
-              :required="needsName(row)"
+              required
             />
           </div>
         </div>

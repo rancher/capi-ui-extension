@@ -151,8 +151,14 @@ export default {
       //   class:     '',
       //   variables: { overrides: [] }
       // },
-      // TODO nb rename/make each validator work the same
       variablesReady:            true,
+      variableSectionReady: {
+        general:      true,
+        controlPlane: true,
+        networking:   true,
+        misc:         true,
+        workers:      true
+      },
       clusterClassObj:           null,
       loading:                   true,
       k3sVersions:               [],
@@ -214,6 +220,7 @@ export default {
 
       return true;
     },
+
     machinePoolsValid() {
       if (this.value?.spec?.topology?.workers?.machinePools && this.value?.spec?.topology?.workers?.machinePools.length > 0) {
         for (const pool of this.value?.spec?.topology?.workers?.machinePools) {
@@ -226,13 +233,16 @@ export default {
       return true;
     },
 
+    variablesValid() {
+      return !Object.values(this.variableSectionReady).includes(false);
+    },
+
     stepConfigurationRequires() {
       const workersValid = ((this.value?.spec?.topology?.workers?.machinePools && this.value?.spec?.topology?.workers?.machinePools.length > 0) ||
          (this.value?.spec?.topology?.workers?.machineDeployments && this.value?.spec?.topology?.workers?.machineDeployments.length > 0)) &&
          this.machineDeploymentsValid && this.machinePoolsValid;
 
-      // TODO nb test variable validation as part of step 2
-      return this.fvFormIsValid & workersValid && this.variablesReady ;
+      return this.fvFormIsValid & workersValid && this.variablesValid ;
     },
     clusterIsAlreadyCreated() {
       return this.mode === _EDIT;
@@ -411,7 +421,6 @@ export default {
       }
     },
 
-    // TODO nb add something similar to queueUpdate in list components
     setVariables(vars, names) {
       const removed = (this.value.spec.topology.variables || []).filter((v) => !names.includes(v.name));
 
@@ -610,7 +619,7 @@ export default {
           :section="formSections.GENERAL"
           :cluster-class="clusterClassObj"
           @update-variables="setVariables"
-          @validation-passed="e => variablesReady = e"
+          @validation-passed="e => variableSectionReady.general = e"
         />
       </Accordion>
 
@@ -654,7 +663,7 @@ export default {
           :section="formSections.CONTROL_PLANE"
           :cluster-class="clusterClassObj"
           @update-variables="setVariables"
-          @validation-passed="e => variablesReady = e"
+          @validation-passed="e => variableSectionReady.controlPlane = e"
         />
       </Accordion>
 
@@ -693,7 +702,8 @@ export default {
           :value="value.spec.topology.variables"
           :cluster-class="clusterClassObj"
           :section="formSections.NETWORKING"
-          @validation-passed="e => variablesReady = e"
+          @validation-passed="e => variableSectionReady.networking = e"
+
           @update-variables="setVariables"
         />
       </Accordion>
@@ -707,7 +717,7 @@ export default {
         :cluster-class="clusterClassObj"
         @update-variables="setVariables"
 
-        @validation-passed="e => variablesReady = e"
+        @validation-passed="e => variableSectionReady.misc = e"
       />
 
       <!-- <hr /> -->
@@ -724,7 +734,7 @@ export default {
             :section="formSections.WORKERS"
             :cluster-class="clusterClassObj"
             @update-variables="setVariables"
-            @validation-passed="e => variablesReady = e"
+            @validation-passed="e => variableSectionReady.workers = e"
           />
           <div class="span-12">
             <div
@@ -790,6 +800,10 @@ export default {
 }
 .version {
     width: 65%
+}
+
+:deep(.accordion-container){
+  border-radius: 5px;
 }
 
 @media screen and (max-width: 1000px) {
