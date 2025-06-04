@@ -11,11 +11,7 @@ export default {
       type:     String,
       required: true
     },
-    // TODO nb handle not namespaced
-    namespaced: {
-      type:    Boolean,
-      default: true
-    },
+
     label: {
       type:    String,
       default: null
@@ -43,6 +39,7 @@ export default {
   components: { LabeledSelect },
 
   data() {
+    const [namespace = '', name = ''] = (this.value|| '').split('/')
     return {
       namespace: '',
       // spinner on resource input when querying by ns
@@ -52,23 +49,28 @@ export default {
   },
 
   watch: {
-    namespace(neu) {
+    namespace(neu, old) {
       if (neu) {
-        console.log('ns set to ', neu);
+        if(old){
+          this.$emit('update:value', '')
+        }
         // check if ns from list or user entered value
         if (this.namespaces.find((n) => n.id === neu)) {
-          this.fetchNamespacedResource(neu);
+          this.fetchResource(neu);
         }
       }
     },
   },
 
   methods: {
-    async fetchNamespacedResource(ns) {
+    async fetchResource(ns) {
       this.loading = true;
-
+      const opt = {}
+      if(this.namespaced){
+        opt.namespaced = ns
+      }
       try {
-        this.resource = await this.$store.dispatch('management/findAll', { type: this.resourceType, opt: { namespaced: ns } });
+        this.resource = await this.$store.dispatch('management/findAll', { type: this.resourceType, opt});
       } catch (err) {
         console.error(err);
       }
@@ -77,7 +79,13 @@ export default {
   },
 
   computed: {
-    ...mapGetters({ all: 'management/all', matching: 'management/matching' }),
+    ...mapGetters({ all: 'management/all', schemaFor: 'management/schemaFor' }),
+
+    namespaced(){
+      const schema = this.schemaFor(this.resourceType)
+
+      return !!schema
+    },
 
     namespaces() {
       return this.all('namespace');
@@ -103,6 +111,8 @@ export default {
         option-label="id"
         :options="namespaces || []"
         @selecting="e=>namespace=e.id"
+        searchable
+        taggable
       />
     </div>
     <div class="col span-6">
@@ -113,6 +123,7 @@ export default {
         :options="resourceNames || []"
         :mode="mode"
         taggable
+        searchable
         @selecting="e=>$emit('update:value', e)"
       />
     </div>

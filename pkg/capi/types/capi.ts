@@ -13,8 +13,7 @@ export const ANNOTATIONS = {
   HIGHLIGHT:    'turtles-capi.cattle.io/highlight', // show description more prominently and with info, warning, or error icon + colors
   LABEL:        'turtles-capi.cattle.io/label', // human-readable label
 
-  TOGGLED_BY:   'turtles-capi.cattle.io/toggled-by', // gate visibility on a boolean var - template responsible for grouping
-  TOGGLE_GROUP: 'turtles-capi.cattle.io/toggle-group', // use a boolean to toggle the visibility of a sub-section
+  TOGGLED_BY: 'turtles-capi.cattle.io/toggled-by', // gate visibility on a boolean var - template responsible for grouping
 
   SEARCH_TYPE: 'turtles-capi.cattle.io/type' // k8s resource type to search for and populate labeledselect w/
 
