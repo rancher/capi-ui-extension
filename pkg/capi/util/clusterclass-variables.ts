@@ -30,6 +30,19 @@ export const VARIABLE_INPUT_NAMES = {
 export const isToggle = (variable, all) => {
   return !!(all || []).filter((v) => (v?.metadata?.annotations?.[ANNOTATIONS.TOGGLED_BY] || '').split(',').map((n) => n.replace(' ', '')).includes(variable.name)).length || variable.name.includes('toggle');
 };
+
+// in addition to having a resource type annotation variables need to be an object with name and optionally namespace keys to use the ResourceVariable component
+const isResourceVariable = (variable)=>{
+   const schema = variable?.schema?.openAPIV3Schema || {};
+  let { type, properties = {} } = schema;
+
+  if(!variable?.metadata?.annotations?.[ANNOTATIONS.SEARCH_TYPE]){
+    return false
+  }
+
+  return properties?.name && properties?.name?.type === 'string' && !Object.keys(properties).find(p=>p !== 'name' && p!=='namespace')
+}
+
 /**
  * Accepts a clusterclass variable schema and determines which input component would best represent that variable
  * The 'name' field of the output is used by the component containing all variable inputs, to position inputs dependent on their type
@@ -53,7 +66,12 @@ export const componentForType = (variable, all) => {
   } else {
     switch (type) {
     case 'object':
-      out = { component: YamlEditor, name: VARIABLE_INPUT_NAMES.YAML };
+      if(isResourceVariable(variable)){
+        out = { component: ResourceVariable, name: VARIABLE_INPUT_NAMES.SEARCH_TYPE };
+
+      } else {
+        out = { component: YamlEditor, name: VARIABLE_INPUT_NAMES.YAML };
+      }
       break;
     case 'map':
       if (schema.additionalProperties.properties) {
@@ -70,11 +88,12 @@ export const componentForType = (variable, all) => {
       }
       break;
     case 'string':
-      if (variable?.metadata?.annotations?.[ANNOTATIONS.SEARCH_TYPE]) {
-        out = { component: ResourceVariable, name: VARIABLE_INPUT_NAMES.SEARCH_TYPE };
-      } else {
-        out = { component: LabeledInput, name: VARIABLE_INPUT_NAMES.TEXT };
-      }
+      // if (variable?.metadata?.annotations?.[ANNOTATIONS.SEARCH_TYPE]) {
+      //   out = { component: ResourceVariable, name: VARIABLE_INPUT_NAMES.SEARCH_TYPE };
+      // } else {
+      //   out = { component: LabeledInput, name: VARIABLE_INPUT_NAMES.TEXT };
+      // }
+      out = { component: LabeledInput, name: VARIABLE_INPUT_NAMES.TEXT };
       break;
     case 'integer':
       out = { component: LabeledInput, name: VARIABLE_INPUT_NAMES.TEXT };

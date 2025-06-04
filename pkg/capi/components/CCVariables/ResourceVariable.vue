@@ -16,10 +16,14 @@ export default {
       type:    String,
       default: null
     },
-    // resource id
+    //
     value: {
-      type:    String,
-      default: ''
+      type:    Object,
+      default: ()=>{
+        return {
+          name: ''
+        }
+      }
     },
     // validation rules
     // will be passed directly to a labeledselect w/ resource ID as value
@@ -39,27 +43,11 @@ export default {
   components: { LabeledSelect },
 
   data() {
-    const [namespace = '', name = ''] = (this.value|| '').split('/')
     return {
-      namespace: '',
       // spinner on resource input when querying by ns
       loading:   false,
       resource:  []
     };
-  },
-
-  watch: {
-    namespace(neu, old) {
-      if (neu) {
-        if(old){
-          this.$emit('update:value', '')
-        }
-        // check if ns from list or user entered value
-        if (this.namespaces.find((n) => n.id === neu)) {
-          this.fetchResource(neu);
-        }
-      }
-    },
   },
 
   methods: {
@@ -75,12 +63,23 @@ export default {
         console.error(err);
       }
       this.loading = false;
-    }
+      
+    },
+
+    update(name=''){
+      let out = {name}
+      if(this.namespaced){
+        out.namespace = this.namespace
+      }
+
+      this.$emit('update:value', out)
+    },
   },
 
   computed: {
     ...mapGetters({ all: 'management/all', schemaFor: 'management/schemaFor' }),
 
+    // TODO nb actually check if namespaced
     namespaced(){
       const schema = this.schemaFor(this.resourceType)
 
@@ -93,7 +92,38 @@ export default {
 
     resourceNames() {
       return this.resource.map((r) => r?.metadata?.name || r.id);
-    }
+    },
+
+    name: {
+      get(){
+        return this.value?.name || ''
+      },
+      set(neu){
+        let out = {name: neu}
+        if(this.namespaced){
+          debugger
+          out.namespace = this.namespace
+        }
+
+        this.$emit('update:value', out)
+      }
+    },
+
+    namespace: {
+      get(){
+        return this.value?.namespace || ''
+      },
+      set(neu){
+
+        let out = {namespace: neu, name: this.name}
+        
+        this.$emit('update:value', out)
+        // check if ns from list or user entered value
+        if (this.namespaces.find((n) => n.id === neu)) {
+          this.fetchResource(neu);
+        }
+      }
+    },
   }
 };
 </script>
@@ -117,14 +147,14 @@ export default {
     </div>
     <div class="col span-6">
       <LabeledSelect
-        :value="value"
+        :value="name"
         :loading="loading"
         label="Name"
         :options="resourceNames || []"
         :mode="mode"
         taggable
         searchable
-        @selecting="e=>$emit('update:value', e)"
+        @selecting="e=>name=e"
       />
     </div>
   </div>
