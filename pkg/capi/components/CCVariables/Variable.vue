@@ -328,7 +328,7 @@ export default {
           :on-label="label"
           :placeholder="placeholder"
           :tooltip="!variable?.metadata?.annotations?.['turtles-capi.cattle.io/highlight'] ? schema.description : ''"
-          :required="variable.required && !isMachineScoped"
+          :required="variable.required && !isMachineScoped && !highlighted"
           :title="variable.name"
           :options="variableOptions"
           :rules="!isListComponent ? validationRules : []"
