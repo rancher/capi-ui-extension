@@ -168,7 +168,6 @@ export default {
 
     // use variable metadata to add vars to groups
     // if machine scoped, ignore sections
-    // TODO nb perhaps a less silly way of keeping ungrouped at the end
     groupedVariableDefinitions() {
       const out = { };
       const startWith = this.isMachineScoped ? { misc: this.variableDefinitions } : this.sectionedVariableDefinitions;

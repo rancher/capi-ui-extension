@@ -11,7 +11,7 @@ export default {
       type:     String,
       required: true
     },
-    // TODO nb is this on schema?
+    // TODO nb handle not namespaced
     namespaced: {
       type:    Boolean,
       default: true
@@ -42,16 +42,6 @@ export default {
 
   components: { LabeledSelect },
 
-  //   created() {
-  //     try {
-  //       this.$store.dispatch('management/findAll', { type: this.resourceType }).then((res) => {
-  //         this.resource = res;
-  //       });
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   },
-
   data() {
     return {
       namespace: '',
@@ -67,7 +57,6 @@ export default {
         console.log('ns set to ', neu);
         // check if ns from list or user entered value
         if (this.namespaces.find((n) => n.id === neu)) {
-        //   this.fetchResource();
           this.fetchNamespacedResource(neu);
         }
       }
