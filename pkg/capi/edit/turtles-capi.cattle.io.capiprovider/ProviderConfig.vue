@@ -113,7 +113,8 @@ export default {
       allNamespaces:         [],
       credentialComponent:     providerDetails?.credential,
       useCredential:       !!providerDetails?.credentialRequired || (this.mode === _EDIT && !!this.value?.spec?.credentials?.rancherCloudCredentialNamespaceName),
-      credentialRequired:  providerDetails?.credentialRequired
+      credentialRequired:  providerDetails?.credentialRequired,
+      defaultNamespace:        providerDetails?.ns
     };
   },
 
@@ -188,6 +189,7 @@ export default {
           set(this.value, 'spec', { ...clone(defaultSpec), ...defaultsFromCoreProvider });
           set(this.value.spec, 'type', this.category);
           set(this.value.metadata, 'name', this.provider);
+          set(this.value.metadata, 'namespace', this.defaultNamespace);
         } else {
           set(this.value, 'spec', { ...clone(customProviderSpec), ...defaultsFromCoreProvider });
         }
@@ -246,6 +248,18 @@ export default {
       if ( this.errors ) {
         clear(this.errors);
       }
+
+      if ( this.$refs.providercruresource) {
+        try {
+          await this.$refs.providercruresource.createNamespaceIfNeeded();
+        } catch (err) {
+        // After the attempt to create the namespace,
+        // show any applicable errors if the namespace is
+        // invalid.
+          this.errors.push(err.message);
+          btnCb(false);
+        }
+      }
       if ( !this.useCredential && !this.value.spec?.credentials?.rancherCloudCredentialNamespaceName ) {
         this.value.spec.credentials = null;
       }
@@ -300,6 +314,7 @@ export default {
         :namespaced="true"
         :namespace-options="allNamespaces"
         :namespace-new-allowed="true"
+        :create-namespace-override="true"
         :name-required="false"
         name-label="capi.provider.name.label"
         name-placeholder="capi.provider.name.placeholder"
@@ -371,6 +386,7 @@ export default {
         :namespaced="true"
         :namespace-options="allNamespaces"
         :namespace-new-allowed="true"
+        :create-namespace-override="true"
         :name-hidden="true"
         name-label="capi.provider.name.label"
         name-placeholder="capi.provider.name.placeholder"

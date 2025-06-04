@@ -1,4 +1,5 @@
 <script>
+import { mapGetters, mapActions } from 'vuex';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import CruResource from '@shell/components/CruResource.vue';
 import SelectIconGrid from '@shell/components/SelectIconGrid.vue';
@@ -46,6 +47,7 @@ export default {
       default: 'capi-provider-create'
     }
   },
+
   async beforeMount() {
     this.capiProviders = await this.$store.dispatch('management/findAll', { type: CAPI.PROVIDER });
     const name = this.value.spec?.name || this.value.metadata?.name;
@@ -59,12 +61,29 @@ export default {
       this.selectType(name);
     }
   },
+  mounted() {
+    console.log('trrr');
+    this.$nextTick(() => {
+      console.log('frrr');
+      this.$store.dispatch('cru-resource/setCreateNamespace', true);
+      // this.$refs.providercruresource.createNamespace = true;
+    });
+  },
+  updated() {
+    console.log('yaaa');
+    this.$nextTick(() => {
+      console.log('woooo');
+      this.$store.dispatch('cru-resource/setCreateNamespace', true);
+      // this.$refs.providercruresource.createNamespace = true;
+    });
+  },
 
   data() {
     return { subType: null, capiProviders: [] };
   },
 
   computed: {
+    ...mapActions('cru-resource', ['setCreateNamespace']),
     subTypes() {
       const out = [];
       const getters = this.$store.getters;
@@ -135,7 +154,8 @@ export default {
 
     enabledProviderTypes() {
       return this.capiProviders.reduce((existing, p) => {
-        const { name, type } = p?.spec || p?.metadata || {};
+        const name = !!p?.spec?.name ? p.spec.name : p?.metadata?.name;
+        const type = p?.spec?.type;
         const id = this.makeProviderId(name, type);
 
         if (!existing.includes(id) && name !== CUSTOM) {
@@ -164,8 +184,12 @@ export default {
       this.subType = name;
       this.category = category;
 
-      this.$emit('set-subtype', this.$store.getters['i18n/withFallback'](`capi.provider.providerDisplayNames."${ name }"`, null, name));
+      this.$emit('set-subtype', this.$store.getters['i18n/withFallback'](`cluster.provider."${ name }"`, null, name));
     },
+    cruResourceMounted() {
+      this.$store.dispatch('cru-resource/setCreateNamespace', true);
+    //   this.$refs.providercruresource.createNamespace = true;
+    }
   },
 };
 </script>
@@ -181,6 +205,7 @@ export default {
     :cancel-event="true"
     :prevent-enter-submit="true"
     class="create-cluster"
+    @create-namespace-changed="cruResourceMounted"
     @finish="save"
     @cancel="done"
     @select-type="selectType"
