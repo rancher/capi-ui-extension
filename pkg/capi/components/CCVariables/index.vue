@@ -406,7 +406,7 @@ export default {
           v-for="(group, label) in s"
           :key="label"
         >
-          <div
+          <GroupPanel
             v-if="label !== 'misc'"
             class="ccvariable-group-panel"
             :label="label"
@@ -436,7 +436,7 @@ export default {
                 />
               </template>
             </div>
-          </div>
+          </GroupPanel>
           <div
             v-else
             class="variables-group"
@@ -490,7 +490,7 @@ export default {
             v-for="(group, label) in s"
             :key="label"
           >
-            <div
+            <GroupPanel
               v-if="label !== 'misc'"
               class="ccvariable-group-panel"
               :label="label"
@@ -521,7 +521,7 @@ export default {
                   />
                 </template>
               </div>
-            </div>
+            </GroupPanel>
             <div
               v-else
               class="variables-group"
@@ -574,9 +574,17 @@ $group-indent: 5%;
 
 .ccvariable-group-panel {
   // margin: 0px 0px 0px $group-indent;
-  margin: 0px 0px 20px 0px;
+  margin: 0px 0px 20px 20px;
 
   // border-top: 1px solid var(--border);
+  &>*:deep(){
+    padding-right: 0px;
+  }
+
+  :deep(.group-panel-title){
+    // h3 font size
+    font-size: 18px;
+  }
 }
 
 .machine-group {

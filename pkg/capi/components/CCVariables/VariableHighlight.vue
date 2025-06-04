@@ -249,7 +249,7 @@ $header-height: 3em;  // position info text below header
 
         .right-container {
             padding-right: 3px;
-            border-right: 3px solid var(--info);
+            border-right: 1px solid var(--info);
             background-image: linear-gradient(to left, var(--info-banner-bg), var(--body-bg));
             transition:    background-image linear-gradient(to left, var(--info-banner-bg), var(--body-bg)) 1s;
         }
@@ -259,40 +259,12 @@ $header-height: 3em;  // position info text below header
 
         .right-container {
             padding-right: 3px;
-            border-right: 3px solid var(--warning);
+            border-right: 1px solid var(--warning);
             background-image: linear-gradient(to left, var(--warning-banner-bg), var(--body-bg));
             transition:    background-image linear-gradient(to left, var(--warning-banner-bg), var(--body-bg)) 1s;
         }
     }
 
-    // //coloration when open
-    // .open {
-    //     &.info {
-    //         & .highlight{
-    //             // background-image: linear-gradient(var(--info-banner-bg), var(--body-bg));
-    //         //  transition:    background-image linear-gradient(var(--info-banner-bg), var(--body-bg)) 1s;
-    //             transition: opacity $animate-duration ease-in;
-    //             // border-color:  var(--info);
-    //             border-image-slice: 100% 0%;
-    //         }
-
-    //          i {
-    //             color: var(--info);
-    //         }
-    //     }
-
-    //     &.warning {
-    //             & .highlight{
-    //                 // background-image: linear-gradient(var(--warning-banner-bg), var(--body-bg));
-    //                 // border-color:  var(--warning);
-    //                 border-image-slice: 100% 0%;
-    //             }
-
-    //         .highlight .icon {
-    //             color: var(--warning);
-    //         }
-    //     }
-    // }
 
 }
 </style>
