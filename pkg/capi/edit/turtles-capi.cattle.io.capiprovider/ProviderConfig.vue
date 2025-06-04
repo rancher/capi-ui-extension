@@ -446,7 +446,7 @@ export default {
           :mode="mode"
           :provider="credentialComponent"
           :cancel="cancelCredential"
-          :showing-form="!credentialRequired"
+          :showing-form="false"
           class="credential"
           @update:value="$emit('update:value', {k: 'spec.credentials.rancherCloudCredentialNamespaceName', val: $event})"
         />
@@ -456,7 +456,7 @@ export default {
       v-if="waitingForCredential && useCredential"
       #form-footer
     >
-      <div><!-- Hide the outer footer --></div>
+      <div></div>
     </template>
   </CruResource>
 </template>
