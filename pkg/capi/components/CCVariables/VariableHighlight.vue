@@ -115,12 +115,7 @@ export default {
         </slot>
       </div> -->
         <h4 class="name">
-          <i
-            class="icon"
-            :class="{['icon-question-mark']: highlightColor === 'info', ['icon-warning']: highlightColor === 'warning',['icon-error']: highlightColor === 'error',}"
-            @click="toggleOpen(!open)"
-          >
-          </i>
+
           {{ displayName }}  <span
             v-if="required"
             class="text-error"
@@ -131,6 +126,13 @@ export default {
           class="type"
         > {{ searchType }}</label>
         <Label v-else />
+          <i
+          v-if="highlightColor === 'warning' || highlightColor === 'error'"
+            class="icon"
+            :class="{['icon-question-mark']: highlightColor === 'info', ['icon-warning']: highlightColor === 'warning',['icon-error']: highlightColor === 'error',}"
+            @click="toggleOpen(!open)"
+          >
+          </i>
       </div>
       <div class="var-input">
         <slot
@@ -146,12 +148,12 @@ export default {
           class="highlight"
         >
           {{ highlight }}
-          <i
+          <!-- <i
             class="icon"
             :class="{['icon-question-mark']: highlightColor === 'info', ['icon-warning']: highlightColor === 'warning',['icon-error']: highlightColor === 'error',}"
             @click="!isToggle ? toggleOpen : ()=>{}"
           >
-          </i>
+          </i> -->
         </div>
       </Transition>
     </div>
@@ -180,13 +182,14 @@ $header-height: 3em;  // position info text below header
     display:flex;
     justify-content: space-between;
 
-    .fade-enter-active, .fade-leave-active {
-        transition: opacity $animate-duration ease;
+    //TODO nb  why does this not fire when toggle group is shown?
+    // .fade-enter-active, .fade-leave-active {
+    //     transition: opacity $animate-duration ease;
 
-    }
-    .fade-enter-from, .fade-leave-to {
-        opacity: 0;
-    }
+    // }
+    // .fade-enter-from, .fade-leave-to {
+    //     opacity: 0;
+    // }
 
     .left-container {
         flex-basis: $left-basis;
@@ -249,9 +252,9 @@ $header-height: 3em;  // position info text below header
 
         .right-container {
             padding-right: 3px;
-            border-right: 1px solid var(--info);
-            background-image: linear-gradient(to left, var(--info-banner-bg), var(--body-bg));
-            transition:    background-image linear-gradient(to left, var(--info-banner-bg), var(--body-bg)) 1s;
+            // border-right: 1px solid var(--info);
+            // background-image: linear-gradient(to left, var(--info-banner-bg), var(--body-bg));
+            // transition:    background-image linear-gradient(to left, var(--info-banner-bg), var(--body-bg)) 1s;
         }
     }
 
@@ -261,7 +264,7 @@ $header-height: 3em;  // position info text below header
             padding-right: 3px;
             border-right: 1px solid var(--warning);
             background-image: linear-gradient(to left, var(--warning-banner-bg), var(--body-bg));
-            transition:    background-image linear-gradient(to left, var(--warning-banner-bg), var(--body-bg)) 1s;
+            // transition:    background-image linear-gradient(to left, var(--warning-banner-bg), var(--body-bg)) 1s;
         }
     }
 
