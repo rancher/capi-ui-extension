@@ -16,7 +16,6 @@ export function init($plugin: any, store: any) {
   virtualType({
     label:       'CAPI Turtles',
     icon:        'gear',
-    svg:          require('../assets/images/icon.svg'),
     name:        'capi-dashboard',
     namespaced:  false,
     weight:      99,
