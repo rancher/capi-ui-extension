@@ -162,13 +162,7 @@ capi:
       vsphere: vSphere
       kubeadm: Kubeadm
       rke2: RKE2
-
-asyncButton:
-  saveGitRepo:
-    action: Save GitRepo
-    waiting: Saving...
-    success: Saved
-
+  # used in cluster creation when a variable name exactly matches one of these keys   
   variables:
     # azure variables
     azureClusterIdentityName: Azure Cluster Identity Name
@@ -197,6 +191,14 @@ asyncButton:
     rkeBootnodeAnnotations: Node Annotations
     rkeBootnodeLabels: Node Labels
     rkeBootnodeTaints: Node Taints
+
+asyncButton:
+  saveGitRepo:
+    action: Save GitRepo
+    waiting: Saving...
+    success: Saved
+
+
 
 
 nav:

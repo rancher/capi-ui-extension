@@ -20,7 +20,7 @@ import ControlPlaneSection from './ControlPlaneSection.vue';
 import { mapGetters } from 'vuex';
 import { LABELS, CAPI } from '../../types/capi';
 import Loading from '@shell/components/Loading.vue';
-import { NAMESPACE } from '@shell/config/types';
+import { NAMESPACE,  FLEET } from '@shell/config/types';
 import Accordion from '@components/Accordion/Accordion.vue';
 
 const defaultTopologyConfig = {
@@ -173,7 +173,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters({ t: 'i18n/t' }),
+    ...mapGetters({ t: 'i18n/t', schemaFor: 'management/schemaFor' }),
     fvExtraRules() {
       return {
         version:   versionValidator(this.t, this.clusterClassControlPlane),
@@ -312,9 +312,9 @@ export default {
       }
     },
 
-    // TODO nb not this
     canCreateGitRepos() {
-      return true;
+      const  gitRepoSchema = this.schemaFor(FLEET.GIT_REPO)
+      return gitRepoSchema  && gitRepoSchema?.collectionMethods.find((x) => x.toLowerCase() === 'post') ;
     },
 
     isk3s() {

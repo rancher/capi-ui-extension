@@ -85,11 +85,10 @@ export default {
   computed: {
     ...mapGetters({ all: 'management/all', schemaFor: 'management/schemaFor' }),
 
-    // TODO nb actually check if namespaced
     namespaced(){
       const schema = this.schemaFor(this.resourceType)
 
-      return !!schema
+      return !!schema && schema?.attributes?.namespaced
     },
 
     namespaces() {
