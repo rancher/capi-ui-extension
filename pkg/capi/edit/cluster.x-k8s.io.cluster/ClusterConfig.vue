@@ -598,6 +598,8 @@ export default {
               :value="value.spec.topology.version"
               label-key="cluster.kubernetesVersion.label"
               required
+              searchable
+              taggable
               :rules="fvGetAndReportPathRules('spec.topology.version')"
               :options="versionOptions"
               @selecting="$emit('update:value', {k: 'spec.topology.version', val: $event})"
