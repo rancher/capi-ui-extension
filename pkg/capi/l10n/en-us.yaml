@@ -171,10 +171,8 @@ asyncButton:
 
   # TODO nb docs
   variables:
+    # azure variables
     azureClusterIdentityName: Azure Cluster Identity Name
-    enableETCDBackup: Enable Automatic ETCD Backups
-    etcdBackupRetention: Retention Count
-    etcdBackupScheduleCron: Cron Schedule
     imageGallery: Image Gallery
     imageName: Image Name
     location: Location
@@ -183,6 +181,23 @@ asyncButton:
     resourceGroup: Resource Group
     subscriptionID: Subscription ID
     vmSize: Virtual Machine Size
+    # RKE2 cp variables
+    enableETCDBackup: Enable Automatic ETCD Backups
+    etcdBackupretention: Retention Count
+    etcdBackupscheduleChron: Backup Cron Schedule
+    etcdBackupsnapshotName: Snapshot Name
+    etcdBackupdirectory: Backup Directory Name
+    etcdS3endpoint: S3 Endpoint
+    ectdS3endpointCASecret: CA Secret
+    etcdS3s3CredentialSecret: S3 Credential Secret
+    etcdS3region: S3 AWS Region
+    etcdS3bucket: Bucket
+    etcdS3folder: Folder
+    # RKE2 bootstrap variables
+    rkeBootnodeAnnotations: Node Annotations
+    rkeBootnodeLabels: Node Labels
+    rkeBootnodeTaints: Node Taints
+
 
 
 

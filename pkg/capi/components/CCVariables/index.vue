@@ -330,10 +330,8 @@ export default {
       const varRef = this.$refs[`${ variableDef.name }-input`]?.[0];
 
       if (varRef) {
-        console.log('*** checking ref visibility...');
 
         if (varRef.toggled === false) {
-          console.log('*** ref not visible; skipping line break');
 
           return;
         }
@@ -575,6 +573,7 @@ $max-width-2: calc($widest-input - $group-indent-2);
   
   :deep(.group-panel){
     padding-top: 20px;
+    padding-right: 0px;
   }
 
   :deep(.group-panel-title){

@@ -94,7 +94,7 @@ export default {
     },
 
     displayName() {
-      return this.$store.getters['i18n/withFallback'](`capi.variableDefs.${ this.variableDef.name }`, null, this.variableDef.name);
+      return this.$store.getters['i18n/withFallback'](`capi.variables.${ this.variableDef.name }`, null, this.variableDef.name);
     },
 
     required() {

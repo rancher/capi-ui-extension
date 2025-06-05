@@ -364,8 +364,9 @@ export default {
           :resource-type="resourceType"
           @update:value="e=>setValue(e, toggleOpen)"
         >
-          <template #title>
-            <div class="input-label">
+          <template  #title>
+            <div v-if="highlighted"><span/></div>
+            <div v-else class="input-label">
               <span>{{ variable.name }}
                 <i
                   v-if="schema.description"
