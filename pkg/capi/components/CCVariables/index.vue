@@ -60,7 +60,12 @@ export default {
     willOpen: {
       type:    Boolean,
       default: true
-    }
+    },
+
+    clusterNamespace: {
+      type: String,
+      default : ''
+    },
   },
 
   data() {
@@ -414,6 +419,7 @@ export default {
                   :is-machine-scoped="isMachineScoped"
                   :global-variables="globalVariables"
                   :validate-required="!machineDeploymentClass && !machinePoolClass"
+                  :cluster-namespace="clusterNamespace"
                   @update:value="e=>updateVariables(e, variableDef)"
                   @validation-passed="updateErrors"
                 />
@@ -444,6 +450,7 @@ export default {
                 :value="valueFor(variableDef)"
                 :validate-required="!isMachineScoped"
                 :is-machine-scoped="isMachineScoped"
+                :cluster-namespace="clusterNamespace"
                 @update:value="e=>updateVariables(e, variableDef)"
                 @validation-passed="updateErrors"
               />
@@ -499,6 +506,7 @@ export default {
                     :is-machine-scoped="isMachineScoped"
                     :global-variables="globalVariables"
                     :validate-required="!machineDeploymentClass && !machinePoolClass"
+                    :cluster-namespace="clusterNamespace"
                     @update:value="e=>updateVariables(e, variableDef)"
                     @validation-passed="updateErrors"
                   />
@@ -529,6 +537,7 @@ export default {
                   :value="valueFor(variableDef)"
                   :validate-required="!isMachineScoped"
                   :is-machine-scoped="isMachineScoped"
+                  :cluster-namespace="clusterNamespace"
                   @update:value="e=>updateVariables(e, variableDef)"
                   @validation-passed="updateErrors"
                 />

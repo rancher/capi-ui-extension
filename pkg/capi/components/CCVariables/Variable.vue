@@ -61,7 +61,12 @@ export default {
     allDefinitions: {
       type:    Array,
       default: () => []
-    }
+    },
+
+    clusterNamespace: {
+      type: String,
+      default : ''
+    },
 
   },
 
@@ -362,6 +367,8 @@ export default {
           :type="schema.type === 'number' || schema.type === 'integer' ? 'number' : 'text'"
           :as-map="true"
           :resource-type="resourceType"
+                  :cluster-namespace="clusterNamespace"
+
           @update:value="e=>setValue(e, toggleOpen)"
         >
           <template  #title>

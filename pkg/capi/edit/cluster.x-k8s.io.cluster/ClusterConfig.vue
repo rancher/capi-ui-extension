@@ -620,6 +620,8 @@ export default {
           :value="value.spec.topology.variables"
           :section="formSections.GENERAL"
           :cluster-class="clusterClassObj"
+          :cluster-namespace="value.metadata?.namespace"
+
           @update-variables="setVariables"
           @validation-passed="e => variableSectionReady.general = e"
         />
@@ -664,6 +666,8 @@ export default {
           :value="value.spec.topology.variables"
           :section="formSections.CONTROL_PLANE"
           :cluster-class="clusterClassObj"
+          :cluster-namespace="value.metadata?.namespace"
+
           @update-variables="setVariables"
           @validation-passed="e => variableSectionReady.controlPlane = e"
         />
@@ -704,6 +708,7 @@ export default {
           :value="value.spec.topology.variables"
           :cluster-class="clusterClassObj"
           :section="formSections.NETWORKING"
+          :cluster-namespace="value.metadata?.namespace"
           @validation-passed="e => variableSectionReady.networking = e"
 
           @update-variables="setVariables"
@@ -717,6 +722,7 @@ export default {
       <ClusterClassVariables
         :value="value.spec.topology.variables"
         :cluster-class="clusterClassObj"
+          :cluster-namespace="value.metadata?.namespace"
         @update-variables="setVariables"
 
         @validation-passed="e => variableSectionReady.misc = e"
@@ -735,6 +741,8 @@ export default {
             :value="value.spec.topology.variables"
             :section="formSections.WORKERS"
             :cluster-class="clusterClassObj"
+          :cluster-namespace="value.metadata?.namespace"
+
             @update-variables="setVariables"
             @validation-passed="e => variableSectionReady.workers = e"
           />

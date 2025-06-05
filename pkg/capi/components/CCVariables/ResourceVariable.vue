@@ -36,6 +36,12 @@ export default {
       type:    String,
       default: 'create'
     },
+
+    // if it exists already, default to the cluster's namespace in the namespace dropdown
+    clusterNamespace: {
+      type: String,
+      default : ''
+    },
   },
 
   emits: ['update:value', 'validationPassed'],
@@ -110,7 +116,7 @@ export default {
 
     namespace: {
       get(){
-        return this.value?.namespace || ''
+        return this.value?.namespace || this.clusterNamespace || ''
       },
       set(neu){
 
