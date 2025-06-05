@@ -225,9 +225,7 @@ export default {
     clusterIsAlreadyCreated() {
       return this.mode === _EDIT;
     },
-    topology() {
-      return this.value?.spec?.topology;
-    },
+
 
     controlPlane: {
       get() {
