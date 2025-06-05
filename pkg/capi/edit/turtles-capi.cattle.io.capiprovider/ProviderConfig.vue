@@ -112,7 +112,7 @@ export default {
       ],
       allNamespaces:         [],
       credentialComponent:     providerDetails?.credential,
-      useCredential:       !!providerDetails?.credentialRequired,
+      useCredential:       !!providerDetails?.credentialRequired || (this.mode === _EDIT && !!this.value?.spec?.credentials?.rancherCloudCredentialNamespaceName),
       credentialRequired:  providerDetails?.credentialRequired
     };
   },
@@ -171,7 +171,7 @@ export default {
       return this.credentialComponent && !this.value.spec.credentials?.rancherCloudCredentialNamespaceName;
     },
     rancherCloudCredentialNamespaceName() {
-      return this.useCredential && this.credentialComponent && !this.value.spec?.credentials?.rancherCloudCredentialNamespaceName;
+      return this.value.spec?.credentials?.rancherCloudCredentialNamespaceName || '';
     },
 
     providerDisplayName() {
@@ -442,7 +442,7 @@ export default {
 
       <template v-if="useCredential">
         <SelectCredential
-          v-model:value="value.spec.credentials.rancherCloudCredentialNamespaceName"
+          :value="rancherCloudCredentialNamespaceName"
           :mode="mode"
           :provider="credentialComponent"
           :cancel="cancelCredential"
