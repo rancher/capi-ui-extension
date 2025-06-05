@@ -23,6 +23,7 @@
     "@types/node": "16.4.3",
     "glob": "7.2.3"
   },
+  "icon": "./icon.svg",
   "scripts": {
     "dev": "NODE_ENV=dev ./node_modules/.bin/vue-cli-service serve",
     "build": "./node_modules/.bin/vue-cli-service build",

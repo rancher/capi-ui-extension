@@ -6,6 +6,19 @@ export const BLANK_CLUSTER = '_';
 
 export const LABELS = { AUTO_IMPORT: 'cluster-api.cattle.io/rancher-auto-import' };
 
+export const ANNOTATIONS = {
+  // clusterclass variable styling
+  GROUP:        'turtles-capi.cattle.io/group', // group in a sub-section
+  SECTION:      'turtles-capi.cattle.io/section', // add to existing top-level section or insert new one
+  HIGHLIGHT:    'turtles-capi.cattle.io/highlight', // show description more prominently and with info, warning, or error icon + colors
+  LABEL:        'turtles-capi.cattle.io/label', // human-readable label
+
+  TOGGLED_BY: 'turtles-capi.cattle.io/toggled-by', // gate visibility on a boolean var - template responsible for grouping
+
+  SEARCH_TYPE: 'turtles-capi.cattle.io/type' // k8s resource type to search for and populate labeledselect w/
+
+};
+
 export const RANCHER_TURTLES_SYSTEM_NAMESPACE = 'capi-system';
 export const RANCHER_TURTLES_SYSTEM_NAME = 'capi-env-variables';
 

@@ -102,12 +102,10 @@ export default {
         width: 100%
     }
     .col-port {
-        width: 100%;
-        min-width: 120px;
+        width: 100%
     }
     .col-host {
-        width: 200%;
-        min-width: 120px;
+        width: 200%
     }
 }
 </style>
