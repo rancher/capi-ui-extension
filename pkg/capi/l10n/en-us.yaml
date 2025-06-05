@@ -173,6 +173,7 @@ asyncButton:
   variables:
     # azure variables
     azureClusterIdentityName: Azure Cluster Identity Name
+    azureClusterIdentity: Azure Cluster Identity
     imageGallery: Image Gallery
     imageName: Image Name
     location: Location

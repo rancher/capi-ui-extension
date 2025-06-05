@@ -356,7 +356,7 @@ export default {
           :placeholder="placeholder"
           :tooltip="!variable?.metadata?.annotations?.['turtles-capi.cattle.io/highlight'] ? schema.description : ''"
           :required="variable.required && !isMachineScoped && !highlighted"
-          :title="variable.name"
+          :title="!highlighted ? withFallback(`capi.variables.${label}`, null, label) : ' '"
           :options="variableOptions"
           :rules="!isListComponent ? validationRules : []"
           :type="schema.type === 'number' || schema.type === 'integer' ? 'number' : 'text'"
@@ -367,7 +367,7 @@ export default {
           <template  #title>
             <div v-if="highlighted"><span/></div>
             <div v-else class="input-label">
-              <span>{{ variable.name }}
+              <span>{{ withFallback(`capi.variables.${label}`, null, label) || ' '}}
                 <i
                   v-if="schema.description"
                   v-clean-tooltip="schema.description"
