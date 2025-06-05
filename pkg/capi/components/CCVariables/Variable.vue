@@ -10,7 +10,7 @@ import { ANNOTATIONS } from '../../types/capi';
 import VariableHighlight from './VariableHighlight.vue';
 
 // how many indentation levels the ui will display
-const MAX_DEPTH = 3;
+const MAX_DEPTH = 2;
 
 
 export default {
@@ -96,7 +96,6 @@ export default {
     },
 
     // options may be arrays or objects - stringify them to display in labeledselect
-    // TODO nb  add a placeholder to handle none opts eg cluster class may have '' as one of the enum values
     variableOptions() {
       const opts = this.schema?.enum;
 
@@ -367,7 +366,7 @@ export default {
           :type="schema.type === 'number' || schema.type === 'integer' ? 'number' : 'text'"
           :as-map="true"
           :resource-type="resourceType"
-                  :cluster-namespace="clusterNamespace"
+          :cluster-namespace="clusterNamespace"
 
           @update:value="e=>setValue(e, toggleOpen)"
         >

@@ -117,17 +117,6 @@ export default {
       ready:          false,
       weight:         30
     };
-
-    // const stepVariables = {
-    //   name:           'stepVariables',
-    //   title:          t('capi.cluster.steps.variables.title'),
-    //   label:          t('capi.cluster.steps.variables.label'),
-    //   subtext:        '',
-    //   descriptionKey: 'capi.cluster.steps.variables.description',
-    //   ready:          true,
-    //   weight:         30
-    // };
-    // const addSteps = !!this.preselectedClass ? [stepConfiguration, stepVariables] : [stepClusterClass, stepConfiguration, stepVariables];
     const addSteps = !!this.preselectedClass ? [stepConfiguration] : [stepClusterClass, stepConfiguration];
 
     return {
@@ -146,11 +135,6 @@ export default {
       credentialId:              '',
       credential:                null,
       versionInfo:               {},
-      // defaultWorkerAddValue: {
-      //   name:      '',
-      //   class:     '',
-      //   variables: { overrides: [] }
-      // },
       variablesReady:            true,
       variableSectionReady: {
         general:      true,
@@ -186,12 +170,6 @@ export default {
 
       step.ready = !!neu;
     },
-
-    // variablesReady(neu) {
-    //   const step = this.addSteps.find((s) => s.name === 'stepVariables');
-
-    //   step.ready = !!neu;
-    // }
   },
 
   computed: {
@@ -564,18 +542,7 @@ export default {
         open-initially
         :title="t(`capi.cluster.section.${formSections.GENERAL}`)"
       >
-        <!--  <div class="icon-toggles">
-          <i
-            class="icon icon-show icon-lg"
-            :class="{'active': configHighlightOpen}"
-            @click="()=>configHighlightOpen = true"
-          />
-          <i
-            class="icon icon-hide icon-lg"
-            :class="{'active': !configHighlightOpen}"
-            @click="()=>configHighlightOpen = false"
-          />
-        </div> -->
+
         <!-- GENERAL CONFIGURATION -->
         <NameNsDescription
           v-if="!isView"
@@ -640,18 +607,7 @@ export default {
         open-initially
         :title="t(`capi.cluster.section.${formSections.CONTROL_PLANE}`)"
       >
-        <!--   <div class="icon-toggles">
-          <i
-            class="icon icon-show icon-lg"
-            :class="{'active': controlPlaneHighlightOpen}"
-            @click="()=>controlPlaneHighlightOpen = true"
-          />
-          <i
-            class="icon icon-hide icon-lg"
-            :class="{'active': !controlPlaneHighlightOpen}"
-            @click="()=>controlPlaneHighlightOpen = false"
-          />
-        </div> -->
+
         <!-- CONTROL PLANE CONFIGURATION -->
         <div class="row span-12 row-config">
           <div class="col span-6 mt-20">
@@ -686,18 +642,7 @@ export default {
         open-initially
         :title="t(`capi.cluster.section.${formSections.NETWORKING}`)"
       >
-        <!--   <div class="icon-toggles">
-          <i
-            class="icon icon-show icon-lg"
-            :class="{'active': networkingHighlightOpen}"
-            @click="()=>networkingHighlightOpen = true"
-          />
-          <i
-            class="icon icon-hide icon-lg"
-            :class="{'active': !networkingHighlightOpen}"
-            @click="()=>networkingHighlightOpen = false"
-          />
-        </div> -->
+
         <!-- NETWORKING CONFIGURATION -->
         <div class="col span-6 mt-20">
           <NetworkSection
@@ -724,9 +669,7 @@ export default {
       </Accordion>
 
       <!-- GENERIC VARIABLES -->
-      <!-- <h2>
-        <t k="capi.cluster.variables.title" />
-      </h2> -->
+
       <ClusterClassVariables
         :value="value.spec.topology.variables"
         :cluster-class="clusterClassObj"
@@ -736,7 +679,6 @@ export default {
         @validation-passed="e => variableSectionReady.misc = e"
       />
 
-      <!-- <hr /> -->
 
       <!-- WORKERS -->
       <Accordion

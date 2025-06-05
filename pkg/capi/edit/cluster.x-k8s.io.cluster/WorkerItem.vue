@@ -145,11 +145,6 @@ export default {
       }
 
       return this.$nextTick(() => {
-        const inputs = this.$refs.value;
-
-        // if ( inputs && inputs.length > 0 ) {
-        //   inputs[inputs.length - 1].focus();
-        // }
         this.$emit('add');
       });
     },
@@ -311,15 +306,8 @@ export default {
 }
 
 .box {
-    // border: 1px solid var(--border);
-
     margin: 10px 0px 10px 5%;
     padding: 0px 0px 0px 16px;
-
-    // padding-right: 3px;
-    // border-right: 3px solid var(--info);
-    // background-image: linear-gradient(to left, var(--info-banner-bg), var(--body-bg));
-    // transition:    background-image linear-gradient(to left, var(--info-banner-bg)s, var(--body-bg)) 1s;
 
   &>.remove {
     position: relative;

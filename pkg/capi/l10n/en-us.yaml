@@ -169,7 +169,6 @@ asyncButton:
     waiting: Saving...
     success: Saved
 
-  # TODO nb docs
   variables:
     # azure variables
     azureClusterIdentityName: Azure Cluster Identity Name

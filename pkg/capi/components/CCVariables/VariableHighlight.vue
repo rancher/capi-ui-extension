@@ -116,13 +116,6 @@ export default {
         v-if="!isToggle"
         class="header"
       >
-        <!-- <div class="toggle-input-container">
-        <slot
-          :toggle="e=>open=!!e"
-          name="header"
-        >
-        </slot>
-      </div> -->
         <h4 class="name">
 
           {{ displayName }}  <span
@@ -157,12 +150,6 @@ export default {
           class="highlight"
         >
           {{ highlight }}
-          <!-- <i
-            class="icon"
-            :class="{['icon-question-mark']: highlightColor === 'info', ['icon-warning']: highlightColor === 'warning',['icon-error']: highlightColor === 'error',}"
-            @click="!isToggle ? toggleOpen : ()=>{}"
-          >
-          </i> -->
         </div>
       </Transition>
     </div>
@@ -186,19 +173,9 @@ $header-height: 3em;  // position info text below header
 .ccvar-highlight-container{
     margin-top: $container-margin-top-bottom;
     padding-top: $container-top-padding;
-    // padding-right: 1em;
     position: relative;
     display:flex;
     justify-content: space-between;
-
-    //TODO nb  why does this not fire when toggle group is shown?
-    // .fade-enter-active, .fade-leave-active {
-    //     transition: opacity $animate-duration ease;
-
-    // }
-    // .fade-enter-from, .fade-leave-to {
-    //     opacity: 0;
-    // }
 
     .left-container {
         flex-basis: $left-basis;
@@ -234,8 +211,6 @@ $header-height: 3em;  // position info text below header
     .highlight {
         text-align: end;
         padding: 10px 0 2em 4em;
-        // padding-left: 4em;
-        // padding-bottom: 1em;
          i {
             display: block;
             position: absolute;
@@ -263,7 +238,6 @@ $header-height: 3em;  // position info text below header
             padding-right: 3px;
             border-right: 1px solid var(--info);
             background-image: linear-gradient(to left, var(--info-banner-bg), var(--body-bg));
-            // transition:    background-image linear-gradient(to left, var(--info-banner-bg), var(--body-bg)) 1s;
         }
     }
 
@@ -273,7 +247,6 @@ $header-height: 3em;  // position info text below header
             padding-right: 3px;
             border-right: 1px solid var(--warning);
             background-image: linear-gradient(to left, var(--warning-banner-bg), var(--body-bg));
-            // transition:    background-image linear-gradient(to left, var(--warning-banner-bg), var(--body-bg)) 1s;
         }
     }
 

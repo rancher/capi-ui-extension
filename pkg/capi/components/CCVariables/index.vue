@@ -556,29 +556,17 @@ export default {
 </template>
 
 <style lang="scss" scoped>
-// $standard-input: 23.25%;
-// $standard-input: 33%;
-
-// $wider-input: 48.25%;
 $wider-input: 50%;
-
-
-// $widest-input: 98.25%;
 $widest-input: 100%;
-
 $standard-input: $wider-input;
 
-// $group-indent: calc($standard-input/2);
 $group-indent: 5%;
-
 $group-indent-2: calc($group-indent * 2);
 $max-width-2: calc($widest-input - $group-indent-2);
 
 .ccvariable-group-panel {
-  // margin: 0px 0px 0px $group-indent;
   margin: 0px 0px 20px 20px;
 
-  // border-top: 1px solid var(--border);
   
   :deep(.group-panel){
     padding-top: 20px;
@@ -641,13 +629,6 @@ padding: .5em;
       flex: 0 1 calc($widest-input - $group-indent);
       max-width: calc($wider-input - calc(0.5 * $group-indent));
 
-      // &.wider {
-      // flex: 0 1 calc($wider-input - calc(0.5 * $group-indent));
-      // max-width: calc($wider-input - calc(0.5 * $group-indent));
-      // }
-      // &.widest {
-
-      // }
     }
 
     &.depth-1.wider:deep(){

@@ -2,7 +2,6 @@
 import { CAPI as RANCHER_CAPI, SCHEMA } from '@shell/config/types';
 import Banner from '@components/Banner/Banner.vue';
 import { CAPI } from '../types/capi.ts';
-// import InstallHelmCharts from '@shell/components/InstallHelmCharts.vue';
 import { Checkbox } from '@rancher/components';
 
 export default {
@@ -10,24 +9,23 @@ export default {
 
   async beforeCreate() {
     try {
-      // // TODO nb turn back on
-      // const turtlesProviderSchema = await this.$store.dispatch('management/find', {
-      //   type: SCHEMA,
-      //   id:   CAPI.PROVIDER,
-      //   opt:  { force: true },
-      // });
+      const turtlesProviderSchema = await this.$store.dispatch('management/find', {
+        type: SCHEMA,
+        id:   CAPI.PROVIDER,
+        opt:  { force: true },
+      });
 
-      // if (turtlesProviderSchema) {
-      // this.$router.replace({
-      //   name:   'c-cluster-product-resource',
-      //   params: {
-      //     ...this.$router.currentRoute.params,
-      //     cluster:  '_',
-      //     resource: RANCHER_CAPI.CAPI_CLUSTER,
-      //     product:  'manager'
-      //   }
-      // });
-      // }
+      if (turtlesProviderSchema) {
+      this.$router.replace({
+        name:   'c-cluster-product-resource',
+        params: {
+          ...this.$router.currentRoute.params,
+          cluster:  '_',
+          resource: RANCHER_CAPI.CAPI_CLUSTER,
+          product:  'manager'
+        }
+      });
+      }
     } catch {}
   },
 
@@ -37,7 +35,6 @@ export default {
 
   components: {
     Banner,
-    // InstallHelmCharts,
     Checkbox
   },
 
@@ -73,24 +70,6 @@ export default {
           />
         </div>
       </Banner>
-      <div class="row">
-        <!-- <InstallHelmCharts
-          display-name="Rancher Turtles"
-          store="management"
-          chart-name="rancher-turtles"
-          repo-name="turtles"
-          repo-url="https://rancher.github.io/turtles"
-          :extra-values="{rancherTurtles: {features:{default: false}}}"
-        >
-          <template #values="{setValue, values}">
-            <Checkbox
-              label="Install cert-manager"
-              :value="values?.['cluster-api-operator']?.['cert-manager']?.enabled"
-              @update:value="e=>setValue(`'cluster-api-operator'.'cert-manager'.enabled`, e)"
-            />
-          </template>
-        </InstallHelmCharts> -->
-      </div>
       <div class="row mt-5">
         <t
           raw

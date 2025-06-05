@@ -17,7 +17,6 @@ const exampleRepo = {
     paths:                 [],
     pollingInterval:       '60s',
     repo:                  'https://github.com/rancher/turtles',
-    // TODO nb allow namespace picker
     targetNamespace:       NEW_NAMESPACE,
     targets:               [{
       clusterSelector: {
