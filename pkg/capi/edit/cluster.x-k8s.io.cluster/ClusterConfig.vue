@@ -589,7 +589,15 @@ export default {
           :rules="{ name: fvGetAndReportPathRules('metadata.name') }"
           @update:value="$emit('update:value', { k: 'metadata', val: $event.metadata })"
         />
-
+        <div class="mt-30">
+          <Checkbox
+            v-model:value="autoImport"
+            :mode="mode"
+            label-key="capi.cluster.labels.autoimport.label"
+            :disabled="clusterIsAlreadyCreated"
+            @update:value="enableAutoImport"
+          />
+        </div>
         <div class="row mb-20">
           <div class="col col-config span-4 mt-20">
             <LabeledSelect
@@ -791,15 +799,7 @@ export default {
           :value="value"
           :mode="mode"
         />
-      <div class="mt-30">
-        <Checkbox
-          v-model:value="autoImport"
-          :mode="mode"
-          label-key="capi.cluster.labels.autoimport.label"
-          :disabled="clusterIsAlreadyCreated"
-          @update:value="enableAutoImport"
-        />
-      </div>
+
       </Accordion>
     </template>
   </CruResource>

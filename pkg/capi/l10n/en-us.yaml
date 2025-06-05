@@ -200,15 +200,6 @@ asyncButton:
     rkeBootnodeTaints: Node Taints
 
 
-
-
-asyncButton:
-  saveGitRepo:
-    action: Save GitRepo
-    waiting: Saving...
-    success: Saved
-
-
 nav:
   group:
     CAPITurtles: CAPI
