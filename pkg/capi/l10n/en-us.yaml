@@ -49,6 +49,7 @@ capi:
       description: Cluster Class Description
     variables:
       title: Variables
+      emptyStringOption: None
     version:
       title: Kubernetes Version
     networking:

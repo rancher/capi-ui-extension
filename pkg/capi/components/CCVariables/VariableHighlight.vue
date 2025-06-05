@@ -32,6 +32,11 @@ export default {
       default: false
     },
 
+    isMachineScoped: {
+      type:    Boolean,
+      default: false
+    },
+
   },
 
   data() {
@@ -80,6 +85,10 @@ export default {
       return this.variableDef?.schema?.openAPIV3Schema?.description;
     },
 
+    showHighlight(){
+      return !!this.highlightColor && !this.isMachineScoped
+    },
+
     searchType() {
       return this.variableDef?.metadata?.annotations?.[ANNOTATIONS.SEARCH_TYPE] || '';
     },
@@ -98,7 +107,7 @@ export default {
 
 <template>
   <div
-    v-if="!!highlightColor"
+    v-if="showHighlight"
     class="ccvar-highlight-container"
     :class="{open:open, closed:!open, toggle:isToggle, ['info']: highlightColor === 'info', ['warning']: highlightColor === 'warning',['error']: highlightColor === 'error'}"
   >
@@ -165,8 +174,8 @@ export default {
   />
 </template>
 
-<style lang='scss' scoped>
-$container-top-padding: 10px;
+<style lang='scss'>
+$container-top-padding: 0px;
 $container-margin-top-bottom: 15px;
 $header-offset: -30px;
 $animate-duration: 300ms;
@@ -252,8 +261,8 @@ $header-height: 3em;  // position info text below header
 
         .right-container {
             padding-right: 3px;
-            // border-right: 1px solid var(--info);
-            // background-image: linear-gradient(to left, var(--info-banner-bg), var(--body-bg));
+            border-right: 1px solid var(--info);
+            background-image: linear-gradient(to left, var(--info-banner-bg), var(--body-bg));
             // transition:    background-image linear-gradient(to left, var(--info-banner-bg), var(--body-bg)) 1s;
         }
     }
@@ -269,5 +278,8 @@ $header-height: 3em;  // position info text below header
     }
 
 
+    .var-input .labeled-input.edit INPUT{
+      padding-top: 0px;
+    }
 }
 </style>

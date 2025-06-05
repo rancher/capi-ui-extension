@@ -572,7 +572,10 @@ $max-width-2: calc($widest-input - $group-indent-2);
   margin: 0px 0px 20px 20px;
 
   // border-top: 1px solid var(--border);
-
+  
+  :deep(.group-panel){
+    padding-top: 20px;
+  }
 
   :deep(.group-panel-title){
     // h3 font size

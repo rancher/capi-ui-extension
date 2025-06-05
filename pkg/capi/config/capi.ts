@@ -13,25 +13,6 @@ export function init($plugin: any, store: any) {
   } = $plugin.DSL(store, CLUSTER_MGMT_PRODUCT);
 
 
-  product({
-    ifHaveType:              RANCHER_CAPI.CAPI_CLUSTER,
-    label:       'CAPI Turtles',
-    icon:        'gear',
-    svg:          require('../assets/images/icon.svg'),
-    name:        'capi',
-    namespaced:  false,
-    inStore:               'management',
-    to:                  {
-      name:   `c-cluster-capi`,
-      params: { cluster: '_' }
-    },
-    removable:             false,
-    showClusterSwitcher:   false,
-    // overview: true,
-    // exact:    true,
-  });
-
-
   virtualType({
     label:       'CAPI Turtles',
     icon:        'gear',

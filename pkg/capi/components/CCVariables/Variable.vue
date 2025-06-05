@@ -12,6 +12,7 @@ import VariableHighlight from './VariableHighlight.vue';
 // how many indentation levels the ui will display
 const MAX_DEPTH = 3;
 
+
 export default {
   name: 'CCVariable',
 
@@ -76,6 +77,12 @@ export default {
     }
   },
 
+  data(){
+    return {
+      noneOption: this.t('capi.cluster.variables.emptyStringOption')
+    }
+  },
+
   computed: {
     ...mapGetters({ t: 'i18n/t', withFallback: 'i18n/withFallback' }),
 
@@ -93,7 +100,11 @@ export default {
       }
 
       return opts.map((opt) => {
-        return typeof opt === 'object' ? JSON.stringify(opt) : opt;
+        let out = typeof opt === 'object' ? JSON.stringify(opt) : opt;
+        if(opt === ""){
+          out = this.noneOption
+        }
+        return out
       });
     },
 
@@ -244,7 +255,7 @@ export default {
     },
 
     highlighted() {
-      return !!this.variable?.metadata?.annotations?.[ANNOTATIONS.HIGHLIGHT];
+      return !!this.variable?.metadata?.annotations?.[ANNOTATIONS.HIGHLIGHT] && !this.isMachineScoped;
     },
 
     isSearchComponent() {
@@ -254,6 +265,16 @@ export default {
     resourceType() {
       return this.variable?.metadata?.annotations?.[ANNOTATIONS.SEARCH_TYPE];
     },
+
+    displayValue(){
+      if(this.isYamlComponent){
+        return this.yamlPlaceholder || this.value 
+      }
+      if(this.variableOptions?.length && this.value === ''){
+        return this.noneOption
+      }
+      return this.value
+    }
 
   },
 
@@ -282,6 +303,11 @@ export default {
         // open the info highlight when toggle switch is enabled
         toggleOpen(e);
       }
+
+      if(this.variableOptions?.length && e === this.noneOption){
+        out = ''
+      }
+
       this.$emit('update:value', out);
     }
   },
@@ -300,6 +326,7 @@ export default {
     }"
   >
     <VariableHighlight
+    :is-machine-scoped="isMachineScoped"
       :mode="mode"
       :variable-def="variable"
       :variable-value="value"
@@ -323,8 +350,8 @@ export default {
           v-if="componentForType"
           :id="componentForType.name"
           :aria-label="withFallback(`capi.variables.${label}`, null, label)"
-          :value="isYamlComponent ? yamlPlaceholder || value : value"
-          :label="!variable?.metadata?.annotations?.['turtles-capi.cattle.io/highlight'] ? withFallback(`capi.variables.${label}`, null, label) : ' '"
+          :value="displayValue"
+          :label="!highlighted ? withFallback(`capi.variables.${label}`, null, label) : ' '"
           :on-label="label"
           :placeholder="placeholder"
           :tooltip="!variable?.metadata?.annotations?.['turtles-capi.cattle.io/highlight'] ? schema.description : ''"

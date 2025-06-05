@@ -101,7 +101,6 @@ export default {
       set(neu){
         let out = {name: neu}
         if(this.namespaced){
-          debugger
           out.namespace = this.namespace
         }
 
