@@ -1,5 +1,4 @@
 <script>
-import { mapGetters, mapActions } from 'vuex';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import CruResource from '@shell/components/CruResource.vue';
 import SelectIconGrid from '@shell/components/SelectIconGrid.vue';
@@ -61,29 +60,12 @@ export default {
       this.selectType(name);
     }
   },
-  mounted() {
-    console.log('trrr');
-    this.$nextTick(() => {
-      console.log('frrr');
-      this.$store.dispatch('cru-resource/setCreateNamespace', true);
-      // this.$refs.providercruresource.createNamespace = true;
-    });
-  },
-  updated() {
-    console.log('yaaa');
-    this.$nextTick(() => {
-      console.log('woooo');
-      this.$store.dispatch('cru-resource/setCreateNamespace', true);
-      // this.$refs.providercruresource.createNamespace = true;
-    });
-  },
 
   data() {
     return { subType: null, capiProviders: [] };
   },
 
   computed: {
-    ...mapActions('cru-resource', ['setCreateNamespace']),
     subTypes() {
       const out = [];
       const getters = this.$store.getters;
@@ -185,10 +167,6 @@ export default {
       this.category = category;
 
       this.$emit('set-subtype', this.$store.getters['i18n/withFallback'](`cluster.provider."${ name }"`, null, name));
-    },
-    cruResourceMounted() {
-      this.$store.dispatch('cru-resource/setCreateNamespace', true);
-    //   this.$refs.providercruresource.createNamespace = true;
     }
   },
 };
@@ -205,7 +183,6 @@ export default {
     :cancel-event="true"
     :prevent-enter-submit="true"
     class="create-cluster"
-    @create-namespace-changed="cruResourceMounted"
     @finish="save"
     @cancel="done"
     @select-type="selectType"
