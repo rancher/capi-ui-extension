@@ -43,6 +43,7 @@ const customProviderSpec = {
 };
 
 const CATEGORIES = ['infrastructure', 'bootstrap', 'controlPlane', 'addon', 'ipam', 'runtimeextension', 'core'];
+const CUSTOM = 'custom';
 
 export default {
   name: 'ProviderConfig',
@@ -106,14 +107,14 @@ export default {
       loading:            true,
       fvFormRuleSets:          [
         { path: 'metadata.name', rules: ['name'] },
-        { path: 'spec.name', rules: ['required'] },
         { path: 'spec.version', rules: ['version'] },
         { path: 'spec.fetchConfig.url', rules: ['url'] },
       ],
       allNamespaces:         [],
       credentialComponent:     providerDetails?.credential,
       useCredential:       !!providerDetails?.credentialRequired || (this.mode === _EDIT && !!this.value?.spec?.credentials?.rancherCloudCredentialNamespaceName),
-      credentialRequired:  providerDetails?.credentialRequired
+      credentialRequired:  providerDetails?.credentialRequired,
+      defaultNamespace:        providerDetails?.ns
     };
   },
 
@@ -160,7 +161,7 @@ export default {
     },
 
     isCustom() {
-      return this.provider === 'custom';
+      return this.provider === CUSTOM;
     },
 
     shouldShowBanner() {
@@ -168,7 +169,7 @@ export default {
     },
 
     waitingForCredential() {
-      return this.credentialComponent && !this.value.spec.credentials?.rancherCloudCredentialNamespaceName;
+      return this.credentialComponent && !this.value?.spec?.credentials?.rancherCloudCredentialNamespaceName;
     },
     rancherCloudCredentialNamespaceName() {
       return this.value.spec?.credentials?.rancherCloudCredentialNamespaceName || '';
@@ -184,10 +185,11 @@ export default {
       if ( !this.value.spec ) {
         const defaultsFromCoreProvider = this.getSpecFromCoreSecret();
 
-        if ( this.provider !== 'custom') {
+        if ( this.provider !== CUSTOM) {
           set(this.value, 'spec', { ...clone(defaultSpec), ...defaultsFromCoreProvider });
-          set(this.value.spec, 'name', this.provider); // Defines the provider kind to provision.
           set(this.value.spec, 'type', this.category);
+          set(this.value.metadata, 'name', this.provider);
+          set(this.value.metadata, 'namespace', this.defaultNamespace);
         } else {
           set(this.value, 'spec', { ...clone(customProviderSpec), ...defaultsFromCoreProvider });
         }
@@ -246,6 +248,18 @@ export default {
       if ( this.errors ) {
         clear(this.errors);
       }
+
+      if ( this.$refs.providercruresource) {
+        try {
+          await this.$refs.providercruresource.createNamespaceIfNeeded();
+        } catch (err) {
+        // After the attempt to create the namespace,
+        // show any applicable errors if the namespace is
+        // invalid.
+          this.errors.push(err.message);
+          btnCb(false);
+        }
+      }
       if ( !this.useCredential && !this.value.spec?.credentials?.rancherCloudCredentialNamespaceName ) {
         this.value.spec.credentials = null;
       }
@@ -293,21 +307,22 @@ export default {
     @cancel="done"
     @error="e=>errors=e"
   >
-    <NameNsDescription
-      :value="value"
-      :mode="mode"
-      :namespaced="true"
-      :namespace-options="allNamespaces"
-      :namespace-new-allowed="true"
-      :create-namespace-override="true"
-      name-label="capi.provider.name.label"
-      name-placeholder="capi.provider.name.placeholder"
-      description-label="capi.provider.description.label"
-      description-placeholder="capi.provider.description.placeholder"
-      :rules="{name:fvGetAndReportPathRules('metadata.name')}"
-      @update:value="$emit('update:value', {k: 'metadata', val: $event.metadata })"
-    />
     <div v-if="isCustom">
+      <NameNsDescription
+        :value="value"
+        :mode="mode"
+        :namespaced="true"
+        :namespace-options="allNamespaces"
+        :namespace-new-allowed="true"
+        :create-namespace-override="true"
+        :name-required="false"
+        name-label="capi.provider.name.label"
+        name-placeholder="capi.provider.name.placeholder"
+        description-label="capi.provider.description.label"
+        description-placeholder="capi.provider.description.placeholder"
+        :rules="{name:fvGetAndReportPathRules('metadata.name')}"
+        @update:value="$emit('update:value', {k: 'metadata', val: $event.metadata })"
+      />
       <div class="row mb-20">
         <div
           class="col span-3"
@@ -364,6 +379,26 @@ export default {
         </div>
       </div>
     </div>
+    <div v-else>
+      <NameNsDescription
+        :value="value"
+        :mode="mode"
+        :namespaced="true"
+        :namespace-options="allNamespaces"
+        :namespace-new-allowed="true"
+        :create-namespace-override="true"
+        :name-hidden="true"
+        name-label="capi.provider.name.label"
+        name-placeholder="capi.provider.name.placeholder"
+        description-label="capi.provider.description.label"
+        description-placeholder="capi.provider.description.placeholder"
+        @update:value="$emit('update:value', {k: 'metadata', val: $event.metadata })"
+      />
+    </div>
+    <div
+      v-if="credentialComponent"
+      class="mb-10"
+    />
     <h2
       v-if="hasFeatures || hasVariables"
       class="mb-20"

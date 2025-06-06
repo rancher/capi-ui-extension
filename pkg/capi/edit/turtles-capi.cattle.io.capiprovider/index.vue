@@ -46,6 +46,7 @@ export default {
       default: 'capi-provider-create'
     }
   },
+
   async beforeMount() {
     this.capiProviders = await this.$store.dispatch('management/findAll', { type: CAPI.PROVIDER });
     const name = this.value.spec?.name || this.value.metadata?.name;
@@ -135,7 +136,8 @@ export default {
 
     enabledProviderTypes() {
       return this.capiProviders.reduce((existing, p) => {
-        const { name, type } = p?.spec || p?.metadata || {};
+        const name = !!p?.spec?.name ? p.spec.name : p?.metadata?.name;
+        const type = p?.spec?.type;
         const id = this.makeProviderId(name, type);
 
         if (!existing.includes(id) && name !== CUSTOM) {
@@ -164,8 +166,8 @@ export default {
       this.subType = name;
       this.category = category;
 
-      this.$emit('set-subtype', this.$store.getters['i18n/withFallback'](`capi.provider.providerDisplayNames."${ name }"`, null, name));
-    },
+      this.$emit('set-subtype', this.$store.getters['i18n/withFallback'](`cluster.provider."${ name }"`, null, name));
+    }
   },
 };
 </script>
