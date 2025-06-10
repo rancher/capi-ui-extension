@@ -20,7 +20,7 @@ import ControlPlaneSection from './ControlPlaneSection.vue';
 import { mapGetters } from 'vuex';
 import { LABELS, CAPI } from '../../types/capi';
 import Loading from '@shell/components/Loading.vue';
-import { NAMESPACE,  FLEET } from '@shell/config/types';
+import { NAMESPACE, FLEET } from '@shell/config/types';
 import Accordion from '@components/Accordion/Accordion.vue';
 
 const defaultTopologyConfig = {
@@ -147,9 +147,9 @@ export default {
       loading:                   true,
       k3sVersions:               [],
       rke2Versions:              [],
-      autoImport:              !!this.value?.metadata?.labels && !!this.value?.metadata?.labels[LABELS.AUTO_IMPORT],
-      classNamespaceSupported: false,
-      allNamespaces:           [],
+      autoImport:                !!this.value?.metadata?.labels && !!this.value?.metadata?.labels[LABELS.AUTO_IMPORT],
+      classNamespaceSupported:   false,
+      allNamespaces:             [],
       configHighlightOpen:       true,
       controlPlaneHighlightOpen:  true,
       networkingHighlightOpen:   true,
@@ -226,7 +226,6 @@ export default {
       return this.mode === _EDIT;
     },
 
-
     controlPlane: {
       get() {
         return this.value?.spec?.topology?.controlPlane || {};
@@ -265,7 +264,7 @@ export default {
         }
       }
     },
-    
+
     topology() {
       return this.value?.spec?.topology;
     },
@@ -311,8 +310,9 @@ export default {
     },
 
     canCreateGitRepos() {
-      const  gitRepoSchema = this.schemaFor(FLEET.GIT_REPO)
-      return gitRepoSchema  && gitRepoSchema?.collectionMethods.find((x) => x.toLowerCase() === 'post') ;
+      const gitRepoSchema = this.schemaFor(FLEET.GIT_REPO);
+
+      return gitRepoSchema && gitRepoSchema?.collectionMethods.find((x) => x.toLowerCase() === 'post') ;
     },
 
     isk3s() {
@@ -540,13 +540,13 @@ export default {
         open-initially
         :title="t(`capi.cluster.section.${formSections.GENERAL}`)"
       >
-
         <!-- GENERAL CONFIGURATION -->
         <NameNsDescription
           v-if="!isView"
           :value="value"
           :mode="mode"
-          :namespaced="false"
+          :namespaced="classNamespaceSupported"
+          :namespace-options="allNamespaces"
           name-label="cluster.name.label"
           name-placeholder="cluster.name.placeholder"
           description-label="cluster.description.label"
@@ -605,7 +605,6 @@ export default {
         open-initially
         :title="t(`capi.cluster.section.${formSections.CONTROL_PLANE}`)"
       >
-
         <!-- CONTROL PLANE CONFIGURATION -->
         <div class="row span-12 row-config">
           <div class="col span-6 mt-20">
@@ -640,7 +639,6 @@ export default {
         open-initially
         :title="t(`capi.cluster.section.${formSections.NETWORKING}`)"
       >
-
         <!-- NETWORKING CONFIGURATION -->
         <div class="col span-6 mt-20">
           <NetworkSection
@@ -671,12 +669,11 @@ export default {
       <ClusterClassVariables
         :value="value.spec.topology.variables"
         :cluster-class="clusterClassObj"
-          :cluster-namespace="value.metadata?.namespace"
+        :cluster-namespace="value.metadata?.namespace"
         @update-variables="setVariables"
 
         @validation-passed="e => variableSectionReady.misc = e"
       />
-
 
       <!-- WORKERS -->
       <Accordion
@@ -689,7 +686,7 @@ export default {
             :value="value.spec.topology.variables"
             :section="formSections.WORKERS"
             :cluster-class="clusterClassObj"
-          :cluster-namespace="value.metadata?.namespace"
+            :cluster-namespace="value.metadata?.namespace"
 
             @update-variables="setVariables"
             @validation-passed="e => variableSectionReady.workers = e"
@@ -739,7 +736,6 @@ export default {
           :value="value"
           :mode="mode"
         />
-
       </Accordion>
     </template>
   </CruResource>
