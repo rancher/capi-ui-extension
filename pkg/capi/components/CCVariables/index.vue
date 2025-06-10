@@ -63,8 +63,8 @@ export default {
     },
 
     clusterNamespace: {
-      type: String,
-      default : ''
+      type:    String,
+      default: ''
     },
   },
 
@@ -154,17 +154,14 @@ export default {
     sectionedVariableDefinitions() {
       const out = { };
 
-
       this.variableDefinitions.forEach((spec) => {
         const section = spec?.metadata?.annotations?.[ANNOTATIONS.SECTION] || 'misc';
 
-
-          if (!out[section]) {
-            out[section] = [spec];
-          } else {
-            out[section].push(spec);
-          }
-
+        if (!out[section]) {
+          out[section] = [spec];
+        } else {
+          out[section].push(spec);
+        }
       });
 
       return out;
@@ -179,16 +176,14 @@ export default {
       for (const section in startWith) {
         const grouped = { };
 
-
         startWith[section].forEach((spec) => {
-          const group = spec?.metadata?.annotations?.[ANNOTATIONS.GROUP]|| 'misc';
+          const group = spec?.metadata?.annotations?.[ANNOTATIONS.GROUP] || 'misc';
 
-            if (!grouped[group]) {
-              grouped[group] = [spec];
-            } else {
-              grouped[group].push(spec);
-            }
-
+          if (!grouped[group]) {
+            grouped[group] = [spec];
+          } else {
+            grouped[group].push(spec);
+          }
         });
 
         out[section] = grouped;
@@ -335,9 +330,7 @@ export default {
       const varRef = this.$refs[`${ variableDef.name }-input`]?.[0];
 
       if (varRef) {
-
         if (varRef.toggled === false) {
-
           return;
         }
       }
@@ -562,12 +555,16 @@ $standard-input: $wider-input;
 
 $group-indent: 5%;
 $group-indent-2: calc($group-indent * 2);
+
+$half-indent: calc($group-indent / 2);
+// $half-indent-2: calc($half-indent + calc($group-indent-2 / 2));
+$half-indent-2: calc($group-indent-2 / 2);
+
 $max-width-2: calc($widest-input - $group-indent-2);
 
 .ccvariable-group-panel {
   margin: 0px 0px 20px 20px;
 
-  
   :deep(.group-panel){
     padding-top: 20px;
     padding-right: 0px;
@@ -626,30 +623,40 @@ padding: .5em;
 
     &.depth-1:deep(){
       margin: 0 0 0 $group-indent;
-      flex: 0 1 calc($widest-input - $group-indent);
-      max-width: calc($wider-input - calc(0.5 * $group-indent));
-
+      // flex: 0 1 calc($widest-input - calc(0.5 * $group-indent));
+      // max-width: calc($wider-input - calc(0.5 * $group-indent));
+      flex: 0 1 calc($widest-input - $half-indent);
+      max-width: calc($wider-input - $half-indent);
     }
 
     &.depth-1.wider:deep(){
-      flex: 0 1 calc($wider-input - calc(0.5 * $group-indent));
-      max-width: calc($wider-input - calc(0.5 * $group-indent));
-    } 
+      // flex: 0 1 calc($wider-input - calc(0.5 * $group-indent));
+      // max-width: calc($wider-input - calc(0.5 * $group-indent));
+
+      flex: 0 1 calc($wider-input - $half-indent);
+      max-width: calc($wider-input - $half-indent);
+    }
 
     &.depth-1.widest:deep(){
-      flex: 0 1 calc($widest-input - calc(0.5 * $group-indent));
-      max-width: calc($widest-input - calc(0.5 * $group-indent));
-    } 
+      // flex: 0 1 calc($widest-input - calc(0.5 * $group-indent));
+      // max-width: calc($widest-input - calc(0.5 * $group-indent));
+      flex: 0 1 calc($widest-input - $half-indent);
+      max-width: calc($widest-input - $half-indent);
+    }
 
     &.depth-2:deep(){
       margin: 0 0 0 $group-indent-2;
-      flex: 0 1 calc($widest-input - $group-indent-2);
-      max-width: calc($standard-input - calc($group-indent-2 / 2));
+      // flex: 0 1 calc($widest-input - calc($group-indent-2 / 2));
+      // max-width: calc($standard-input - calc($group-indent-2 / 2));
+            flex: 0 1 calc($widest-input - $half-indent-2);
+      max-width: calc($standard-input - $half-indent-2);
     }
 
     &.depth-2.widest:deep(){
-        flex: 0 1 calc($widest-input - $group-indent-2);
-        max-width: calc($widest-input - $group-indent-2);
+        // flex: 0 1 calc($widest-input - calc($group-indent-2 / 2));
+        // max-width: calc($widest-input - calc($group-indent-2 / 2));
+        flex: 0 1 calc($widest-input - $half-indent-2);
+        max-width: calc($widest-input - $half-indent-2);
     }
 
   }

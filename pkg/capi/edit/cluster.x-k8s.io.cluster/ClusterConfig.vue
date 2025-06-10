@@ -564,7 +564,7 @@ export default {
           />
         </div>
         <div class="row mb-20">
-          <div class="col col-config span-4 mt-20">
+          <div class="col col-half mt-20">
             <LabeledSelect
               v-if="versionOptions.length"
               :mode="mode"
@@ -606,15 +606,17 @@ export default {
         :title="t(`capi.cluster.section.${formSections.CONTROL_PLANE}`)"
       >
         <!-- CONTROL PLANE CONFIGURATION -->
-        <div class="row span-12 row-config">
-          <div class="col span-6 mt-20">
+        <div class="row row-config">
+          <div class="col col-half">
             <ControlPlaneEndpointSection
               v-model:value="controlPlaneEndpoint"
               :mode="mode"
               :rules="{ host: fvGetAndReportPathRules('spec.controlPlaneEndpoint.host'), port: fvGetAndReportPathRules('spec.controlPlaneEndpoint.port') }"
             />
           </div>
-          <div class="col span-6 mt-20">
+        </div>
+        <div class="row  row-config">
+          <div class="col col-half">
             <ControlPlaneSection
               v-model:value="controlPlane"
               :mode="mode"
@@ -640,7 +642,7 @@ export default {
         :title="t(`capi.cluster.section.${formSections.NETWORKING}`)"
       >
         <!-- NETWORKING CONFIGURATION -->
-        <div class="col span-6 mt-20">
+        <div class="col col-half mt-20">
           <NetworkSection
             v-model:value="network"
             :mode="mode"
@@ -746,6 +748,12 @@ export default {
 }
 .version {
     width: 65%
+}
+
+//custom width for input columns instead of the usual classes (span-*) to simplify variable sizing
+:deep(.col-half)  {
+  margin-right: 0px;
+  width: 50%;
 }
 
 :deep(.accordion-container){

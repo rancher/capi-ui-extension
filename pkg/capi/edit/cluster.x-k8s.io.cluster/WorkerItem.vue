@@ -213,32 +213,8 @@ export default {
         :data-testid="`${componentTestid}-box${ idx }`"
         class="box"
       >
-        <div
-          class="remove"
-        >
-          <button
-            type="button"
-            :disabled="isView"
-            class="btn role-link"
-            :data-testid="`remove-item-${idx}`"
-            @click="remove(row, idx)"
-          >
-            {{ removeLabel }}
-          </button>
-        </div>
-
         <div class="value row row-wi">
-          <div class="col-short mr-10 mt-20 span-2">
-            <LabeledInput
-              :value="row.value.replicas"
-              :mode="mode"
-              :disabled="false"
-              :label="t('capi.cluster.workers.replicas')"
-              placeholder="1"
-              @update:value="(val) => !!val ? row.value.replicas = parseInt(val) : row.value.replicas = null"
-            />
-          </div>
-          <div class="col-long mr-20 span-5 mt-20">
+          <div class="col-long span-5">
             <LabeledSelect
               v-model:value="row.value.class"
               :mode="mode"
@@ -249,7 +225,7 @@ export default {
           </div>
           <div
             v-if="row.value.class"
-            class="col-long mr-20 span-5 mt-20"
+            class="col-long  span-5"
           >
             <LabeledInput
               ref="value"
@@ -259,6 +235,29 @@ export default {
               :label="t('capi.cluster.workers.name')"
               required
             />
+          </div>
+          <div class="col-short mr-10    span-2">
+            <LabeledInput
+              :value="row.value.replicas"
+              :mode="mode"
+              :disabled="false"
+              :label="t('capi.cluster.workers.replicas')"
+              placeholder="1"
+              @update:value="(val) => !!val ? row.value.replicas = parseInt(val) : row.value.replicas = null"
+            />
+          </div>
+          <div
+            class="remove"
+          >
+            <button
+              type="button"
+              :disabled="isView"
+              class="btn role-link"
+              :data-testid="`remove-item-${idx}`"
+              @click="remove(row, idx)"
+            >
+              {{ removeLabel }}
+            </button>
           </div>
         </div>
 
@@ -291,32 +290,42 @@ export default {
 @media screen and (max-width: 1000px) {
   .row-wi {
       flex-direction: column;
-      width: 100%
+      width: 100%;
   }
-  .col-long {
-      width: 100%
+  .box .row-wi.value.row>.col-long {
+      width: 100%;
+      margin-top: 20px;
   }
-  .col-short {
-      width: 75%
+  .box .row-wi.value.row>.col-short {
+      width: 100%;
+      margin-top: 20px;
   }
 }
 
 .machine-variables {
-  margin: 1em  0px 1em 1em;
+  // margin: 1em  0px 1em 1em;
 }
 
 .box {
-    margin: 10px 0px 10px 5%;
-    padding: 0px 0px 0px 16px;
+    margin: 40px 0px 40px 0px;
 
-  &>.remove {
-    position: relative;
-
-    & button{
-      position: absolute;
-      left: -80px;
-      top: 2em;
+    &>.value.row .col-long{
+      width: 25%;
+      margin-right: 1.12%;
     }
-  }
+
+    & .remove{
+
+    }
+
+  // &>.remove {
+  //   position: relative;
+
+  //   & button{
+  //     position: absolute;
+  //     right: 80px;
+  //     top: 2em;
+  //   }
+  // }
 }
 </style>
