@@ -43,9 +43,9 @@ export default {
 
   computed: {
     hasClusterClassSchema() {
-      //TODO nb undo
+      // TODO nb undo
       // return !!this.$store.getters['management/schemaFor'](CAPI.CLUSTER_CLASS);
-      return false
+      return false;
     },
   }
 
@@ -87,7 +87,7 @@ export default {
         >
           <template #values="{setValue, values}">
             <Checkbox
-            class="mb-10"
+              class="mb-10"
               :label="t('capi.installation.includeCertManager')"
               :value="values?.['cluster-api-operator']?.['cert-manager']?.enabled"
               @update:value="e=>setValue(`'cluster-api-operator'.'cert-manager'.enabled`, e)"
