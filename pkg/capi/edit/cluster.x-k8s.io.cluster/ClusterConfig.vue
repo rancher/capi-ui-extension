@@ -666,17 +666,6 @@ export default {
         />
       </Accordion>
 
-      <!-- GENERIC VARIABLES -->
-
-      <ClusterClassVariables
-        :value="value.spec.topology.variables"
-        :cluster-class="clusterClassObj"
-        :cluster-namespace="value.metadata?.namespace"
-        @update-variables="setVariables"
-
-        @validation-passed="e => variableSectionReady.misc = e"
-      />
-
       <!-- WORKERS -->
       <Accordion
         class="mt-20 section-accordion"
@@ -729,6 +718,17 @@ export default {
           </div>
         </div>
       </Accordion>
+
+      <!-- GENERIC VARIABLES -->
+
+      <ClusterClassVariables
+        :value="value.spec.topology.variables"
+        :cluster-class="clusterClassObj"
+        :cluster-namespace="value.metadata?.namespace"
+        @update-variables="setVariables"
+
+        @validation-passed="e => variableSectionReady.misc = e"
+      />
 
       <Accordion
         class="mt-20 section-accordion"

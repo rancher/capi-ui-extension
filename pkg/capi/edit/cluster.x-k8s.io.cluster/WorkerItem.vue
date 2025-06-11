@@ -87,7 +87,20 @@ export default {
     },
     removeLabel() {
       return this.$store.getters['i18n/t']('generic.remove');
-    }
+    },
+
+    addLabel() {
+      return this.isDeployments ? this.t('capi.cluster.workers.machineDeployments.add') : this.t('capi.cluster.workers.machinePools.add');
+    },
+
+    machineClassType() {
+      return this.isDeployments ? 'machineDeploymentClass' : 'machinePoolClass';
+    },
+    // TODO nb not this
+    isDeployments() {
+      return this.title.includes('Deployments');
+    },
+
   },
   watch:    {
     value: {
@@ -112,29 +125,6 @@ export default {
   },
   created() {
     this.queueUpdate = debounce(this.update, 50);
-  },
-
-  computed: {
-    isView() {
-      return this.mode === _VIEW;
-    },
-
-    isDeployments() {
-      return this.title.includes('Deployments');
-    },
-
-    removeLabel() {
-      return this.$store.getters['i18n/t']('generic.remove');
-    },
-
-    addLabel() {
-      return this.isDeployments ? this.t('capi.cluster.workers.machineDeployments.add') : this.t('capi.cluster.workers.machinePools.add');
-    },
-
-    machineClassType() {
-      return this.isDeployments ? 'machineDeploymentClass' : 'machinePoolClass';
-    },
-
   },
 
   methods: {
@@ -247,6 +237,7 @@ export default {
             />
           </div>
           <div
+            v-show="rows.length > 1"
             class="remove"
           >
             <button
@@ -302,10 +293,6 @@ export default {
   }
 }
 
-.machine-variables {
-  // margin: 1em  0px 1em 1em;
-}
-
 .box {
     margin: 40px 0px 40px 0px;
 
@@ -315,17 +302,7 @@ export default {
     }
 
     & .remove{
-
+      align-content: center;
     }
-
-  // &>.remove {
-  //   position: relative;
-
-  //   & button{
-  //     position: absolute;
-  //     right: 80px;
-  //     top: 2em;
-  //   }
-  // }
 }
 </style>

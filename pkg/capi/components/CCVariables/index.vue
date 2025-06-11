@@ -553,6 +553,7 @@ $wider-input: 50%;
 $widest-input: 100%;
 $standard-input: $wider-input;
 
+// not last row
 $row-bottom-margin: 20px;
 
 $group-indent: 5%;
@@ -610,6 +611,7 @@ padding: .5em;
   &>*{
     flex: 0 1 $standard-input;
     margin-bottom: $row-bottom-margin;
+
     max-width: $standard-input;
 
     &.wider:deep(){
@@ -619,44 +621,39 @@ padding: .5em;
 
     &.widest:deep() {
       margin: 0 0 $row-bottom-margin 0;
+
       flex: 0 1 $widest-input;
       max-width: $widest-input;
     }
 
     &.depth-1:deep(){
       margin: 0 0 $row-bottom-margin $group-indent;
-      // flex: 0 1 calc($widest-input - calc(0.5 * $group-indent));
-      // max-width: calc($wider-input - calc(0.5 * $group-indent));
+
       flex: 0 1 calc($widest-input - $half-indent);
       max-width: calc($wider-input - $half-indent);
     }
 
     &.depth-1.wider:deep(){
-      // flex: 0 1 calc($wider-input - calc(0.5 * $group-indent));
-      // max-width: calc($wider-input - calc(0.5 * $group-indent));
 
       flex: 0 1 calc($wider-input - $half-indent);
       max-width: calc($wider-input - $half-indent);
     }
 
     &.depth-1.widest:deep(){
-      // flex: 0 1 calc($widest-input - calc(0.5 * $group-indent));
-      // max-width: calc($widest-input - calc(0.5 * $group-indent));
+
       flex: 0 1 calc($widest-input - $half-indent);
       max-width: calc($widest-input - $half-indent);
     }
 
     &.depth-2:deep(){
       margin: 0 0 $row-bottom-margin $group-indent-2;
-      // flex: 0 1 calc($widest-input - calc($group-indent-2 / 2));
-      // max-width: calc($standard-input - calc($group-indent-2 / 2));
+
       flex: 0 1 calc($widest-input - $half-indent-2);
       max-width: calc($standard-input - $half-indent-2);
     }
 
     &.depth-2.widest:deep(){
-        // flex: 0 1 calc($widest-input - calc($group-indent-2 / 2));
-        // max-width: calc($widest-input - calc($group-indent-2 / 2));
+
         flex: 0 1 calc($widest-input - $half-indent-2);
         max-width: calc($widest-input - $half-indent-2);
     }

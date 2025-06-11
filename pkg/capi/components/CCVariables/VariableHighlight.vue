@@ -85,8 +85,8 @@ export default {
       return this.variableDef?.schema?.openAPIV3Schema?.description;
     },
 
-    showHighlight(){
-      return !!this.highlightColor && !this.isMachineScoped
+    showHighlight() {
+      return !!this.highlightColor && !this.isMachineScoped;
     },
 
     searchType() {
@@ -117,7 +117,6 @@ export default {
         class="header"
       >
         <h4 class="name">
-
           {{ displayName }}  <span
             v-if="required"
             class="text-error"
@@ -128,13 +127,13 @@ export default {
           class="type"
         > {{ searchType }}</label>
         <Label v-else />
-          <i
+        <i
           v-if="highlightColor === 'warning' || highlightColor === 'error'"
-            class="icon"
-            :class="{['icon-question-mark']: highlightColor === 'info', ['icon-warning']: highlightColor === 'warning',['icon-error']: highlightColor === 'error',}"
-            @click="toggleOpen(!open)"
-          >
-          </i>
+          class="icon"
+          :class="{['icon-question-mark']: highlightColor === 'info', ['icon-warning']: highlightColor === 'warning',['icon-error']: highlightColor === 'error',}"
+          @click="toggleOpen(!open)"
+        >
+        </i>
       </div>
       <div class="var-input">
         <slot
@@ -163,7 +162,7 @@ export default {
 
 <style lang='scss'>
 $container-top-padding: 0px;
-$container-margin-top-bottom: 15px;
+$container-margin-top-bottom: 0px;
 $header-offset: -30px;
 $animate-duration: 300ms;
 $left-basis: 50%;
@@ -249,7 +248,6 @@ $header-height: 3em;  // position info text below header
             background-image: linear-gradient(to left, var(--warning-banner-bg), var(--body-bg));
         }
     }
-
 
     .var-input .labeled-input.edit INPUT{
       padding-top: 0px;

@@ -20,7 +20,7 @@ capi:
       controlplane: Control Plane
       networking: Networking
       workers: Workers
-      labels: Labels
+      labels: Labels and Annotations
     steps:
       clusterClass:
         title: Cluster Class
