@@ -32,16 +32,16 @@ export const isToggle = (variable, all) => {
 };
 
 // in addition to having a resource type annotation variables need to be an object with name and optionally namespace keys to use the ResourceVariable component
-const isResourceVariable = (variable)=>{
-   const schema = variable?.schema?.openAPIV3Schema || {};
-  let { type, properties = {} } = schema;
+const isResourceVariable = (variable) => {
+  const schema = variable?.schema?.openAPIV3Schema || {};
+  const { properties = {} } = schema;
 
-  if(!variable?.metadata?.annotations?.[ANNOTATIONS.SEARCH_TYPE]){
-    return false
+  if (!variable?.metadata?.annotations?.[ANNOTATIONS.SEARCH_TYPE]) {
+    return false;
   }
 
-  return properties?.name && properties?.name?.type === 'string' && !Object.keys(properties).find(p=>p !== 'name' && p!=='namespace')
-}
+  return properties?.name && properties?.name?.type === 'string' && !Object.keys(properties).find((p) => p !== 'name' && p !== 'namespace');
+};
 
 /**
  * Accepts a clusterclass variable schema and determines which input component would best represent that variable
@@ -66,9 +66,8 @@ export const componentForType = (variable, all) => {
   } else {
     switch (type) {
     case 'object':
-      if(isResourceVariable(variable)){
+      if (isResourceVariable(variable)) {
         out = { component: ResourceVariable, name: VARIABLE_INPUT_NAMES.SEARCH_TYPE };
-
       } else {
         out = { component: YamlEditor, name: VARIABLE_INPUT_NAMES.YAML };
       }
@@ -88,11 +87,6 @@ export const componentForType = (variable, all) => {
       }
       break;
     case 'string':
-      // if (variable?.metadata?.annotations?.[ANNOTATIONS.SEARCH_TYPE]) {
-      //   out = { component: ResourceVariable, name: VARIABLE_INPUT_NAMES.SEARCH_TYPE };
-      // } else {
-      //   out = { component: LabeledInput, name: VARIABLE_INPUT_NAMES.TEXT };
-      // }
       out = { component: LabeledInput, name: VARIABLE_INPUT_NAMES.TEXT };
       break;
     case 'integer':
@@ -209,7 +203,6 @@ export const makeYamlPlaceholders = function(openSchema, data = {}) {
   try {
     out = createYaml(schemas, 'ccvariable', data, false);
   } catch (err) {
-    console.error(err);
   }
 
   if (openSchema.type === 'array') {

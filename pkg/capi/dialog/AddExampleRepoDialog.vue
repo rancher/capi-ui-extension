@@ -4,8 +4,10 @@ import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
 import AsyncButton from '@shell/components/AsyncButton';
 import { checkSchemasForFindAllHash } from '@shell/utils/auth';
 import FleetSummary from '@shell/components/fleet/FleetSummary';
+import { mapGetters } from 'vuex';
 
 const NEW_NAMESPACE = 'turtles-clusterclasses';
+const REPO_URL = 'https://github.com/rancher/turtles';
 
 const exampleRepo = {
   type:     FLEET.GIT_REPO,
@@ -16,7 +18,7 @@ const exampleRepo = {
     insecureSkipTLSVerify: false,
     paths:                 [],
     pollingInterval:       '60s',
-    repo:                  'https://github.com/rancher/turtles',
+    repo:                  REPO_URL,
     targetNamespace:       NEW_NAMESPACE,
     targets:               [{
       clusterSelector: {
@@ -74,6 +76,8 @@ export default {
     };
   },
 
+  computed: { ...mapGetters({ t: 'i18n/t' }) },
+
   methods: {
     async loadBundles() {
       const allDispatches = await checkSchemasForFindAllHash({
@@ -87,12 +91,12 @@ export default {
       this.allBundles = allDispatches.allBundles || [];
     },
 
-    async saveGitRepo(cb) {
+    async saveGitRepo(btnCb) {
       if (this.newNamespace) {
         try {
           await this.newNamespace.save();
         } catch (err) {
-          this.$store.dispatch('growl/fromError', { title: 'Error creating namespace', err });
+          this.$store.dispatch('growl/fromError', { title: this.t('capi.exampleClasses.error.creatingNs'), err });
 
           return;
         }
@@ -100,14 +104,12 @@ export default {
 
       try {
         await this.gitRepo.save();
-        // eslint-disable-next-line node/no-callback-literal
-        cb(true);
+        btnCb(true);
         this.loadBundles();
       } catch (err) {
-        this.$store.dispatch('growl/fromError', { title: 'Error saving git repo', err });
+        this.$store.dispatch('growl/fromError', { title: this.t('capi.exampleClasses.error.creatingGitrepo'), err });
 
-        // eslint-disable-next-line node/no-callback-literal
-        cb(false);
+        btnCb(false);
       }
     },
 
@@ -132,18 +134,21 @@ export default {
 
 <template>
   <div class="dialog-container">
-    <h2>Add Example Clusterclasses</h2>
+    <h2>{{ t('capi.exampleClasses.addExamples') }}</h2>
     <div
       v-if="!gitRepo?.id"
       class="text-label mb-20"
     >
-      This will create a fleet git repo resource, <code>turtles-clusterclass-examples</code>, and new namespace in the local cluster,  <code>turtles-clusterclasses</code>, which the example cluster classes will be deployed in. Note that in order for the cluster class resources to be created, you must have already installed the relevant CAPI provider(s).
+      <t
+        raw
+        k="capi.exampleClasses.description"
+      />
     </div>
     <div
       v-else
       class="text-label mb-20"
     >
-      This dialog may be safely closed. Cluster classes will automatically appear on the page when they become available.
+      <t k="capi.exampleClasses.done" />
     </div>
     <div v-if="gitRepo && !gitRepo.id">
       <div
@@ -182,14 +187,14 @@ export default {
           href="#"
           @click="goToDetail"
         >
-          View GitRepo deployment details
+          {{ t('capi.exampleClasses.viewDetails') }}
         </a>
         <button
           class="btn role-primary"
           type="button"
           @click="$emit('close')"
         >
-          Continue
+          {{ t('capi.exampleClasses.continue') }}
         </button>
       </template>
     </div>

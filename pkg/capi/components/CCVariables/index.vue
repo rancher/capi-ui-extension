@@ -8,6 +8,7 @@ import { ANNOTATIONS } from '../../types/capi';
 import GroupPanel from '@shell/components/GroupPanel';
 import { FORM_SECTIONS } from '../../edit/cluster.x-k8s.io.cluster/ClusterConfig.vue';
 import Accordion from '@components/Accordion/Accordion.vue';
+import { _CREATE } from '@shell/config/query-params';
 
 export default {
   name: 'ClusterClassVariables',
@@ -67,6 +68,12 @@ export default {
       type:    String,
       default: ''
     },
+
+    mode: {
+      type:    String,
+      default: _CREATE
+    },
+
   },
 
   data() {
@@ -101,7 +108,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters({ withFallback: 'i18n/withFallback' }),
+    ...mapGetters({ withFallback: 'i18n/withFallback', t: 'i18n/t' }),
 
     // this.value is all variable values for the cluster
     // ownedVariables are the subset of those variables that this instance of CCVariables controls
@@ -122,11 +129,11 @@ export default {
       if (!this.isMachineScoped) {
         // variables with annotation matching this section
         if (this.section) {
-          return allVariableDefinitions.filter((v) => v?.metadata?.annotations?.[ANNOTATIONS.SECTION] === this.section);
+          return allVariableDefinitions.filter((v) => (v?.metadata?.annotations?.[ANNOTATIONS.SECTION] || '').toLowerCase() === this.section);
           // if this component doesn't have section prop show all variables without section prop
           // and all variables with a section prop that does not match the list  shown in ClusterConfig (FORM_SECTIONS)
         } else {
-          return allVariableDefinitions.filter((v) => !Object.values(FORM_SECTIONS).includes(v?.metadata?.annotations?.[ANNOTATIONS.SECTION]) || !v?.metadata?.annotations?.[ANNOTATIONS.SECTION]);
+          return allVariableDefinitions.filter((v) => !Object.values(FORM_SECTIONS).includes((v?.metadata?.annotations?.[ANNOTATIONS.SECTION] || '').toLowerCase()) || !v?.metadata?.annotations?.[ANNOTATIONS.SECTION]);
         }
       }
       const variableNames = this.machineScopedJsonPatches.reduce((names, patch) => {
@@ -470,7 +477,7 @@ export default {
             <i
               class="icon text-primary"
               :class="{'icon-chevron-down': expanded, 'icon-chevron-up':!expanded}"
-            />Override Defaults
+            />{{ t('capi.cluster.variables.overrideDefaults') }}
           </h4>
         </div>
         <div
@@ -501,8 +508,9 @@ export default {
                     :value="valueFor(variableDef)"
                     :is-machine-scoped="isMachineScoped"
                     :global-variables="globalVariables"
-                    :validate-required="!machineDeploymentClass && !machinePoolClass"
+                    :validate-required="!isMachineScoped"
                     :cluster-namespace="clusterNamespace"
+                    :mode="mode"
                     @update:value="e=>updateVariables(e, variableDef)"
                     @validation-passed="updateErrors"
                     @error="e=>$emit('error', e)"
@@ -535,6 +543,7 @@ export default {
                   :validate-required="!isMachineScoped"
                   :is-machine-scoped="isMachineScoped"
                   :cluster-namespace="clusterNamespace"
+                  :mode="mode"
                   @update:value="e=>updateVariables(e, variableDef)"
                   @validation-passed="updateErrors"
                   @error="e=>$emit('error', e)"
@@ -558,6 +567,7 @@ $wider-input: 50%;
 $widest-input: 100%;
 $standard-input: $wider-input;
 
+// not last row
 $row-bottom-margin: 20px;
 
 $group-indent: 5%;
@@ -588,6 +598,10 @@ padding: .5em;
  }
 }
 
+.expander {
+  margin-top: 5px;
+}
+
 .expandee {
   margin: 0px  0px 0px $group-indent;
 
@@ -603,7 +617,7 @@ padding: .5em;
 }
 
 .variables-group {
-  margin-top: 5px;
+  margin-top: 10px;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -615,6 +629,7 @@ padding: .5em;
   &>*{
     flex: 0 1 $standard-input;
     margin-bottom: $row-bottom-margin;
+
     max-width: $standard-input;
     &.wider:deep(){
       flex: 0 1 $wider-input;
@@ -623,44 +638,39 @@ padding: .5em;
 
     &.widest:deep() {
       margin: 0 0 $row-bottom-margin 0;
+
       flex: 0 1 $widest-input;
       max-width: $widest-input;
     }
 
     &.depth-1:deep(){
       margin: 0 0 $row-bottom-margin $group-indent;
-      // flex: 0 1 calc($widest-input - calc(0.5 * $group-indent));
-      // max-width: calc($wider-input - calc(0.5 * $group-indent));
+
       flex: 0 1 calc($widest-input - $half-indent);
       max-width: calc($wider-input - $half-indent);
     }
 
     &.depth-1.wider:deep(){
-      // flex: 0 1 calc($wider-input - calc(0.5 * $group-indent));
-      // max-width: calc($wider-input - calc(0.5 * $group-indent));
 
       flex: 0 1 calc($wider-input - $half-indent);
       max-width: calc($wider-input - $half-indent);
     }
 
     &.depth-1.widest:deep(){
-      // flex: 0 1 calc($widest-input - calc(0.5 * $group-indent));
-      // max-width: calc($widest-input - calc(0.5 * $group-indent));
+
       flex: 0 1 calc($widest-input - $half-indent);
       max-width: calc($widest-input - $half-indent);
     }
 
     &.depth-2:deep(){
       margin: 0 0 $row-bottom-margin $group-indent-2;
-      // flex: 0 1 calc($widest-input - calc($group-indent-2 / 2));
-      // max-width: calc($standard-input - calc($group-indent-2 / 2));
+
       flex: 0 1 calc($widest-input - $half-indent-2);
       max-width: calc($standard-input - $half-indent-2);
     }
 
     &.depth-2.widest:deep(){
-        // flex: 0 1 calc($widest-input - calc($group-indent-2 / 2));
-        // max-width: calc($widest-input - calc($group-indent-2 / 2));
+
         flex: 0 1 calc($widest-input - $half-indent-2);
         max-width: calc($widest-input - $half-indent-2);
     }

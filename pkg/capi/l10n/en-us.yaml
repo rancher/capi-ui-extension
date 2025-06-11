@@ -20,7 +20,7 @@ capi:
       controlplane: Control Plane
       networking: Networking
       workers: Workers
-      labels: Labels
+      labels: Labels and Annotations
     steps:
       clusterClass:
         title: Cluster Class
@@ -50,6 +50,8 @@ capi:
     variables:
       title: Variables
       emptyStringOption: None
+      overrideDefaults: Override Variables
+      learnMore: Learn more
     version:
       title: Kubernetes Version
     networking:
@@ -63,7 +65,6 @@ capi:
         title: Service VIP CIDR Blocks
         add: Add Service VIP CIDR Block
       cidrplaceholder: e.g. 192.168.0.0/16
-
     controlPlaneEndpoint:
       title: Control Plane Endpoint
       host: Host
@@ -99,6 +100,16 @@ capi:
         one {{count} Machine Pool }
         other {{count} Machine Pools }
       }
+  exampleClasses:
+    noClass: It looks like you don't have any cluster classes. Rancher Turtles has a curated collection of sample classes to get you started.
+    addExamples: Add Example Classes
+    description: This will create a fleet git repo resource, <code>turtles-clusterclass-examples</code>, and new namespace in the local cluster,  <code>turtles-clusterclasses</code>, which the example cluster classes will be deployed in. Note that in order for the cluster class resources to be created, you must have already installed the relevant CAPI provider(s).
+    done: This dialog may be safely closed. Cluster classes will automatically appear on the page when they become available.
+    viewDetails: View git repo deployment details
+    continue: Continue
+    error:
+      creatingNs: Error creating namespace
+      creatingGitrepo: Error saving gitrepo
   experimental: "The Rancher CAPI UI extension is currently in tech preview."
   provider:
     title: Provider
@@ -192,26 +203,13 @@ capi:
     rkeBootnodeLabels: Node Labels
     rkeBootnodeTaints: Node Taints
 
-<<<<<<< HEAD
 cluster:
   provider:
     kubeadm: Kubeadm
-=======
-asyncButton:
-  saveGitRepo:
-    action: Save GitRepo
-    waiting: Saving...
-    success: Saved
 
-
-
-
->>>>>>> 9c6183ff0 (clusterclass variables enhancements: add machine-scoped variable overrides, sections, labels, toggle, highlight)
 nav:
   group:
     CAPITurtles: CAPI
-
-
 
 typeLabel:
   cluster.x-k8s.io.cluster: |-
@@ -264,3 +262,5 @@ error:
   clusterClassNotFound: Could not find corresponding cluster class. Please check that cluster class exists and is valid.
   yamlPlaceholderError: 'Error generating a yaml template for {variable}: '
   yamlParseError: 'Error parsing yaml in {variable}: '
+  parseVariableAnnotation: Error parsing the {variable} {annotation} annotation - this variable may not be displayed correctly.
+

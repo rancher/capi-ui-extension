@@ -8,6 +8,7 @@ import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
 import { componentForType, isToggle, makeYamlPlaceholders, VARIABLE_INPUT_NAMES } from '../../util/clusterclass-variables';
 import { ANNOTATIONS } from '../../types/capi';
 import VariableHighlight from './VariableHighlight.vue';
+import { _CREATE } from '@shell/config/query-params';
 
 // how many indentation levels the ui will display
 const MAX_DEPTH = 2;
@@ -67,6 +68,11 @@ export default {
       default: ''
     },
 
+    mode: {
+      type:    String,
+      default: _CREATE
+    },
+
   },
 
   watch: {
@@ -86,11 +92,9 @@ export default {
   },
 
   data() {
-    return { yamlPlaceholder: '' };
-  },
-
-  data() {
-    return { noneOption: this.t('capi.cluster.variables.emptyStringOption') };
+    return {
+      noneOption: this.t('capi.cluster.variables.emptyStringOption'), annotationError: '', yamlPlaceholder: ''
+    };
   },
 
   computed: {
@@ -234,7 +238,8 @@ export default {
 
         return true;
       } catch (err) {
-        console.log(err);
+        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+        this.annotationError = (this.t('error.parseVariableAnnotation', { variable: this.withFallback(`capi.variables.${ this.label }`, null, this.label), annotation: ANNOTATIONS.TOGGLED_BY }));
 
         return true;
       }
@@ -270,6 +275,23 @@ export default {
       }
 
       return this.value;
+    },
+
+    // use description in tooltip if the description isn't being used in a highlight.
+    // If there was an error parsing the variables annotations, include that in the tooltip
+    // and show  a warning icon
+    tooltip() {
+      let out = '';
+
+      if (!this.highlighted) {
+        out += this.schema.description;
+      }
+
+      if (this.annotationError) {
+        out += this.annotationError;
+      }
+
+      return out;
     }
 
   },
@@ -366,12 +388,15 @@ export default {
           :is="componentForType.component"
           v-if="componentForType"
           :id="componentForType.name"
+          :mode="mode"
           :aria-label="withFallback(`capi.variables.${label}`, null, label)"
           :value="displayValue"
           :label="!highlighted ? withFallback(`capi.variables.${label}`, null, label) : ' '"
-          :on-label="label"
+          :on-label="isToggle ? withFallback(`capi.variables.${label}`, null, label) : undefined"
+
           :placeholder="placeholder"
-          :tooltip="!variable?.metadata?.annotations?.['turtles-capi.cattle.io/highlight'] ? schema.description : ''"
+          :tooltip="tooltip"
+          :status="annotationError ? 'warning' : null"
           :required="variable.required && !isMachineScoped && !highlighted"
           :title="!highlighted ? withFallback(`capi.variables.${label}`, null, label) : ' '"
           :options="variableOptions"

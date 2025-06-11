@@ -20,9 +20,9 @@ export default {
       type:    String,
       default: _EDIT,
     },
-    title: {
-      type:     String,
-      required: true
+    isDeployments: {
+      type:    Boolean,
+      default: true
     },
     classOptions: {
       type:     Array,
@@ -87,7 +87,19 @@ export default {
     },
     removeLabel() {
       return this.$store.getters['i18n/t']('generic.remove');
-    }
+    },
+
+    addLabel() {
+      return this.isDeployments ? this.t('capi.cluster.workers.machineDeployments.add') : this.t('capi.cluster.workers.machinePools.add');
+    },
+
+    machineClassType() {
+      return this.isDeployments ? 'machineDeploymentClass' : 'machinePoolClass';
+    },
+    title() {
+      return this.isDeployments ? this.t('capi.cluster.workers.machineDeployments.title') : this.t('capi.cluster.workers.machinePools.title');
+    },
+
   },
   watch:    {
     value: {
@@ -112,29 +124,6 @@ export default {
   },
   created() {
     this.queueUpdate = debounce(this.update, 50);
-  },
-
-  computed: {
-    isView() {
-      return this.mode === _VIEW;
-    },
-
-    isDeployments() {
-      return this.title.includes('Deployments');
-    },
-
-    removeLabel() {
-      return this.$store.getters['i18n/t']('generic.remove');
-    },
-
-    addLabel() {
-      return this.isDeployments ? this.t('capi.cluster.workers.machineDeployments.add') : this.t('capi.cluster.workers.machinePools.add');
-    },
-
-    machineClassType() {
-      return this.isDeployments ? 'machineDeploymentClass' : 'machinePoolClass';
-    },
-
   },
 
   methods: {
@@ -242,18 +231,20 @@ export default {
               :mode="mode"
               :disabled="false"
               :label="t('capi.cluster.workers.replicas')"
+              type="number"
               placeholder="1"
               @update:value="(val) => !!val ? row.value.replicas = parseInt(val) : row.value.replicas = null"
             />
           </div>
           <div
+            v-show="rows.length > 1"
             class="remove"
           >
             <button
               type="button"
               :disabled="isView"
               class="btn role-link"
-              :data-testid="`remove-item-${idx}`"
+              :data-testid="`${componentTestid}-remove-item-${idx}`"
               @click="remove(row, idx)"
             >
               {{ removeLabel }}
@@ -302,10 +293,6 @@ export default {
   }
 }
 
-.machine-variables {
-  // margin: 1em  0px 1em 1em;
-}
-
 .box {
     margin: 40px 0px 40px 0px;
 
@@ -315,17 +302,7 @@ export default {
     }
 
     & .remove{
-
+      align-content: center;
     }
-
-  // &>.remove {
-  //   position: relative;
-
-  //   & button{
-  //     position: absolute;
-  //     right: 80px;
-  //     top: 2em;
-  //   }
-  // }
 }
 </style>

@@ -1,6 +1,8 @@
 <script>
 import { mapGetters } from 'vuex';
 import LabeledSelect from '@shell/components/form/LabeledSelect';
+import { _CREATE } from '@shell/config/query-params';
+import { NAMESPACE } from '@shell/config/types';
 
 export default {
   name: 'ResourceVariableInput',
@@ -16,13 +18,10 @@ export default {
       type:    String,
       default: null
     },
-    //
     value: {
       type:    Object,
-      default: ()=>{
-        return {
-          name: ''
-        }
+      default: () => {
+        return { name: '' };
       }
     },
     // validation rules
@@ -34,13 +33,13 @@ export default {
 
     mode: {
       type:    String,
-      default: 'create'
+      default: _CREATE
     },
 
     // if it exists already, default to the cluster's namespace in the namespace dropdown
     clusterNamespace: {
-      type: String,
-      default : ''
+      type:    String,
+      default: ''
     },
   },
 
@@ -49,6 +48,8 @@ export default {
   components: { LabeledSelect },
 
   data() {
+    this.fetchResource(this.clusterNamespace);
+
     return {
       // spinner on resource input when querying by ns
       loading:   false,
@@ -59,40 +60,41 @@ export default {
   methods: {
     async fetchResource(ns) {
       this.loading = true;
-      const opt = {}
-      if(this.namespaced){
-        opt.namespaced = ns
+      const opt = {};
+
+      if (this.namespaced) {
+        opt.namespaced = ns;
       }
       try {
-        this.resource = await this.$store.dispatch('management/findAll', { type: this.resourceType, opt});
+        this.resource = await this.$store.dispatch('management/findAll', { type: this.resourceType, opt });
       } catch (err) {
         console.error(err);
       }
       this.loading = false;
-      
     },
 
-    update(name=''){
-      let out = {name}
-      if(this.namespaced){
-        out.namespace = this.namespace
+    update(name = '') {
+      const out = { name };
+
+      if (this.namespaced) {
+        out.namespace = this.namespace;
       }
 
-      this.$emit('update:value', out)
+      this.$emit('update:value', out);
     },
   },
 
   computed: {
     ...mapGetters({ all: 'management/all', schemaFor: 'management/schemaFor' }),
 
-    namespaced(){
-      const schema = this.schemaFor(this.resourceType)
+    namespaced() {
+      const schema = this.schemaFor(this.resourceType);
 
-      return !!schema && schema?.attributes?.namespaced
+      return !!schema && schema?.attributes?.namespaced;
     },
 
     namespaces() {
-      return this.all('namespace');
+      return this.all(NAMESPACE);
     },
 
     resourceNames() {
@@ -100,28 +102,28 @@ export default {
     },
 
     name: {
-      get(){
-        return this.value?.name || ''
+      get() {
+        return this.value?.name || '';
       },
-      set(neu){
-        let out = {name: neu}
-        if(this.namespaced){
-          out.namespace = this.namespace
+      set(neu) {
+        const out = { name: neu };
+
+        if (this.namespaced) {
+          out.namespace = this.namespace;
         }
 
-        this.$emit('update:value', out)
+        this.$emit('update:value', out);
       }
     },
 
     namespace: {
-      get(){
-        return this.value?.namespace || this.clusterNamespace || ''
+      get() {
+        return this.value?.namespace || this.clusterNamespace || '';
       },
-      set(neu){
+      set(neu) {
+        const out = { namespace: neu, name: this.name };
 
-        let out = {namespace: neu, name: this.name}
-        
-        this.$emit('update:value', out)
+        this.$emit('update:value', out);
         // check if ns from list or user entered value
         if (this.namespaces.find((n) => n.id === neu)) {
           this.fetchResource(neu);
@@ -139,21 +141,21 @@ export default {
       class="col span-6"
     >
       <LabeledSelect
-        label="Namespace"
+        label-key="tableHeaders.namespace"
         :mode="mode"
         :value="namespace"
         option-label="id"
         :options="namespaces || []"
-        @selecting="e=>namespace=e.id"
         searchable
         taggable
+        @selecting="e=>namespace=e.id"
       />
     </div>
     <div class="col span-6">
       <LabeledSelect
         :value="name"
         :loading="loading"
-        label="Name"
+        label-key="tableHeaders.name"
         :options="resourceNames || []"
         :mode="mode"
         taggable

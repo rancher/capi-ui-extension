@@ -310,23 +310,23 @@ export default {
     },
 
     canCreateGitRepos() {
-      const gitRepoSchema = this.schemaFor(FLEET.GIT_REPO);
+      const gitRepoSchema = this.$store.getters[`management/schemaFor`](FLEET.GIT_REPO);
 
       return gitRepoSchema && gitRepoSchema?.collectionMethods.find((x) => x.toLowerCase() === 'post') ;
     },
 
     isk3s() {
-      return this.clusterClassControlPlane === 'KThreesControlPlaneTemplate';
+      return this.clusterClassControlPlane === CAPI.K3S_CP;
     },
 
     isRke2() {
-      return this.clusterClassControlPlane === 'RKE2ControlPlaneTemplate';
+      return this.clusterClassControlPlane === CAPI.RKE2_CP;
     },
 
     // if k3s or rke2 use release channel endpoint to get a list of version choices
     // if this property is [] show a plain text input for cp version
     versionOptions() {
-      if (this.isK3s) {
+      if (this.isk3s) {
         return (this.k3sVersions?.data || []).map((d) => d.version).reverse();
       }
 
@@ -398,7 +398,7 @@ export default {
     },
 
     setVariables(vars, names) {
-      const removed = (this.value.spec.topology.variables || []).filter((v) => !names.includes(v.name));
+      const removed = (this.value?.spec?.topology?.variables || []).filter((v) => !names.includes(v.name));
 
       this.value.spec.topology.variables = removed;
 
@@ -518,14 +518,19 @@ export default {
       >
         <template #no-rows>
           <div v-if="canCreateGitRepos">
-            It looks like you don't have any cluster classes. Rancher Turtles has a curated collection of sample classes to get you started.
+            <t
+              raw
+              k="capi.exampleClasses.noClass"
+            />
             <div class="mt-20">
               <button
                 type="button"
                 class="btn role-secondary"
                 @click="openRepoModal"
               >
-                Add Example Classes
+                <t
+                  k="capi.exampleClasses.addExamples"
+                />
               </button>
             </div>
           </div>
@@ -590,7 +595,7 @@ export default {
         </div>
         <ClusterClassVariables
           :will-open="configHighlightOpen"
-          :value="value.spec.topology.variables"
+          :value="value?.spec?.topology?.variables"
           :section="formSections.GENERAL"
           :cluster-class="clusterClassObj"
           :cluster-namespace="value.metadata?.namespace"
@@ -626,7 +631,7 @@ export default {
         </div>
         <ClusterClassVariables
           :will-open="controlPlaneHighlightOpen"
-          :value="value.spec.topology.variables"
+          :value="value?.spec?.topology?.variables"
           :section="formSections.CONTROL_PLANE"
           :cluster-class="clusterClassObj"
           :cluster-namespace="value.metadata?.namespace"
@@ -656,7 +661,7 @@ export default {
         </div>
         <ClusterClassVariables
           :will-open="networkingHighlightOpen"
-          :value="value.spec.topology.variables"
+          :value="value?.spec?.topology?.variables"
           :cluster-class="clusterClassObj"
           :section="formSections.NETWORKING"
           :cluster-namespace="value.metadata?.namespace"
@@ -666,17 +671,6 @@ export default {
         />
       </Accordion>
 
-      <!-- GENERIC VARIABLES -->
-
-      <ClusterClassVariables
-        :value="value.spec.topology.variables"
-        :cluster-class="clusterClassObj"
-        :cluster-namespace="value.metadata?.namespace"
-        @update-variables="setVariables"
-
-        @validation-passed="e => variableSectionReady.misc = e"
-      />
-
       <!-- WORKERS -->
       <Accordion
         class="mt-20 section-accordion"
@@ -685,7 +679,7 @@ export default {
       >
         <div class="col span-12 mb-20">
           <ClusterClassVariables
-            :value="value.spec.topology.variables"
+            :value="value?.spec?.topology?.variables"
             :section="formSections.WORKERS"
             :cluster-class="clusterClassObj"
             :cluster-namespace="value.metadata?.namespace"
@@ -729,6 +723,17 @@ export default {
           </div>
         </div>
       </Accordion>
+
+      <!-- GENERIC VARIABLES -->
+
+      <ClusterClassVariables
+        :value="value?.spec?.topology?.variables"
+        :cluster-class="clusterClassObj"
+        :cluster-namespace="value.metadata?.namespace"
+        @update-variables="setVariables"
+
+        @validation-passed="e => variableSectionReady.misc = e"
+      />
 
       <Accordion
         class="mt-20 section-accordion"

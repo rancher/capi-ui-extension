@@ -1,5 +1,7 @@
 <script>
+import { _CREATE } from '@shell/config/query-params';
 import { ANNOTATIONS } from '../../types/capi';
+
 export default {
   name: 'CCvariableDefHighlightWrapper',
 
@@ -19,7 +21,7 @@ export default {
 
     mode: {
       type:    String,
-      default: 'create'
+      default: _CREATE
     },
 
     willOpen: {
@@ -85,8 +87,12 @@ export default {
       return this.variableDef?.schema?.openAPIV3Schema?.description;
     },
 
-    showHighlight(){
-      return !!this.highlightColor && !this.isMachineScoped
+    link() {
+      return this.variableDef?.metadata?.annotations?.[ANNOTATIONS.DOCS];
+    },
+
+    showHighlight() {
+      return !!this.highlightColor && !this.isMachineScoped;
     },
 
     searchType() {
@@ -117,7 +123,6 @@ export default {
         class="header"
       >
         <h4 class="name">
-
           {{ displayName }}  <span
             v-if="required"
             class="text-error"
@@ -127,14 +132,14 @@ export default {
           v-if="searchType"
           class="type"
         > {{ searchType }}</label>
-        <Label v-else />
-          <i
+        <label v-else />
+        <i
           v-if="highlightColor === 'warning' || highlightColor === 'error'"
-            class="icon"
-            :class="{['icon-question-mark']: highlightColor === 'info', ['icon-warning']: highlightColor === 'warning',['icon-error']: highlightColor === 'error',}"
-            @click="toggleOpen(!open)"
-          >
-          </i>
+          class="icon icon-toggle"
+          :class="{['icon-question-mark']: highlightColor === 'info', ['icon-warning']: highlightColor === 'warning',['icon-error']: highlightColor === 'error',}"
+          @click="toggleOpen(!open)"
+        >
+        </i>
       </div>
       <div class="var-input">
         <slot
@@ -150,6 +155,20 @@ export default {
           class="highlight"
         >
           {{ highlight }}
+          <div
+            v-if="link"
+            class="highlight-link"
+          >
+            <a
+              :aria-label="variableDef.name"
+              :href="link"
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+            >
+
+              <t k="capi.cluster.variables.learnMore" /> <i class="icon-external-link icon-sm" />
+            </a>
+          </div>
         </div>
       </Transition>
     </div>
@@ -161,9 +180,9 @@ export default {
   />
 </template>
 
-<style lang='scss'>
+<style scoped lang='scss'>
 $container-top-padding: 0px;
-$container-margin-top-bottom: 15px;
+$container-margin-top-bottom: 0px;
 $header-offset: -30px;
 $animate-duration: 300ms;
 $left-basis: 50%;
@@ -176,6 +195,21 @@ $header-height: 3em;  // position info text below header
     position: relative;
     display:flex;
     justify-content: space-between;
+
+    &:not(.toggle) .highlight{
+      // min-height: 6em;
+      padding: 20px 0 30px 4em;
+      position: relative;
+      & .highlight-link{
+        position: absolute;
+        bottom: 0.5em;
+        right: 3px;
+      }
+    }
+
+    &.toggle .left-container {
+      padding-top: 10px;
+    }
 
     .left-container {
         flex-basis: $left-basis;
@@ -210,8 +244,8 @@ $header-height: 3em;  // position info text below header
 
     .highlight {
         text-align: end;
-        padding: 10px 0 2em 4em;
-         i {
+        padding: 20px 0 20px 4em;
+         i.icon-toggle {
             display: block;
             position: absolute;
             right: 5px;
@@ -220,22 +254,22 @@ $header-height: 3em;  // position info text below header
     }
 
     &.info {
-        i {
+        i.icon-toggle {
             color: var(--info);
 
         }
     }
 
     &.warning {
-        i {
+        i.icon-warning {
             color: var(--warning);
         }
     }
 
     &.open.info {
 
-        .right-container {
-            padding-right: 3px;
+        .right-container .highlight {
+            padding-right: 5px;
             border-right: 1px solid var(--info);
             background-image: linear-gradient(to left, var(--info-banner-bg), var(--body-bg));
         }
@@ -243,16 +277,23 @@ $header-height: 3em;  // position info text below header
 
     &.open.warning {
 
-        .right-container {
-            padding-right: 3px;
+        .right-container .highlight {
+            padding-right: 5px;
             border-right: 1px solid var(--warning);
             background-image: linear-gradient(to left, var(--warning-banner-bg), var(--body-bg));
         }
     }
 
-
-    .var-input .labeled-input.edit INPUT{
+    .var-input :deep(.labeled-input) INPUT{
       padding-top: 0px;
+    }
+
+    .var-input>:deep(.labeled-select) .vs__selected-options{
+      height:100% !important;
+    }
+
+    .highlight-link {
+      padding-top: 10px;
     }
 }
 </style>

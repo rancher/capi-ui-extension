@@ -4,7 +4,6 @@ const CLUSTER_MGMT_PRODUCT = 'manager';
 
 export function init($plugin: any, store: any) {
   const {
-    product,
     basicType,
     weightType,
     weightGroup,
@@ -20,14 +19,16 @@ export function init($plugin: any, store: any) {
     namespaced:  false,
     weight:      99,
     route:                  {
-      name:   `c-cluster-${CLUSTER_MGMT_PRODUCT}-capi`,
+      name:   `c-cluster-${ CLUSTER_MGMT_PRODUCT }-capi`,
       params: { cluster: '_' }
     },
     overview: true,
     exact:    true,
   });
 
-
+  // Interestingly, types can only appear in one place, so by adding machine deployment
+  // and others here, they will no longer show up in the Advanced section, which is
+  // quite nice for this use case
   basicType([
     'capi-dashboard',
     RANCHER_CAPI.CAPI_CLUSTER,
@@ -37,9 +38,9 @@ export function init($plugin: any, store: any) {
     // RANCHER_CAPI.MACHINE,
     RANCHER_CAPI.MACHINE_SET,
     RANCHER_CAPI.MACHINE_DEPLOYMENT,
-  ], 'CAPI');
+  ], 'CAPITurtles');
 
   weightType(RANCHER_CAPI.CAPI_CLUSTER, 10, true);
 
-
+  weightGroup('CAPITurtles', 10, true);
 }
