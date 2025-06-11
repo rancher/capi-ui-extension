@@ -518,14 +518,14 @@ export default {
       >
         <template #no-rows>
           <div v-if="canCreateGitRepos">
-            It looks like you don't have any cluster classes. Rancher Turtles has a curated collection of sample classes to get you started.
+            <t k="capi.exampleClasses.noClass" />
             <div class="mt-20">
               <button
                 type="button"
                 class="btn role-secondary"
                 @click="openRepoModal"
               >
-                Add Example Classes
+                <t k="capi.exampleClasses.addExamples" />
               </button>
             </div>
           </div>
