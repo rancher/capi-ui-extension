@@ -20,9 +20,9 @@ export default {
       type:    String,
       default: _EDIT,
     },
-    title: {
-      type:     String,
-      required: true
+    isDeployments: {
+      type:    Boolean,
+      default: true
     },
     classOptions: {
       type:     Array,
@@ -96,9 +96,8 @@ export default {
     machineClassType() {
       return this.isDeployments ? 'machineDeploymentClass' : 'machinePoolClass';
     },
-    // TODO nb not this
-    isDeployments() {
-      return this.title.includes('Deployments');
+    title() {
+      return this.isDeployments ? this.t('capi.cluster.workers.machineDeployments.title') : this.t('capi.cluster.workers.machinePools.title');
     },
 
   },
@@ -232,6 +231,7 @@ export default {
               :mode="mode"
               :disabled="false"
               :label="t('capi.cluster.workers.replicas')"
+              type="number"
               placeholder="1"
               @update:value="(val) => !!val ? row.value.replicas = parseInt(val) : row.value.replicas = null"
             />

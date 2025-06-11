@@ -1,5 +1,7 @@
 <script>
+import { _CREATE } from '@shell/config/query-params';
 import { ANNOTATIONS } from '../../types/capi';
+
 export default {
   name: 'CCvariableDefHighlightWrapper',
 
@@ -19,7 +21,7 @@ export default {
 
     mode: {
       type:    String,
-      default: 'create'
+      default: _CREATE
     },
 
     willOpen: {
@@ -126,7 +128,7 @@ export default {
           v-if="searchType"
           class="type"
         > {{ searchType }}</label>
-        <Label v-else />
+        <label v-else />
         <i
           v-if="highlightColor === 'warning' || highlightColor === 'error'"
           class="icon"
@@ -234,7 +236,7 @@ $header-height: 3em;  // position info text below header
     &.open.info {
 
         .right-container {
-            padding-right: 3px;
+            padding-right: 5px;
             border-right: 1px solid var(--info);
             background-image: linear-gradient(to left, var(--info-banner-bg), var(--body-bg));
         }
@@ -243,7 +245,7 @@ $header-height: 3em;  // position info text below header
     &.open.warning {
 
         .right-container {
-            padding-right: 3px;
+            padding-right: 5px;
             border-right: 1px solid var(--warning);
             background-image: linear-gradient(to left, var(--warning-banner-bg), var(--body-bg));
         }

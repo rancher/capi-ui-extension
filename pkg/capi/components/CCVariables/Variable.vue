@@ -8,10 +8,10 @@ import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
 import { componentForType, isToggle, makeYamlPlaceholders, VARIABLE_INPUT_NAMES } from '../../util/clusterclass-variables';
 import { ANNOTATIONS } from '../../types/capi';
 import VariableHighlight from './VariableHighlight.vue';
+import { _CREATE } from '@shell/config/query-params';
 
 // how many indentation levels the ui will display
 const MAX_DEPTH = 2;
-
 
 export default {
   name: 'CCVariable',
@@ -64,8 +64,13 @@ export default {
     },
 
     clusterNamespace: {
-      type: String,
-      default : ''
+      type:    String,
+      default: ''
+    },
+
+    mode: {
+      type:    String,
+      default: _CREATE
     },
 
   },
@@ -82,10 +87,8 @@ export default {
     }
   },
 
-  data(){
-    return {
-      noneOption: this.t('capi.cluster.variables.emptyStringOption')
-    }
+  data() {
+    return { noneOption: this.t('capi.cluster.variables.emptyStringOption'), annotationError: '' };
   },
 
   computed: {
@@ -105,10 +108,12 @@ export default {
 
       return opts.map((opt) => {
         let out = typeof opt === 'object' ? JSON.stringify(opt) : opt;
-        if(opt === ""){
-          out = this.noneOption
+
+        if (opt === '') {
+          out = this.noneOption;
         }
-        return out
+
+        return out;
       });
     },
 
@@ -243,7 +248,8 @@ export default {
 
         return true;
       } catch (err) {
-        console.log(err);
+        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+        this.annotationError = (this.t('error.parseVariableAnnotation', { variable: this.withFallback(`capi.variables.${ this.label }`, null, this.label), annotation: ANNOTATIONS.TOGGLED_BY }));
 
         return true;
       }
@@ -270,14 +276,32 @@ export default {
       return this.variable?.metadata?.annotations?.[ANNOTATIONS.SEARCH_TYPE];
     },
 
-    displayValue(){
-      if(this.isYamlComponent){
-        return this.yamlPlaceholder || this.value 
+    displayValue() {
+      if (this.isYamlComponent) {
+        return this.yamlPlaceholder || this.value;
       }
-      if(this.variableOptions?.length && this.value === ''){
-        return this.noneOption
+      if (this.variableOptions?.length && this.value === '') {
+        return this.noneOption;
       }
-      return this.value
+
+      return this.value;
+    },
+
+    // use description in tooltip if the description isn't being used in a highlight.
+    // If there was an error parsing the variables annotations, include that in the tooltip
+    // and show  a warning icon
+    tooltip() {
+      let out = '';
+
+      if (!this.highlighted) {
+        out += this.schema.description;
+      }
+
+      if (this.annotationError) {
+        out += this.annotationError;
+      }
+
+      return out;
     }
 
   },
@@ -308,8 +332,8 @@ export default {
         toggleOpen(e);
       }
 
-      if(this.variableOptions?.length && e === this.noneOption){
-        out = ''
+      if (this.variableOptions?.length && e === this.noneOption) {
+        out = '';
       }
 
       this.$emit('update:value', out);
@@ -330,7 +354,7 @@ export default {
     }"
   >
     <VariableHighlight
-    :is-machine-scoped="isMachineScoped"
+      :is-machine-scoped="isMachineScoped"
       :mode="mode"
       :variable-def="variable"
       :variable-value="value"
@@ -353,12 +377,12 @@ export default {
           :is="componentForType.component"
           v-if="componentForType"
           :id="componentForType.name"
+          :mode="mode"
           :aria-label="withFallback(`capi.variables.${label}`, null, label)"
           :value="displayValue"
           :label="!highlighted ? withFallback(`capi.variables.${label}`, null, label) : ' '"
-          :on-label="label"
           :placeholder="placeholder"
-          :tooltip="!variable?.metadata?.annotations?.['turtles-capi.cattle.io/highlight'] ? schema.description : ''"
+          :tooltip="tooltip"
           :required="variable.required && !isMachineScoped && !highlighted"
           :title="!highlighted ? withFallback(`capi.variables.${label}`, null, label) : ' '"
           :options="variableOptions"
@@ -370,10 +394,15 @@ export default {
 
           @update:value="e=>setValue(e, toggleOpen)"
         >
-          <template  #title>
-            <div v-if="highlighted"><span/></div>
-            <div v-else class="input-label">
-              <span>{{ withFallback(`capi.variables.${label}`, null, label) || ' '}}
+          <template #title>
+            <div v-if="highlighted">
+              <span />
+            </div>
+            <div
+              v-else
+              class="input-label"
+            >
+              <span>{{ withFallback(`capi.variables.${label}`, null, label) || ' ' }}
                 <i
                   v-if="schema.description"
                   v-clean-tooltip="schema.description"

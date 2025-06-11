@@ -50,6 +50,7 @@ capi:
     variables:
       title: Variables
       emptyStringOption: None
+      overrideDefaults: Override Variables
     version:
       title: Kubernetes Version
     networking:
@@ -63,7 +64,6 @@ capi:
         title: Service VIP CIDR Blocks
         add: Add Service VIP CIDR Block
       cidrplaceholder: e.g. 192.168.0.0/16
-
     controlPlaneEndpoint:
       title: Control Plane Endpoint
       host: Host
@@ -199,13 +199,9 @@ asyncButton:
     success: Saved
 
 
-
-
 nav:
   group:
     CAPITurtles: CAPI
-
-
 
 typeLabel:
   cluster.x-k8s.io.cluster: |-
@@ -256,3 +252,4 @@ validation:
   url: '"Value" must be a valid URL.'
 error:
   clusterClassNotFound: Could not find corresponding cluster class. Please check that cluster class exists and is valid.
+  parseVariableAnnotation: Error parsing the {variable} {annotation} annotation - this variable may not be displayed correctly.

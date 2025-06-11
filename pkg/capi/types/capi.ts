@@ -26,6 +26,8 @@ export const CAPI = {
   CLUSTER:       'cluster.x-k8s.io.cluster',
   CLUSTER_CLASS: 'cluster.x-k8s.io.clusterclass',
   PROVIDER:      'turtles-capi.cattle.io.capiprovider',
+  K3S_CP:        'KThreesControlPlaneTemplate',
+  RKE2_CP:       'RKE2ControlPlaneTemplate'
 };
 
 export const CP_VERSIONS = {

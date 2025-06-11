@@ -316,11 +316,11 @@ export default {
     },
 
     isk3s() {
-      return this.clusterClassControlPlane === 'KThreesControlPlaneTemplate';
+      return this.clusterClassControlPlane === CAPI.K3S_CP;
     },
 
     isRke2() {
-      return this.clusterClassControlPlane === 'RKE2ControlPlaneTemplate';
+      return this.clusterClassControlPlane === CAPI.RKE2_CP;
     },
 
     // if k3s or rke2 use release channel endpoint to get a list of version choices
@@ -398,7 +398,7 @@ export default {
     },
 
     setVariables(vars, names) {
-      const removed = (this.value.spec.topology.variables || []).filter((v) => !names.includes(v.name));
+      const removed = (this.value?.spec?.topology?.variables || []).filter((v) => !names.includes(v.name));
 
       this.value.spec.topology.variables = removed;
 
@@ -590,7 +590,7 @@ export default {
         </div>
         <ClusterClassVariables
           :will-open="configHighlightOpen"
-          :value="value.spec.topology.variables"
+          :value="value?.spec?.topology?.variables"
           :section="formSections.GENERAL"
           :cluster-class="clusterClassObj"
           :cluster-namespace="value.metadata?.namespace"
@@ -626,7 +626,7 @@ export default {
         </div>
         <ClusterClassVariables
           :will-open="controlPlaneHighlightOpen"
-          :value="value.spec.topology.variables"
+          :value="value?.spec?.topology?.variables"
           :section="formSections.CONTROL_PLANE"
           :cluster-class="clusterClassObj"
           :cluster-namespace="value.metadata?.namespace"
@@ -656,7 +656,7 @@ export default {
         </div>
         <ClusterClassVariables
           :will-open="networkingHighlightOpen"
-          :value="value.spec.topology.variables"
+          :value="value?.spec?.topology?.variables"
           :cluster-class="clusterClassObj"
           :section="formSections.NETWORKING"
           :cluster-namespace="value.metadata?.namespace"
@@ -674,7 +674,7 @@ export default {
       >
         <div class="col span-12 mb-20">
           <ClusterClassVariables
-            :value="value.spec.topology.variables"
+            :value="value?.spec?.topology?.variables"
             :section="formSections.WORKERS"
             :cluster-class="clusterClassObj"
             :cluster-namespace="value.metadata?.namespace"
@@ -722,7 +722,7 @@ export default {
       <!-- GENERIC VARIABLES -->
 
       <ClusterClassVariables
-        :value="value.spec.topology.variables"
+        :value="value?.spec?.topology?.variables"
         :cluster-class="clusterClassObj"
         :cluster-namespace="value.metadata?.namespace"
         @update-variables="setVariables"

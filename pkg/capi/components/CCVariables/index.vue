@@ -3,11 +3,12 @@ import { mapGetters } from 'vuex';
 import debounce from 'lodash/debounce';
 import { randomStr } from '@shell/utils/string';
 import Variable from './Variable.vue';
-import { componentForType, isToggle } from '../../util/clusterclass-variables';
-import { LABELS, ANNOTATIONS } from '../../types/capi';
+import { componentForType } from '../../util/clusterclass-variables';
+import { ANNOTATIONS } from '../../types/capi';
 import GroupPanel from '@shell/components/GroupPanel';
 import { FORM_SECTIONS } from '../../edit/cluster.x-k8s.io.cluster/ClusterConfig.vue';
 import Accordion from '@components/Accordion/Accordion.vue';
+import { _CREATE } from '@shell/config/query-params';
 
 export default {
   name: 'ClusterClassVariables',
@@ -66,6 +67,12 @@ export default {
       type:    String,
       default: ''
     },
+
+    mode: {
+      type:    String,
+      default: _CREATE
+    },
+
   },
 
   data() {
@@ -100,7 +107,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters({ withFallback: 'i18n/withFallback' }),
+    ...mapGetters({ withFallback: 'i18n/withFallback', t: 'i18n/t' }),
 
     // this.value is all variable values for the cluster
     // ownedVariables are the subset of those variables that this instance of CCVariables controls
@@ -467,7 +474,7 @@ export default {
             <i
               class="icon text-primary"
               :class="{'icon-chevron-down': expanded, 'icon-chevron-up':!expanded}"
-            />Override Defaults
+            />{{ t('capi.cluster.variables.overrideDefaults') }}
           </h4>
         </div>
         <div
@@ -498,8 +505,9 @@ export default {
                     :value="valueFor(variableDef)"
                     :is-machine-scoped="isMachineScoped"
                     :global-variables="globalVariables"
-                    :validate-required="!machineDeploymentClass && !machinePoolClass"
+                    :validate-required="!isMachineScoped"
                     :cluster-namespace="clusterNamespace"
+                    :mode="mode"
                     @update:value="e=>updateVariables(e, variableDef)"
                     @validation-passed="updateErrors"
                   />
@@ -531,6 +539,7 @@ export default {
                   :validate-required="!isMachineScoped"
                   :is-machine-scoped="isMachineScoped"
                   :cluster-namespace="clusterNamespace"
+                  :mode="mode"
                   @update:value="e=>updateVariables(e, variableDef)"
                   @validation-passed="updateErrors"
                 />
@@ -582,6 +591,10 @@ padding: .5em;
  & H3{
   margin: 0px;
  }
+}
+
+.expander {
+  margin-top: 5px;
 }
 
 .expandee {
