@@ -553,20 +553,18 @@ $wider-input: 50%;
 $widest-input: 100%;
 $standard-input: $wider-input;
 
+$row-bottom-margin: 20px;
+
 $group-indent: 5%;
 $group-indent-2: calc($group-indent * 2);
 
 $half-indent: calc($group-indent / 2);
-// $half-indent-2: calc($half-indent + calc($group-indent-2 / 2));
 $half-indent-2: calc($group-indent-2 / 2);
-
-$max-width-2: calc($widest-input - $group-indent-2);
 
 .ccvariable-group-panel {
   margin: 0px 0px 20px 20px;
 
   :deep(.group-panel){
-    padding-top: 20px;
     padding-right: 0px;
   }
 
@@ -605,9 +603,13 @@ padding: .5em;
   flex-direction: row;
   flex-wrap: wrap;
 
+  &>.force-newline{
+    margin: 0px;
+  }
+
   &>*{
     flex: 0 1 $standard-input;
-    margin: 0 0 10px 0;
+    margin-bottom: $row-bottom-margin;
     max-width: $standard-input;
 
     &.wider:deep(){
@@ -616,13 +618,13 @@ padding: .5em;
     }
 
     &.widest:deep() {
-      margin: 0 0 10px 0;
+      margin: 0 0 $row-bottom-margin 0;
       flex: 0 1 $widest-input;
       max-width: $widest-input;
     }
 
     &.depth-1:deep(){
-      margin: 0 0 0 $group-indent;
+      margin: 0 0 $row-bottom-margin $group-indent;
       // flex: 0 1 calc($widest-input - calc(0.5 * $group-indent));
       // max-width: calc($wider-input - calc(0.5 * $group-indent));
       flex: 0 1 calc($widest-input - $half-indent);
@@ -645,10 +647,10 @@ padding: .5em;
     }
 
     &.depth-2:deep(){
-      margin: 0 0 0 $group-indent-2;
+      margin: 0 0 $row-bottom-margin $group-indent-2;
       // flex: 0 1 calc($widest-input - calc($group-indent-2 / 2));
       // max-width: calc($standard-input - calc($group-indent-2 / 2));
-            flex: 0 1 calc($widest-input - $half-indent-2);
+      flex: 0 1 calc($widest-input - $half-indent-2);
       max-width: calc($standard-input - $half-indent-2);
     }
 
