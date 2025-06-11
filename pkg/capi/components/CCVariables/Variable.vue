@@ -383,6 +383,7 @@ export default {
           :label="!highlighted ? withFallback(`capi.variables.${label}`, null, label) : ' '"
           :placeholder="placeholder"
           :tooltip="tooltip"
+          :status="annotationError ? 'warning' : null"
           :required="variable.required && !isMachineScoped && !highlighted"
           :title="!highlighted ? withFallback(`capi.variables.${label}`, null, label) : ' '"
           :options="variableOptions"

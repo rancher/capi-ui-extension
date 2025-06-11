@@ -151,7 +151,7 @@ export default {
       <LabeledSelect
         :value="name"
         :loading="loading"
-        label="Name"
+        label-key="tableHeaders.name"
         :options="resourceNames || []"
         :mode="mode"
         taggable
