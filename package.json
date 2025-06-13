@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@rancher/components": "^0.3.0-alpha.1",
-    "@rancher/shell": "3.0.5-rc.2",
+    "@rancher/shell": "3.0.5-rc.3",
     "@types/lodash": "4.14.196",
     "cache-loader": "4.1.0",
     "color": "4.2.3",
