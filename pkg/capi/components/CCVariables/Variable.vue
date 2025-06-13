@@ -1,18 +1,25 @@
 <script>
 import isEqual from 'lodash/isEqual';
+import jsyaml from 'js-yaml';
 
-import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
-import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
-import KeyValue from '@shell/components/form/KeyValue.vue';
-import ArrayList from '@shell/components/form/ArrayList.vue';
-import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
-
+import YamlEditor from '@shell/components/YamlEditor';
 import { mapGetters } from 'vuex';
 import { isDefined, openAPIV3SchemaValidators } from '../../util/validators';
+import { componentForType, isToggle, makeYamlPlaceholders, VARIABLE_INPUT_NAMES } from '../../util/clusterclass-variables';
+import { ANNOTATIONS } from '../../types/capi';
+import VariableHighlight from './VariableHighlight.vue';
+import { _CREATE } from '@shell/config/query-params';
+
+// how many indentation levels the ui will display
+const MAX_DEPTH = 2;
 
 export default {
-  name:  'CCVariable',
+  name: 'CCVariable',
+
   emits: ['validation-passed', 'update:value'],
+
+  components: { YamlEditor, VariableHighlight },
+
   props: {
     variable: {
       type:     Object,
@@ -24,10 +31,48 @@ export default {
       default: () => null
     },
 
-    validateRequired: {
+    //  if the component is being used in a machine pool use the global variable value as placeholder
+    // and do not validate required fields (the field will be validated as required at global level)
+    isMachineScoped: {
+      type:    Boolean,
+      default: false
+    },
+
+    // the full set of variables that this component is one of
+    // either cluster-level variables or one machine pool's available variable overrides
+    allVariables: {
+      type:    Array,
+      default: () => []
+    },
+
+    // cluster-level variables
+    globalVariables: {
+      type:    Array,
+      default: () => []
+    },
+
+    // show/hide all info boxes
+    willOpen: {
       type:    Boolean,
       default: true
-    }
+    },
+
+    // all variable definitions in this section
+    allDefinitions: {
+      type:    Array,
+      default: () => []
+    },
+
+    clusterNamespace: {
+      type:    String,
+      default: ''
+    },
+
+    mode: {
+      type:    String,
+      default: _CREATE
+    },
+
   },
 
   watch: {
@@ -42,45 +87,12 @@ export default {
     }
   },
 
+  data() {
+    return { noneOption: this.t('capi.cluster.variables.emptyStringOption'), annotationError: '' };
+  },
+
   computed: {
-    ...mapGetters({ t: 'i18n/t' }),
-
-    componentForType() {
-      const { type } = this.schema;
-      let out;
-
-      if (this.variableOptions) {
-        out = { component: LabeledSelect, name: 'text-var' };
-      } else {
-        switch (type) {
-        case 'object':
-          out = { component: KeyValue, name: 'keyvalue-var' };
-          break;
-        case 'array':
-          out = { component: ArrayList, name: 'arraylist-var' };
-          break;
-        case 'string':
-          out = { component: LabeledInput, name: 'text-var' };
-          break;
-        case 'integer':
-          out = { component: LabeledInput, name: 'text-var' };
-
-          break;
-        case 'number':
-          out = { component: LabeledInput, name: 'text-var' };
-
-          break;
-        case 'boolean':
-          out = { component: Checkbox, name: 'checkbox-var' };
-
-          break;
-        default:
-          break;
-        }
-      }
-
-      return out;
-    },
+    ...mapGetters({ t: 'i18n/t', withFallback: 'i18n/withFallback' }),
 
     schema() {
       return this.variable?.schema?.openAPIV3Schema;
@@ -95,7 +107,13 @@ export default {
       }
 
       return opts.map((opt) => {
-        return typeof opt === 'object' ? JSON.stringify(opt) : opt;
+        let out = typeof opt === 'object' ? JSON.stringify(opt) : opt;
+
+        if (opt === '') {
+          out = this.noneOption;
+        }
+
+        return out;
       });
     },
 
@@ -108,7 +126,7 @@ export default {
 
       const required = this.variable?.required;
 
-      if (required && this.validateRequired) {
+      if (required && !this.isMachineScoped) {
         out.push((val) => !isDefined(val) ? t('validation.required', { key: this.variable.name }) : undefined);
       }
 
@@ -141,22 +159,183 @@ export default {
       }, []);
     },
 
-    listComponent() {
-      return this.componentForType?.name === 'arraylist-var' || this.componentForType?.name === 'keyvalue-var';
+    /**
+     * Computed props about which input component to show
+     */
+
+    componentForType() {
+      return componentForType(this.variable, this.allDefinitions);
+    },
+
+    isListComponent() {
+      return this.componentForType?.name === VARIABLE_INPUT_NAMES.ARRAY || this.componentForType?.name === VARIABLE_INPUT_NAMES.MAP || this.componentForType?.name === VARIABLE_INPUT_NAMES.MAP_YAML;
+    },
+
+    isYamlComponent() {
+      return this.componentForType?.name === VARIABLE_INPUT_NAMES.YAML;
+    },
+
+    isYamlKeyValueComponent() {
+      return this.isListComponent && this.schema?.additionalProperties?.properties;
+    },
+
+    yamlPlaceholder() {
+      if (!this.isYamlComponent && !this.isYamlKeyValueComponent) {
+        return;
+      }
+
+      try {
+        const out = makeYamlPlaceholders(this.schema);
+
+        return out || '';
+      } catch (err) {
+
+      }
+
+      return '';
+    },
+
+    /**
+     * Compute how to display variable
+     * 2-per-row or full row
+     * how far indented
+     */
+
+    displayClasses() {
+      const out = {
+        wider:  this.isListComponent,
+        widest: this.isYamlKeyValueComponent || this.isYamlComponent || this.highlighted || this.isSearchComponent,
+        center: this.componentForType.name === VARIABLE_INPUT_NAMES.BOOL || this.componentForType.name === VARIABLE_INPUT_NAMES.BOOL_TOGGLE
+      };
+
+      const toggleLabels = (this.variable?.metadata?.annotations?.[ANNOTATIONS.TOGGLED_BY] || '').split(',').map((n) => n.replace(' ', ''));
+      const toggleDepth = (this.allVariables || []).filter((v) => toggleLabels.includes(v.name))?.length;
+
+      if (toggleDepth <= MAX_DEPTH) {
+        out.depth = `depth-${ toggleDepth }`;
+      } else {
+        out.depth = `depth-max`;
+      }
+
+      return out;
+    },
+
+    // if mahcine variable, use global value as placeholder
+    // otherwise use cluster class's variable definition
+    placeholder() {
+      if (this.isMachineScoped) {
+        const globvalValue = this.globalVariables.find((v) => v.name === this.variable.name)?.value;
+
+        if (globvalValue) {
+          return globvalValue;
+        }
+      }
+
+      return this.schema.example;
+    },
+
+    // if variable def has a toggled-by  label, check allVariables for the toggle's state and show/hide this variable accordingly
+    toggled() {
+      try {
+        const toggleLabels = (this.variable?.metadata?.annotations?.[ANNOTATIONS.TOGGLED_BY] || '').split(',').map((n) => n.replace(' ', ''));
+        const toggleVariables = (this.allVariables || []).filter((v) => toggleLabels.includes(v.name));
+
+        if (toggleVariables && toggleVariables.length) {
+          const toggleFalse = !!toggleVariables.find((v) => !v.value);
+
+          return !toggleFalse;
+        }
+
+        return true;
+      } catch (err) {
+        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+        this.annotationError = (this.t('error.parseVariableAnnotation', { variable: this.withFallback(`capi.variables.${ this.label }`, null, this.label), annotation: ANNOTATIONS.TOGGLED_BY }));
+
+        return true;
+      }
+    },
+
+    // does this variable toggle others in the section
+    isToggle() {
+      return isToggle(this.variable, this.allDefinitions);
+    },
+
+    label() {
+      return this.variable?.metadata?.annotations?.[ANNOTATIONS.LABEL] || this.variable.name;
+    },
+
+    highlighted() {
+      return !!this.variable?.metadata?.annotations?.[ANNOTATIONS.HIGHLIGHT] && !this.isMachineScoped;
+    },
+
+    isSearchComponent() {
+      return this.componentForType.name === VARIABLE_INPUT_NAMES.SEARCH_TYPE;
+    },
+
+    resourceType() {
+      return this.variable?.metadata?.annotations?.[ANNOTATIONS.SEARCH_TYPE];
+    },
+
+    displayValue() {
+      if (this.isYamlComponent) {
+        return this.yamlPlaceholder || this.value;
+      }
+      if (this.variableOptions?.length && this.value === '') {
+        return this.noneOption;
+      }
+
+      return this.value;
+    },
+
+    // use description in tooltip if the description isn't being used in a highlight.
+    // If there was an error parsing the variables annotations, include that in the tooltip
+    // and show  a warning icon
+    tooltip() {
+      let out = '';
+
+      if (!this.highlighted) {
+        out += this.schema.description;
+      }
+
+      if (this.annotationError) {
+        out += this.annotationError;
+      }
+
+      return out;
     }
+
   },
 
   methods: {
-    setValue(e) {
+    setYamlMapValue(e, row, queueUpdate) {
+      try {
+        const out = jsyaml.load(e);
+
+        row.value = out;
+        queueUpdate();
+      } catch (err) {
+
+      }
+    },
+    setValue(e, toggleOpen) {
       let out = e;
 
-      const { type } = this.schema;
-
-      if (type === 'object') {
+      if (this.isYamlComponent) {
         try {
-          out = JSON.parse(e);
-        } catch {}
+          out = jsyaml.load(e);
+        } catch (err) {
+          // the yamleditor component will show an error icon if the user has entered invalid yaml + focuses away
+        }
       }
+      if (this.isToggle) {
+        // open the info highlight when toggle switch is enabled
+        toggleOpen(e);
+      }
+
+      if (this.variableOptions?.length && e === this.noneOption) {
+        out = '';
+      }
+
       this.$emit('update:value', out);
     }
   },
@@ -166,40 +345,91 @@ export default {
 <template>
   <div
     v-if="componentForType"
-    :class="{'wider': listComponent, 'align-center': componentForType?.name==='checkbox-var', [`${componentForType.name}`]: true}"
+    v-show="toggled"
+    :class="{'wider': displayClasses.wider,
+             'widest': displayClasses.widest,
+             'align-center': displayClasses.center,
+             [`${componentForType.name}`]: true,
+             [`${displayClasses.depth}`]: true
+    }"
   >
-    <component
-      :is="componentForType.component"
-      v-if="componentForType"
-      :value="value"
-      :label="variable.name"
-      :placeholder="schema.example"
-      :tooltip="schema.description"
-      :required="variable.required && validateRequired"
-      :title="variable.name"
-      :options="variableOptions"
-      :rules="!listComponent ? validationRules : []"
-      :type="schema.type === 'number' || schema.type === 'integer' ? 'number' : 'text'"
-      @update:value="setValue"
+    <VariableHighlight
+      :is-machine-scoped="isMachineScoped"
+      :mode="mode"
+      :variable-def="variable"
+      :variable-value="value"
+      :will-open="willOpen"
+      :is-toggle="isToggle"
     >
-      <template #title>
-        <div class="input-label">
-          <span>{{ variable.name }}
-            <i
-              v-if="schema.description"
-              v-clean-tooltip="schema.description"
-              class="icon icon-sm icon-info"
+      <template #highlight="{toggleOpen}">
+        <label
+          v-if="isYamlComponent"
+          :for="componentForType.name"
+          class="text-label"
+        >
+          {{ variable.name }}
+          <span
+            v-if="variable.required"
+            class="text-error"
+          >*</span>
+        </label>
+        <component
+          :is="componentForType.component"
+          v-if="componentForType"
+          :id="componentForType.name"
+          :mode="mode"
+          :aria-label="withFallback(`capi.variables.${label}`, null, label)"
+          :value="displayValue"
+          :label="!highlighted ? withFallback(`capi.variables.${label}`, null, label) : ' '"
+          :placeholder="placeholder"
+          :tooltip="tooltip"
+          :status="annotationError ? 'warning' : null"
+          :required="variable.required && !isMachineScoped && !highlighted"
+          :title="!highlighted ? withFallback(`capi.variables.${label}`, null, label) : ' '"
+          :options="variableOptions"
+          :rules="!isListComponent ? validationRules : []"
+          :type="schema.type === 'number' || schema.type === 'integer' ? 'number' : 'text'"
+          :as-map="true"
+          :resource-type="resourceType"
+          :cluster-namespace="clusterNamespace"
+
+          @update:value="e=>setValue(e, toggleOpen)"
+        >
+          <template #title>
+            <div v-if="highlighted">
+              <span />
+            </div>
+            <div
+              v-else
+              class="input-label"
+            >
+              <span>{{ withFallback(`capi.variables.${label}`, null, label) || ' ' }}
+                <i
+                  v-if="schema.description"
+                  v-clean-tooltip="schema.description"
+                  class="icon icon-sm icon-info"
+                />
+                <i
+                  v-if="!isValid"
+                  v-clean-tooltip="validationErrors.join(' ')"
+                  class="icon icon-warning"
+                />
+              </span>
+            </div>
+          </template>
+          <template
+            v-if="isYamlKeyValueComponent && yamlPlaceholder"
+            #value="{queueUpdate, row}"
+          >
+            <YamlEditor
+              :value="yamlPlaceholder || row"
+              @update:value="e=>setYamlMapValue(e, row, queueUpdate)"
             />
-            <i
-              v-if="!isValid"
-              v-clean-tooltip="validationErrors.join(' ')"
-              class="icon icon-warning"
-            />
-          </span>
-        </div>
+          </template>
+        </component>
+        <div class="flexbox-newline" />
       </template>
-    </component>
-    <div class="flexbox-newline" />
+    </VariableHighlight>
   </div>
 </template>
 <style lang="scss" scoped>
