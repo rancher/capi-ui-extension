@@ -395,7 +395,7 @@ export default {
     :steps="addSteps"
     component-testid="capi-cluster-create"
     @done="done"
-    @error="e => errors = e"
+    @error="e => errors.push(e)"
     @finish="saveOverride"
     @cancel="cancel"
   >
@@ -550,6 +550,7 @@ export default {
         :cluster-class="clusterClassObj"
         @validation-passed="e => variablesReady = e"
         @update:value="$emit('update:value', { k: 'spec.topology.variables', val: $event })"
+        @error="e=>errors.push(e)"
       />
     </template>
   </CruResource>
