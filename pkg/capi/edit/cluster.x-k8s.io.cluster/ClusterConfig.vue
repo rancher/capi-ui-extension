@@ -309,10 +309,12 @@ export default {
       }
     },
 
+    // TODO nb why undefined
     canCreateGitRepos() {
-      const gitRepoSchema = this.schemaFor(FLEET.GIT_REPO);
+      // const gitRepoSchema = this.$store.getters[`management/schemaFor`](FLEET.GIT_REPO);
 
-      return gitRepoSchema && gitRepoSchema?.collectionMethods.find((x) => x.toLowerCase() === 'post') ;
+      // return gitRepoSchema && gitRepoSchema?.collectionMethods.find((x) => x.toLowerCase() === 'post') ;
+      return true;
     },
 
     isk3s() {
@@ -518,14 +520,19 @@ export default {
       >
         <template #no-rows>
           <div v-if="canCreateGitRepos">
-            <t k="capi.exampleClasses.noClass" />
+            <t
+              raw
+              k="capi.exampleClasses.noClass"
+            />
             <div class="mt-20">
               <button
                 type="button"
                 class="btn role-secondary"
                 @click="openRepoModal"
               >
-                <t k="capi.exampleClasses.addExamples" />
+                <t
+                  k="capi.exampleClasses.addExamples"
+                />
               </button>
             </div>
           </div>

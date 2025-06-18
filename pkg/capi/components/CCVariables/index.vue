@@ -612,7 +612,7 @@ padding: .5em;
 }
 
 .variables-group {
-  margin-top: 5px;
+  margin-top: 10px;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;

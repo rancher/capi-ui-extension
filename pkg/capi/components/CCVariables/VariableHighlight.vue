@@ -251,7 +251,7 @@ $header-height: 3em;  // position info text below header
         }
     }
 
-    .var-input .labeled-input.edit INPUT{
+    .var-input .labeled-input INPUT{
       padding-top: 0px;
     }
 }
