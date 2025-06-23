@@ -354,7 +354,7 @@ export default {
     :steps="addSteps"
     component-testid="capi-cluster-create"
     @done="done"
-    @error="e => errors.push(e)"
+    @error="e => errors = e"
     @finish="saveOverride"
     @cancel="cancel"
   >

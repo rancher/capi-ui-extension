@@ -161,14 +161,10 @@ export const makeSchemas = function(openSchema, id = 'ccvariable') {
  */
 export const makeYamlPlaceholders = function(openSchema, data = {}) {
   const schemas = makeSchemas(openSchema);
-  let out;
 
-  try {
-    out = createYaml(schemas, 'ccvariable', data, false);
-  } catch (err) {
-    console.error(err);
-  }
+  const out = createYaml(schemas, 'ccvariable', data, false);
 
+  // throw new Error('test error');
   if (openSchema.type === 'array') {
     // remove first line, don't need a key just the array
     const sliced = out.slice(out.indexOf('\n') + 1);

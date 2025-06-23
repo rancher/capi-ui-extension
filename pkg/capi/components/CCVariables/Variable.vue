@@ -41,6 +41,14 @@ export default {
     if (!this.isValid) {
       this.$emit('validation-passed', false);
     }
+
+    if (this.isYamlComponent || this.isYamlKeyValueComponent) {
+      this.yamlPlaceholder = this.generateYamlPlaceholder();
+    }
+  },
+
+  data() {
+    return { yamlPlaceholder: '' };
   },
 
   computed: {
@@ -120,25 +128,6 @@ export default {
     isYamlKeyValueComponent() {
       return this.isListComponent && this.schema?.additionalProperties?.properties;
     },
-
-    yamlPlaceholder() {
-      if (!this.isYamlComponent && !this.isYamlKeyValueComponent) {
-        return;
-      }
-
-      try {
-        const out = makeYamlPlaceholders(this.schema);
-
-        return out || '';
-      } catch (err) {
-        const msg = this.t('error.yamlPlaceholderError', { variable: this.variable.name }) + err;
-
-        this.$emit('error', msg);
-      }
-
-      return '';
-    },
-
   },
 
   methods: {
@@ -167,8 +156,27 @@ export default {
       }
 
       this.$emit('update:value', out);
-    }
+    },
+
+    generateYamlPlaceholder() {
+      if (!this.isYamlComponent && !this.isYamlKeyValueComponent) {
+        return;
+      }
+
+      try {
+        const out = makeYamlPlaceholders(this.schema);
+
+        return out || '';
+      } catch (err) {
+        const msg = this.t('error.yamlPlaceholderError', { variable: this.variable.name }) + err;
+
+        this.$emit('error', msg);
+      }
+
+      return '';
+    },
   },
+
 };
 </script>
 
