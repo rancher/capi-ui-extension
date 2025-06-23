@@ -309,12 +309,10 @@ export default {
       }
     },
 
-    // TODO nb why undefined
     canCreateGitRepos() {
-      // const gitRepoSchema = this.$store.getters[`management/schemaFor`](FLEET.GIT_REPO);
+      const gitRepoSchema = this.$store.getters[`management/schemaFor`](FLEET.GIT_REPO);
 
-      // return gitRepoSchema && gitRepoSchema?.collectionMethods.find((x) => x.toLowerCase() === 'post') ;
-      return true;
+      return gitRepoSchema && gitRepoSchema?.collectionMethods.find((x) => x.toLowerCase() === 'post') ;
     },
 
     isk3s() {

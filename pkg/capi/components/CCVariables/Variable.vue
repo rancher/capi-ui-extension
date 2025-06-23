@@ -381,7 +381,7 @@ export default {
           :aria-label="withFallback(`capi.variables.${label}`, null, label)"
           :value="displayValue"
           :label="!highlighted ? withFallback(`capi.variables.${label}`, null, label) : ' '"
-          :on-label="withFallback(`capi.variables.${label}`, null, label)"
+          :on-label="isToggle ? withFallback(`capi.variables.${label}`, null, label) : undefined"
 
           :placeholder="placeholder"
           :tooltip="tooltip"
