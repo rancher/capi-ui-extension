@@ -1,6 +1,8 @@
 <script>
 import { mapGetters } from 'vuex';
 import LabeledSelect from '@shell/components/form/LabeledSelect';
+import { _CREATE } from '@shell/config/query-params';
+import { NAMESPACE } from '@shell/config/types';
 
 export default {
   name: 'ResourceVariableInput',
@@ -31,7 +33,7 @@ export default {
 
     mode: {
       type:    String,
-      default: 'create'
+      default: _CREATE
     },
 
     // if it exists already, default to the cluster's namespace in the namespace dropdown
@@ -46,6 +48,8 @@ export default {
   components: { LabeledSelect },
 
   data() {
+    this.fetchResource(this.clusterNamespace);
+
     return {
       // spinner on resource input when querying by ns
       loading:   false,
@@ -90,7 +94,7 @@ export default {
     },
 
     namespaces() {
-      return this.all('namespace');
+      return this.all(NAMESPACE);
     },
 
     resourceNames() {

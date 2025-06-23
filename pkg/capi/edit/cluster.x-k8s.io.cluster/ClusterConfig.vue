@@ -328,7 +328,7 @@ export default {
     // if k3s or rke2 use release channel endpoint to get a list of version choices
     // if this property is [] show a plain text input for cp version
     versionOptions() {
-      if (this.isK3s) {
+      if (this.isk3s) {
         return (this.k3sVersions?.data || []).map((d) => d.version).reverse();
       }
 

@@ -211,7 +211,7 @@ $header-height: 3em;  // position info text below header
 
     .highlight {
         text-align: end;
-        padding: 10px 0 2em 4em;
+        padding: 20px 0 20px 4em;
          i {
             display: block;
             position: absolute;
@@ -228,14 +228,14 @@ $header-height: 3em;  // position info text below header
     }
 
     &.warning {
-        i {
+        i.icon-warning {
             color: var(--warning);
         }
     }
 
     &.open.info {
 
-        .right-container {
+        .right-container .highlight {
             padding-right: 5px;
             border-right: 1px solid var(--info);
             background-image: linear-gradient(to left, var(--info-banner-bg), var(--body-bg));
@@ -244,7 +244,7 @@ $header-height: 3em;  // position info text below header
 
     &.open.warning {
 
-        .right-container {
+        .right-container .highlight {
             padding-right: 5px;
             border-right: 1px solid var(--warning);
             background-image: linear-gradient(to left, var(--warning-banner-bg), var(--body-bg));

@@ -7,6 +7,7 @@ import FleetSummary from '@shell/components/fleet/FleetSummary';
 import { mapGetters } from 'vuex';
 
 const NEW_NAMESPACE = 'turtles-clusterclasses';
+const REPO_URL = 'https://github.com/rancher/turtles';
 
 const exampleRepo = {
   type:     FLEET.GIT_REPO,
@@ -17,7 +18,7 @@ const exampleRepo = {
     insecureSkipTLSVerify: false,
     paths:                 [],
     pollingInterval:       '60s',
-    repo:                  'https://github.com/rancher/turtles',
+    repo:                  REPO_URL,
     targetNamespace:       NEW_NAMESPACE,
     targets:               [{
       clusterSelector: {

@@ -244,7 +244,7 @@ export default {
               type="button"
               :disabled="isView"
               class="btn role-link"
-              :data-testid="`remove-item-${idx}`"
+              :data-testid="`${componentTestid}-remove-item-${idx}`"
               @click="remove(row, idx)"
             >
               {{ removeLabel }}
