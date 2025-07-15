@@ -1,14 +1,15 @@
 <script>
 import debounce from 'lodash/debounce';
-
 import { randomStr } from '@shell/utils/string';
 import Variable from './Variable.vue';
+import { componentForType } from '../../util/clusterclass-variables';
 
 export default {
   name: 'ClusterClassVariables',
 
   components: { Variable },
-  emits:      ['validation-passed', 'update:value'],
+  // error is emitted when an error occurs parsing or generating yaml. validation-passed corresponds to validation defined in the clusterclass spec
+  emits:      ['validation-passed', 'update:value', 'error'],
 
   props: {
     clusterClass: {
@@ -110,7 +111,8 @@ export default {
       });
 
       return out;
-    }
+    },
+
   },
 
   methods: {
@@ -188,15 +190,11 @@ export default {
     },
 
     newComponentType(variableDef, i) {
-      const refs = this.$refs;
-      const inputEl = refs[`${ variableDef.name }-input`]?.[0]?.$el;
-      const nextInputEl = refs[`${ this.variableDefinitions[i + 1]?.name }-input`]?.[0]?.$el;
+      const nextVariableDef = this.variableDefinitions[i + 1];
 
-      if (!nextInputEl) {
-        return false;
+      if (nextVariableDef) {
+        return componentForType(variableDef?.schema?.openAPIV3Schema)?.name !== componentForType(nextVariableDef?.schema?.openAPIV3Schema)?.name;
       }
-
-      return inputEl?._prevClass !== nextInputEl._prevClass;
     }
   },
 
@@ -217,6 +215,7 @@ export default {
           :validate-required="!machineDeploymentClass && !machinePoolClass"
           @update:value="e=>updateVariables(e, variableDef)"
           @validation-passed="updateErrors"
+          @error="e=>$emit('error', e)"
         />
         <div
           v-if="newComponentType(variableDef, i)"
@@ -231,6 +230,7 @@ export default {
 <style lang="scss" scoped>
 $standard-input: 23.25%;
 $wider-input: 48.25%;
+$widest-input: 98.25%;
 
 .variables {
   display: flex;
@@ -241,9 +241,14 @@ $wider-input: 48.25%;
     flex: 0 1 $standard-input;
     margin: 0 1.75% 10px 0;
     max-width: $standard-input;
-    &::v-deep.wider{
+    &.wider:deep(){
       flex: 0 1 $wider-input;
       max-width: $wider-input;
+    }
+
+    &.widest:deep(){
+      flex: 0 1 $widest-input;
+      max-width: $widest-input;
     }
 
   }
