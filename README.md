@@ -25,7 +25,7 @@ yarn create @rancher/update
 Bump the app version on `package.json` file, then run:
 ```bash
 # Build for production
-./scripts/publish -g 
+yarn publish-pkgs
 # add flag -f if you need to overwrite an existing version
 
 
