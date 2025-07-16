@@ -60,7 +60,7 @@ export default {
   <div>
     <div class="row row-cp ">
       <div
-        class="col col-host span-4 mb-20"
+        class="col col-host span-6 mb-20"
       >
         <LabeledInput
           v-model:value="host"
@@ -72,7 +72,7 @@ export default {
         />
       </div>
       <div
-        class="col col-port span-2 mb-20"
+        class="col col-port span-6 mb-20"
       >
         <LabeledInput
           v-model:value="port"
@@ -89,12 +89,6 @@ export default {
   </div>
 </template>
 <style lang="scss" scoped>
-
-@media screen and (min-width: 1100px) {
-    .row-cp {
-        width: 200%
-    }
-}
 
 @media screen and (max-width: 1100px) {
     .row-cp {

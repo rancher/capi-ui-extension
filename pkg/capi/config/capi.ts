@@ -1,6 +1,5 @@
 import { CAPI as RANCHER_CAPI } from '@shell/config/types';
 import { CAPI as TURTLES_CAPI } from '../types/capi';
-
 const CLUSTER_MGMT_PRODUCT = 'manager';
 
 export function init($plugin: any, store: any) {
@@ -11,6 +10,7 @@ export function init($plugin: any, store: any) {
     virtualType,
     // headers,
   } = $plugin.DSL(store, CLUSTER_MGMT_PRODUCT);
+
 
   virtualType({
     label:       'CAPI Turtles',
@@ -42,6 +42,5 @@ export function init($plugin: any, store: any) {
 
   weightType(RANCHER_CAPI.CAPI_CLUSTER, 10, true);
 
-  // Ensure CAPI group appears before the Advanced group
   weightGroup('CAPITurtles', 10, true);
 }
