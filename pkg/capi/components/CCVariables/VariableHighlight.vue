@@ -1,7 +1,6 @@
 <script>
 import { _CREATE } from '@shell/config/query-params';
 import { ANNOTATIONS } from '../../types/capi';
-import { escapeHtml, decodeHtml } from '@shell/utils/string';
 
 export default {
   name: 'CCvariableDefHighlightWrapper',
@@ -206,6 +205,10 @@ $header-height: 3em;  // position info text below header
         bottom: 0.5em;
         right: 3px;
       }
+    }
+
+    &.toggle .left-container {
+      padding-top: 10px;
     }
 
     .left-container {
