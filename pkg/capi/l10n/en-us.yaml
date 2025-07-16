@@ -51,6 +51,7 @@ capi:
       title: Variables
       emptyStringOption: None
       overrideDefaults: Override Variables
+      learnMore: Learn more
     version:
       title: Kubernetes Version
     networking:

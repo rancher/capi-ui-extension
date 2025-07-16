@@ -128,11 +128,11 @@ export default {
       if (!this.isMachineScoped) {
         // variables with annotation matching this section
         if (this.section) {
-          return allVariableDefinitions.filter((v) => v?.metadata?.annotations?.[ANNOTATIONS.SECTION] === this.section);
+          return allVariableDefinitions.filter((v) => (v?.metadata?.annotations?.[ANNOTATIONS.SECTION] || '').toLowerCase() === this.section);
           // if this component doesn't have section prop show all variables without section prop
           // and all variables with a section prop that does not match the list  shown in ClusterConfig (FORM_SECTIONS)
         } else {
-          return allVariableDefinitions.filter((v) => !Object.values(FORM_SECTIONS).includes(v?.metadata?.annotations?.[ANNOTATIONS.SECTION]) || !v?.metadata?.annotations?.[ANNOTATIONS.SECTION]);
+          return allVariableDefinitions.filter((v) => !Object.values(FORM_SECTIONS).includes((v?.metadata?.annotations?.[ANNOTATIONS.SECTION] || '').toLowerCase()) || !v?.metadata?.annotations?.[ANNOTATIONS.SECTION]);
         }
       }
       const variableNames = this.machineScopedJsonPatches.reduce((names, patch) => {

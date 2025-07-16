@@ -1,6 +1,7 @@
 <script>
 import { _CREATE } from '@shell/config/query-params';
 import { ANNOTATIONS } from '../../types/capi';
+import { escapeHtml, decodeHtml } from '@shell/utils/string';
 
 export default {
   name: 'CCvariableDefHighlightWrapper',
@@ -87,6 +88,10 @@ export default {
       return this.variableDef?.schema?.openAPIV3Schema?.description;
     },
 
+    link() {
+      return this.variableDef?.metadata?.annotations?.[ANNOTATIONS.DOCS];
+    },
+
     showHighlight() {
       return !!this.highlightColor && !this.isMachineScoped;
     },
@@ -131,7 +136,7 @@ export default {
         <label v-else />
         <i
           v-if="highlightColor === 'warning' || highlightColor === 'error'"
-          class="icon"
+          class="icon icon-toggle"
           :class="{['icon-question-mark']: highlightColor === 'info', ['icon-warning']: highlightColor === 'warning',['icon-error']: highlightColor === 'error',}"
           @click="toggleOpen(!open)"
         >
@@ -151,6 +156,20 @@ export default {
           class="highlight"
         >
           {{ highlight }}
+          <div
+            v-if="link"
+            class="highlight-link"
+          >
+            <a
+              :aria-label="variableDef.name"
+              :href="link"
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+            >
+
+              <t k="capi.cluster.variables.learnMore" /> <i class="icon-external-link icon-sm" />
+            </a>
+          </div>
         </div>
       </Transition>
     </div>
@@ -162,7 +181,7 @@ export default {
   />
 </template>
 
-<style lang='scss'>
+<style scoped lang='scss'>
 $container-top-padding: 0px;
 $container-margin-top-bottom: 0px;
 $header-offset: -30px;
@@ -177,6 +196,17 @@ $header-height: 3em;  // position info text below header
     position: relative;
     display:flex;
     justify-content: space-between;
+
+    &:not(.toggle) .highlight{
+      // min-height: 6em;
+      padding: 20px 0 30px 4em;
+      position: relative;
+      & .highlight-link{
+        position: absolute;
+        bottom: 0.5em;
+        right: 3px;
+      }
+    }
 
     .left-container {
         flex-basis: $left-basis;
@@ -212,7 +242,7 @@ $header-height: 3em;  // position info text below header
     .highlight {
         text-align: end;
         padding: 20px 0 20px 4em;
-         i {
+         i.icon-toggle {
             display: block;
             position: absolute;
             right: 5px;
@@ -221,7 +251,7 @@ $header-height: 3em;  // position info text below header
     }
 
     &.info {
-        i {
+        i.icon-toggle {
             color: var(--info);
 
         }
@@ -251,8 +281,16 @@ $header-height: 3em;  // position info text below header
         }
     }
 
-    .var-input .labeled-input INPUT{
+    .var-input :deep(.labeled-input) INPUT{
       padding-top: 0px;
+    }
+
+    .var-input>:deep(.labeled-select) .vs__selected-options{
+      height:100% !important;
+    }
+
+    .highlight-link {
+      padding-top: 10px;
     }
 }
 </style>

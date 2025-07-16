@@ -12,6 +12,7 @@ export const ANNOTATIONS = {
   SECTION:      'turtles-capi.cattle.io/section', // add to existing top-level section or insert new one
   HIGHLIGHT:    'turtles-capi.cattle.io/highlight', // show description more prominently and with info, warning, or error icon + colors
   LABEL:        'turtles-capi.cattle.io/label', // human-readable label
+  DOCS:        'turtles-capi.cattle.io/docs', // link out to documentation
 
   TOGGLED_BY: 'turtles-capi.cattle.io/toggled-by', // gate visibility on a boolean var - template responsible for grouping
 
