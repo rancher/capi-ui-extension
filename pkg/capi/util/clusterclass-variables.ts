@@ -16,6 +16,9 @@ export const VARIABLE_INPUT_NAMES = {
   YAML:           'yamleditor-var'
 };
 
+// types that do not require an additional schema definition
+export const SIMPLE_TYPES = ['string', 'int', 'boolean'];
+
 /**
  * Accepts a clusterclass variable schema and determines which input component would best represent that variable
  * The 'name' field of the output is used by the component containing all variable inputs, to position inputs dependent on their type
@@ -48,11 +51,11 @@ export const componentForType = (schema) => {
       }
       break;
     case 'array':
-      if (SIMPLE_TYPES.includes(schema?.items?.type) ) {
-        out = { component: ArrayList, name: VARIABLE_INPUT_NAMES.ARRAY };
-      } else {
-        out = { component: YamlEditor, name: VARIABLE_INPUT_NAMES.YAML };
-      }
+      // if (SIMPLE_TYPES.includes(schema?.items?.type) ) {
+      // out = { component: ArrayList, name: VARIABLE_INPUT_NAMES.ARRAY };
+      // } else {
+      out = { component: YamlEditor, name: VARIABLE_INPUT_NAMES.YAML };
+      // }
       break;
     case 'string':
       out = { component: LabeledInput, name: VARIABLE_INPUT_NAMES.TEXT };
@@ -76,9 +79,6 @@ export const componentForType = (schema) => {
 
   return out;
 };
-
-// types that do not require an additional schema definition
-export const SIMPLE_TYPES = ['string', 'int', 'boolean'];
 
 /**
  * This function accepts the schema from a clusterclass variable definition and parses it into the same schema format that steve schemas use.
@@ -123,7 +123,7 @@ export const makeSchemas = function(openSchema, id = 'ccvariable') {
       if (SIMPLE_TYPES.includes(def.type)) {
         mockSchema.resourceFields[key] = def;
       } else if (def.type === 'array') {
-        if (SIMPLE_TYPES.includes(def.items.type)) {
+        if (SIMPLE_TYPES.includes(def?.items?.type)) {
           mockSchema.resourceFields[key] = { type: 'array', subtype: def.items.type };
         } else {
           const subSchemaSubSchemas = makeSchemas(properties[key], subtypeId);
@@ -164,7 +164,6 @@ export const makeYamlPlaceholders = function(openSchema, data = {}) {
 
   const out = createYaml(schemas, 'ccvariable', data, false);
 
-  // throw new Error('test error');
   if (openSchema.type === 'array') {
     // remove first line, don't need a key just the array
     const sliced = out.slice(out.indexOf('\n') + 1);
