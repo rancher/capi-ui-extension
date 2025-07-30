@@ -51,11 +51,11 @@ export const componentForType = (schema) => {
       }
       break;
     case 'array':
-      // if (SIMPLE_TYPES.includes(schema?.items?.type) ) {
-      // out = { component: ArrayList, name: VARIABLE_INPUT_NAMES.ARRAY };
-      // } else {
-      out = { component: YamlEditor, name: VARIABLE_INPUT_NAMES.YAML };
-      // }
+      if (SIMPLE_TYPES.includes(schema?.items?.type) ) {
+        out = { component: ArrayList, name: VARIABLE_INPUT_NAMES.ARRAY };
+      } else {
+        out = { component: YamlEditor, name: VARIABLE_INPUT_NAMES.YAML };
+      }
       break;
     case 'string':
       out = { component: LabeledInput, name: VARIABLE_INPUT_NAMES.TEXT };
