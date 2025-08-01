@@ -1,11 +1,11 @@
 import { createYaml } from '@shell/utils/create-yaml';
 import { randomStr } from '@shell/utils/string';
-import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
-import Checkbox from '@components/Form/Checkbox/Checkbox.vue';
+import { LabeledInput } from '@components/Form/LabeledInput/LabeledInput';
+import { Checkbox } from '@components/Form/Checkbox/Checkbox';
 import KeyValue from '@shell/components/form/KeyValue.vue';
 import ArrayList from '@shell/components/form/ArrayList.vue';
 import LabeledSelect from '@shell/components/form/LabeledSelect.vue';
-import YamlEditor from '@shell/components/YamlEditor';
+import YamlEditor from '@shell/components/YamlEditor.vue';
 
 export const VARIABLE_INPUT_NAMES = {
   TEXT:           'text-var',
