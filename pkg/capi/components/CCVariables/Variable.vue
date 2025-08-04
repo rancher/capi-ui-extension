@@ -373,17 +373,17 @@ export default {
       :is-toggle="isToggle"
     >
       <template #highlight="{toggleOpen}">
-        <label
+        <div
           v-if="isYamlComponent"
           :for="componentForType.name"
-          class="text-label"
+          class="input-label"
         >
           {{ variable.name }}
           <span
             v-if="variable.required"
             class="text-error"
           >*</span>
-        </label>
+        </div>
         <component
           :is="componentForType.component"
           v-if="componentForType"

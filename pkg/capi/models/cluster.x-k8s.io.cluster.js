@@ -5,13 +5,13 @@ import {
 } from '@shell/config/query-params';
 
 export default class CapiCluster extends SteveModel {
-  // get canEditYaml() {
-  //   return false;
-  // }
+  get canEditYaml() {
+    return false;
+  }
 
-  // get canUpdate() {
-  //   return false;
-  // }
+  get canUpdate() {
+    return false;
+  }
 
   get detailLocation() {
     const location = super._detailLocation;
@@ -19,9 +19,9 @@ export default class CapiCluster extends SteveModel {
     return { ...location, query: { [AS]: _YAML } };
   }
 
-  // get _availableActions() {
-  //   const out = super._availableActions;
+  get _availableActions() {
+    const out = super._availableActions;
 
-  //   return out.filter((action) => action.action !== 'goToEdit' && action.action !== 'goToViewConfig');
-  // }
+    return out.filter((action) => action.action !== 'goToEdit' && action.action !== 'goToViewConfig');
+  }
 }

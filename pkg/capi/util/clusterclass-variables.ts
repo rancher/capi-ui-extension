@@ -159,10 +159,9 @@ export const makeSchemas = function(openSchema, id = 'ccvariable') {
       if (SIMPLE_TYPES.includes(def.type)) {
         mockSchema.resourceFields[key] = def;
       } else if (def.type === 'array') {
-        if (SIMPLE_TYPES.includes(def.items.type)) {
+        if (SIMPLE_TYPES.includes(def?.items?.type)) {
           mockSchema.resourceFields[key] = { type: 'array', subtype: def.items.type };
         } else {
-        // heh
           const subSchemaSubSchemas = makeSchemas(properties[key], subtypeId);
 
           schemas.push(...subSchemaSubSchemas);
@@ -198,12 +197,8 @@ export const makeSchemas = function(openSchema, id = 'ccvariable') {
  */
 export const makeYamlPlaceholders = function(openSchema, data = {}) {
   const schemas = makeSchemas(openSchema);
-  let out;
 
-  try {
-    out = createYaml(schemas, 'ccvariable', data, false);
-  } catch (err) {
-  }
+  const out = createYaml(schemas, 'ccvariable', data, false);
 
   if (openSchema.type === 'array') {
     // remove first line, don't need a key just the array
