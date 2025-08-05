@@ -1,6 +1,7 @@
 <script>
 import { mapGetters } from 'vuex';
-import debounce from 'lodash/debounce';
+import throttle from 'lodash/throttle';
+
 import { randomStr } from '@shell/utils/string';
 import Variable from './Variable.vue';
 import { componentForType } from '../../util/clusterclass-variables';
@@ -86,7 +87,7 @@ export default {
 
   watch: {
     errorCount: {
-      handler: debounce(function(neu) {
+      handler: throttle(function(neu) {
         this.$emit('validation-passed', !neu);
       }, 5),
     },
@@ -311,6 +312,7 @@ export default {
         }
       });
 
+      console.log('zeroing out error count in section ', this.section);
       this.errorCount = 0;
       this.$emit('update-variables', out, this.ownedVariableNames);
 
@@ -319,9 +321,12 @@ export default {
 
     updateErrors(isValid) {
       if (!isValid) {
-        this.errorCount++;
+        console.log('updating errors with false arg in section ', this.section, ' current error count ', this.errorCount);
+
+        this.errorCount = this.errorCount + 1;
       } else {
-        this.errorCount--;
+        // this.errorCount--;
+        this.errorCount = this.errorCount - 1 ;
       }
     },
 
@@ -435,7 +440,7 @@ export default {
           </GroupPanel>
           <div
             v-else
-            class="variables-group"
+            class="variables-group no-border"
           >
             <template
               v-for="(variableDef, i) in group"
@@ -525,7 +530,7 @@ export default {
             </GroupPanel>
             <div
               v-else
-              class="variables-group"
+              class="variables-group no-border"
             >
               <template
                 v-for="(variableDef, i) in group"
@@ -579,11 +584,11 @@ $half-indent-2: calc($group-indent-2 / 2);
 .ccvariable-group-panel {
   margin: 0px 0px 20px 20px;
 
-  :deep(.group-panel){
+  :deep(.group-panel) {
     padding-right: 0px;
   }
 
-  :deep(.group-panel-title){
+  :deep(.group-panel-title) {
     // h3 font size
     font-size: 18px;
   }
@@ -593,7 +598,7 @@ $half-indent-2: calc($group-indent-2 / 2);
  &>*{
 padding: .5em;
  }
- & H3{
+ & H3 {
   margin: 0px;
  }
 }
@@ -622,16 +627,20 @@ padding: .5em;
   flex-direction: row;
   flex-wrap: wrap;
 
-  &>.force-newline{
+  &.no-border {
+    margin-right: -16px;
+  }
+
+  &>.force-newline {
     margin: 0px;
   }
 
-  &>*{
+  &>* {
     flex: 0 1 $standard-input;
     margin-bottom: $row-bottom-margin;
 
     max-width: $standard-input;
-    &.wider:deep(){
+    &.wider:deep() {
       flex: 0 1 $wider-input;
       max-width: $wider-input;
     }
@@ -643,33 +652,33 @@ padding: .5em;
       max-width: $widest-input;
     }
 
-    &.depth-1:deep(){
+    &.depth-1:deep() {
       margin: 0 0 $row-bottom-margin $group-indent;
 
       flex: 0 1 calc($widest-input - $half-indent);
       max-width: calc($wider-input - $half-indent);
     }
 
-    &.depth-1.wider:deep(){
+    &.depth-1.wider:deep() {
 
       flex: 0 1 calc($wider-input - $half-indent);
       max-width: calc($wider-input - $half-indent);
     }
 
-    &.depth-1.widest:deep(){
+    &.depth-1.widest:deep() {
 
       flex: 0 1 calc($widest-input - $half-indent);
       max-width: calc($widest-input - $half-indent);
     }
 
-    &.depth-2:deep(){
+    &.depth-2:deep() {
       margin: 0 0 $row-bottom-margin $group-indent-2;
 
       flex: 0 1 calc($widest-input - $half-indent-2);
       max-width: calc($standard-input - $half-indent-2);
     }
 
-    &.depth-2.widest:deep(){
+    &.depth-2.widest:deep() {
 
         flex: 0 1 calc($widest-input - $half-indent-2);
         max-width: calc($widest-input - $half-indent-2);
