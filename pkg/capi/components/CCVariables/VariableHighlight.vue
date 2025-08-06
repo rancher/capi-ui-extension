@@ -197,7 +197,6 @@ $header-height: 3em;  // position info text below header
     justify-content: space-between;
 
     &:not(.toggle) .highlight{
-      // min-height: 6em;
       padding: 20px 0 30px 4em;
       position: relative;
       & .highlight-link{
@@ -219,7 +218,6 @@ $header-height: 3em;  // position info text below header
         flex-basis: $right-basis;
         padding-top: 5px;
         color: var(--disabled-text);
-        // align-content: center;
     }
 
     &.toggle .right-container  {

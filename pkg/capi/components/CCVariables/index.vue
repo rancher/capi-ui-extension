@@ -312,7 +312,6 @@ export default {
         }
       });
 
-      console.log('zeroing out error count in section ', this.section);
       this.errorCount = 0;
       this.$emit('update-variables', out, this.ownedVariableNames);
 
@@ -321,11 +320,8 @@ export default {
 
     updateErrors(isValid) {
       if (!isValid) {
-        console.log('updating errors with false arg in section ', this.section, ' current error count ', this.errorCount);
-
         this.errorCount = this.errorCount + 1;
       } else {
-        // this.errorCount--;
         this.errorCount = this.errorCount - 1 ;
       }
     },
