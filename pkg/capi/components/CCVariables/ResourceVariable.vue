@@ -28,7 +28,9 @@ export default {
     // will be passed directly to a labeledselect w/ resource ID as value
     rules: {
       type:    Array,
-      default: () => {}
+      default: () => {
+        return [];
+      }
     },
 
     mode: {
@@ -47,9 +49,11 @@ export default {
 
   components: { LabeledSelect },
 
-  data() {
+  created() {
     this.fetchResource(this.clusterNamespace);
+  },
 
+  data() {
     return {
       // spinner on resource input when querying by ns
       loading:   false,
@@ -148,7 +152,8 @@ export default {
         :options="namespaces || []"
         searchable
         taggable
-        @selecting="e=>namespace=e.id"
+        :rules="rules"
+        @selecting="e=>namespace=e?.id"
       />
     </div>
     <div class="col span-6">
@@ -160,6 +165,7 @@ export default {
         :mode="mode"
         taggable
         searchable
+        :rules="rules"
         @selecting="e=>name=e"
       />
     </div>

@@ -220,7 +220,7 @@ export default {
          (this.value?.spec?.topology?.workers?.machineDeployments && this.value?.spec?.topology?.workers?.machineDeployments.length > 0)) &&
          this.machineDeploymentsValid && this.machinePoolsValid;
 
-      return this.fvFormIsValid & workersValid && this.variablesValid ;
+      return this.fvFormIsValid && workersValid && this.variablesValid ;
     },
     clusterIsAlreadyCreated() {
       return this.mode === _EDIT;
@@ -274,6 +274,18 @@ export default {
 
     machinePools() {
       return this.value.spec.topology.workers.machinePools;
+    },
+
+    variables: {
+      get() {
+        return this?.value?.spec?.topology?.variables || [];
+      },
+      set(neu) {
+        if (!this.value.spec.topology) {
+          this.value.spec.topology = {};
+        }
+        this.value.spec.topology.variables = neu;
+      }
     },
 
     machineDeploymentOptions() {
@@ -535,9 +547,7 @@ export default {
             </div>
           </div>
         </template>
-        <CardGrid>
-        </cardgrid>
-      </cardgrid>
+      </CardGrid>
     </template>
     <template #stepConfiguration>
       <Accordion
@@ -595,7 +605,7 @@ export default {
         </div>
         <ClusterClassVariables
           :will-open="configHighlightOpen"
-          :value="value?.spec?.topology?.variables"
+          :value="variables"
           :section="formSections.GENERAL"
           :cluster-class="clusterClassObj"
           :cluster-namespace="value.metadata?.namespace"
@@ -631,7 +641,7 @@ export default {
         </div>
         <ClusterClassVariables
           :will-open="controlPlaneHighlightOpen"
-          :value="value?.spec?.topology?.variables"
+          :value="variables"
           :section="formSections.CONTROL_PLANE"
           :cluster-class="clusterClassObj"
           :cluster-namespace="value.metadata?.namespace"
@@ -661,7 +671,7 @@ export default {
         </div>
         <ClusterClassVariables
           :will-open="networkingHighlightOpen"
-          :value="value?.spec?.topology?.variables"
+          :value="variables"
           :cluster-class="clusterClassObj"
           :section="formSections.NETWORKING"
           :cluster-namespace="value.metadata?.namespace"
@@ -679,7 +689,7 @@ export default {
       >
         <div class="col span-12 mb-20">
           <ClusterClassVariables
-            :value="value?.spec?.topology?.variables"
+            :value="variables"
             :section="formSections.WORKERS"
             :cluster-class="clusterClassObj"
             :cluster-namespace="value.metadata?.namespace"
@@ -694,7 +704,7 @@ export default {
             >
               <WorkerItem
                 v-model:value="machineDeployments"
-                :global-variables="value.spec.topology.variables"
+                :global-variables="variables"
                 :mode="mode"
                 :title="t('capi.cluster.workers.machineDeployments.title')"
                 :default-add-value="defaultDeploymentAddValue"
@@ -710,7 +720,7 @@ export default {
             >
               <WorkerItem
                 v-model:value="machinePools"
-                :global-variables="value.spec.topology.variables"
+                :global-variables="variables"
                 :mode="mode"
                 :title="t('capi.cluster.workers.machinePools.title')"
                 :default-add-value="defaultPoolAddValue"
@@ -727,7 +737,7 @@ export default {
       <!-- GENERIC VARIABLES -->
 
       <ClusterClassVariables
-        :value="value?.spec?.topology?.variables"
+        :value="variables"
         :cluster-class="clusterClassObj"
         :cluster-namespace="value.metadata?.namespace"
         @update-variables="setVariables"

@@ -77,10 +77,13 @@ export default {
 
   computed: {
     highlightColor() {
-      const annotationColor = this.variableDef?.metadata?.annotations?.[ANNOTATIONS.HIGHLIGHT];
-      const searchType = this.variableDef?.metadata?.annotations?.[ANNOTATIONS.SEARCH_TYPE] || '';
+      let out = this.variableDef?.metadata?.annotations?.[ANNOTATIONS.HIGHLIGHT];
 
-      return annotationColor || searchType ? annotationColor || 'info' : '';
+      if (!out && this.variableDef?.metadata?.annotations?.[ANNOTATIONS.SEARCH_TYPE]) {
+        out = 'info';
+      }
+
+      return out;
     },
 
     highlight() {
@@ -136,7 +139,7 @@ export default {
         <i
           v-if="highlightColor === 'warning' || highlightColor === 'error'"
           class="icon icon-toggle"
-          :class="{['icon-question-mark']: highlightColor === 'info', ['icon-warning']: highlightColor === 'warning',['icon-error']: highlightColor === 'error',}"
+          :class="{['icon-warning']: highlightColor === 'warning',['icon-error']: highlightColor === 'error',}"
           @click="toggleOpen(!open)"
         >
         </i>
@@ -149,28 +152,26 @@ export default {
       </div>
     </div>
     <div class="right-container">
-      <Transition name="fade">
+      <div
+        v-show="open"
+        class="highlight"
+      >
+        {{ highlight }}
         <div
-          v-show="open"
-          class="highlight"
+          v-if="link"
+          class="highlight-link"
         >
-          {{ highlight }}
-          <div
-            v-if="link"
-            class="highlight-link"
+          <a
+            :aria-label="variableDef.name"
+            :href="link"
+            target="_blank"
+            rel="noopener noreferrer nofollow"
           >
-            <a
-              :aria-label="variableDef.name"
-              :href="link"
-              target="_blank"
-              rel="noopener noreferrer nofollow"
-            >
 
-              <t k="capi.cluster.variables.learnMore" /> <i class="icon-external-link icon-sm" />
-            </a>
-          </div>
+            <t k="capi.cluster.variables.learnMore" /> <i class="icon-external-link icon-sm" />
+          </a>
         </div>
-      </Transition>
+      </div>
     </div>
   </div>
   <slot

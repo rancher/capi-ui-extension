@@ -325,59 +325,6 @@ export default {
         this.errorCount = this.errorCount - 1 ;
       }
     },
-
-    // decide how to group variables
-    forceNewLine(variableDef, i, variableDefs) {
-      // always force a new line
-      let nextVariableDef = variableDefs[i + 1];
-
-      if (nextVariableDef) {
-        return true;
-      }
-
-      // check if variable is visible and dont force new line if not
-      const varRef = this.$refs[`${ variableDef.name }-input`]?.[0];
-
-      if (varRef) {
-        if (varRef.toggled === false) {
-          return;
-        }
-      }
-
-      // check if next variable is a different component
-      // if it is, force a new line
-      nextVariableDef = variableDefs[i + 1];
-
-      if (nextVariableDef && componentForType(variableDef)?.name !== componentForType(nextVariableDef)?.name) {
-        return true;
-      }
-
-      // check if previous var is the same component
-      // if it is force a new line
-      // this combined with last if block ensures there are never more than 2 components on a line
-      const prevVariableDef = variableDefs[i - 1];
-
-      if (prevVariableDef && componentForType(variableDef)?.name === componentForType(prevVariableDef)?.name) {
-        return true;
-      }
-
-      if (nextVariableDef) {
-      // always give toggles their own line
-        const toggledByThis = variableDefs.find((v) => {
-          const toggleBys = (v.metadata?.annotations?.[ANNOTATIONS.TOGGLED_BY] || '').split(',').map((toggleBy) => toggleBy.trim());
-
-          return toggleBys.includes(nextVariableDef?.name);
-        });
-
-        if (toggledByThis) {
-          return true;
-        }
-
-        if ((nextVariableDef?.name || '').includes('toggle') ) {
-          return true;
-        }
-      }
-    }
   },
 
 };
@@ -427,7 +374,7 @@ export default {
                   @error="e=>$emit('error', e)"
                 />
                 <div
-                  v-if="forceNewLine(variableDef, i, group)"
+                  v-if="group[i+1]"
                   :key="`${i}-${rerenderKey}`"
                   class="force-newline"
                 />
@@ -459,7 +406,7 @@ export default {
                 @error="e=>$emit('error', e)"
               />
               <div
-                v-if="forceNewLine(variableDef, i, group)"
+                v-if="group[i+1]"
                 :key="`${i}-${rerenderKey}`"
                 class="force-newline"
               />
@@ -517,7 +464,7 @@ export default {
                     @error="e=>$emit('error', e)"
                   />
                   <div
-                    v-if="forceNewLine(variableDef, i, group)"
+                    v-if="group[i+1]"
                     :key="`${i}-${rerenderKey}`"
                     class="force-newline"
                   />
@@ -550,7 +497,7 @@ export default {
                   @error="e=>$emit('error', e)"
                 />
                 <div
-                  v-if="forceNewLine(variableDef, i, group)"
+                  v-if="group[i+1]"
                   :key="`${i}-${rerenderKey}`"
                   class="force-newline"
                 />

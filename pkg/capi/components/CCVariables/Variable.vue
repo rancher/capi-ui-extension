@@ -195,7 +195,6 @@ export default {
       const out = {
         wider:  this.isListComponent,
         widest: this.isYamlKeyValueComponent || this.isYamlComponent || this.highlighted || this.isSearchComponent,
-        center: this.componentForType.name === VARIABLE_INPUT_NAMES.BOOL || this.componentForType.name === VARIABLE_INPUT_NAMES.BOOL_TOGGLE
       };
 
       const toggleLabels = (this.variable?.metadata?.annotations?.[ANNOTATIONS.TOGGLED_BY] || '').split(',').map((n) => n.replace(' ', ''));
@@ -210,7 +209,7 @@ export default {
       return out;
     },
 
-    // if mahcine variable, use global value as placeholder
+    // if machine variable, use global value as placeholder
     // otherwise use cluster class's variable definition
     placeholder() {
       if (this.isMachineScoped) {
@@ -283,7 +282,7 @@ export default {
     tooltip() {
       let out = '';
 
-      if (!this.highlighted) {
+      if (!this.highlighted && this.schema.description) {
         out += this.schema.description;
       }
 
@@ -359,7 +358,6 @@ export default {
     v-show="toggled"
     :class="{'wider': displayClasses.wider,
              'widest': displayClasses.widest,
-             'align-center': displayClasses.center,
              [`${componentForType.name}`]: true,
              [`${displayClasses.depth}`]: true
     }"
@@ -375,7 +373,6 @@ export default {
       <template #highlight="{toggleOpen}">
         <div
           v-if="isYamlComponent"
-          :for="componentForType.name"
           class="input-label"
         >
           {{ variable.name }}
@@ -446,9 +443,6 @@ export default {
   </div>
 </template>
 <style lang="scss" scoped>
-.align-center {
-  align-self: 'center'
-}
 .input-label{
   color: var(--input-label);
   margin-bottom: 5px;
