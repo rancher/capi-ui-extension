@@ -117,7 +117,7 @@ export default {
 
     // is  the component being used for top  level cluster variables or machine overrides?
     isMachineScoped() {
-      return this.machineClassName && this.machineClassType;
+      return !!this.machineClassName && !!this.machineClassType;
     },
 
     // if not machine scoped, scope using section prop
