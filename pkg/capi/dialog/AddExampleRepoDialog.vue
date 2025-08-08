@@ -125,12 +125,10 @@ export default {
     },
 
     addPath(path) {
-      // this.gitRepo.spec.paths.push(path);
-      this.paths.push(path);
+      this.paths = [...this.paths, path];
     },
 
     removePath(path) {
-      // this.gitRepo.spec.paths = this.gitRepo.spec.paths.filter((p) => p !== path);
       this.paths = this.paths.filter((p) => p !== path);
     },
 
