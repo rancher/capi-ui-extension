@@ -86,10 +86,8 @@ export default {
   },
 
   watch: {
-    errorCount: {
-      handler: throttle(function(neu) {
-        this.$emit('validation-passed', !neu);
-      }, 5),
+    errorCount(neu){
+      this.$emit('validation-passed', !neu);
     },
 
     variableDefinitions(neu, old) {

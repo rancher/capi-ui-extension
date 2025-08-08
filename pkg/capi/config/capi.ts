@@ -8,6 +8,7 @@ export function init($plugin: any, store: any) {
     weightType,
     weightGroup,
     virtualType,
+    configureType
     // headers,
   } = $plugin.DSL(store, CLUSTER_MGMT_PRODUCT);
 
@@ -25,6 +26,8 @@ export function init($plugin: any, store: any) {
     overview: true,
     exact:    true,
   });
+
+  configureType(RANCHER_CAPI.CAPI_CLUSTER, {showConfigView: false})
 
   // Interestingly, types can only appear in one place, so by adding machine deployment
   // and others here, they will no longer show up in the Advanced section, which is

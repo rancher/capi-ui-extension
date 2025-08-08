@@ -76,7 +76,18 @@ export default {
     };
   },
 
-  computed: { ...mapGetters({ t: 'i18n/t' }) },
+  computed: {
+    ...mapGetters({ t: 'i18n/t' }),
+
+    paths: {
+      get() {
+        return this.gitRepo?.spec?.paths || [];
+      },
+      set(neu) {
+        this.gitRepo.spec.paths = neu;
+      }
+    },
+  },
 
   methods: {
     async loadBundles() {
@@ -114,11 +125,13 @@ export default {
     },
 
     addPath(path) {
-      this.gitRepo.spec.paths.push(path);
+      // this.gitRepo.spec.paths.push(path);
+      this.paths.push(path);
     },
 
     removePath(path) {
-      this.gitRepo.spec.paths = this.gitRepo.spec.paths.filter((p) => p !== path);
+      // this.gitRepo.spec.paths = this.gitRepo.spec.paths.filter((p) => p !== path);
+      this.paths = this.paths.filter((p) => p !== path);
     },
 
     goToDetail() {
@@ -156,7 +169,7 @@ export default {
         :key="path"
       >
         <Checkbox
-          :value="gitRepo?.spec?.paths.includes(path)"
+          :value="paths.includes(path)"
           :label="key"
           @update:value="e=> e ? addPath(path) : removePath(path)"
         />
@@ -175,13 +188,22 @@ export default {
       </div>
     </div>
     <div class="footer-buttons mt-20">
-      <AsyncButton
-        v-if="!gitRepo.id"
-        class="btn role-primary"
-        type="button"
-        mode="saveGitRepo"
-        @click="saveGitRepo"
-      />
+      <template v-if="!gitRepo.id">
+        <button
+          class="btn role-secondary"
+          type="button"
+          @click="$emit('close')"
+        >
+          {{ t('generic.cancel') }}
+        </button>
+        <AsyncButton
+          class="btn role-primary"
+          type="button"
+          mode="saveGitRepo"
+          :disabled="!paths.length"
+          @click="saveGitRepo"
+        />
+      </template>
       <template v-else>
         <a
           href="#"

@@ -283,7 +283,7 @@ export default {
 
     machinePools: {
       get() {
-        return this.value.spec.topology.workers.machinePools || [];
+        return this.value?.spec?.topology?.workers?.machinePools || [];
       },
       set(neu) {
         if (!this.value?.spec?.topology?.workers?.machinePools) {
