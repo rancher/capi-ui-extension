@@ -22,6 +22,7 @@ import { LABELS, CAPI } from '../../types/capi';
 import Loading from '@shell/components/Loading.vue';
 import { NAMESPACE, FLEET } from '@shell/config/types';
 import Accordion from '@components/Accordion/Accordion.vue';
+import merge from 'lodash/merge';
 
 const defaultTopologyConfig = {
   version: '',
@@ -135,7 +136,6 @@ export default {
       credentialId:              '',
       credential:                null,
       versionInfo:               {},
-      variablesReady:            true,
       variableSectionReady: {
         general:      true,
         controlPlane: true,
@@ -268,12 +268,29 @@ export default {
     topology() {
       return this.value?.spec?.topology;
     },
-    machineDeployments() {
-      return this.value.spec.topology.workers.machineDeployments;
+
+    machineDeployments: {
+      get() {
+        return this.value?.spec?.topology?.workers?.machineDeployments || [];
+      },
+      set(neu) {
+        if (!this.value?.spec?.topology?.workers?.machineDeployments) {
+          this.value.spec.topology = merge(defaultTopologyConfig, this.value.spec.topology);
+        }
+        this.value.spec.topology.workers.machineDeployments = neu;
+      }
     },
 
-    machinePools() {
-      return this.value.spec.topology.workers.machinePools;
+    machinePools: {
+      get() {
+        return this.value.spec.topology.workers.machinePools || [];
+      },
+      set(neu) {
+        if (!this.value?.spec?.topology?.workers?.machinePools) {
+          this.value.spec.topology = merge(defaultTopologyConfig, this.value.spec.topology );
+        }
+        this.value.spec.topology.workers.machinePools = neu;
+      }
     },
 
     variables: {
@@ -395,11 +412,16 @@ export default {
       }
     },
 
-    setClass() {
+    async setClass() {
+      // if switching cluster classes, re-initialize the cluster object and form
+      if (this.topology.class) {
+        await this.initSpecs(true);
+      }
       const clusterClassName = this.clusterClassObj?.metadata?.name;
 
       this.$emit('update:value', { k: 'spec.topology.class', val: clusterClassName });
     },
+
     setClassNamespace() {
       const clusterClassNs = this.clusterClassObj?.metadata?.namespace;
 
@@ -430,35 +452,37 @@ export default {
       }
     },
 
-    async initSpecs() {
+    async initSpecs(reset = false) {
       const inStore = this.$store.getters['currentStore'](NAMESPACE);
       const val = this.value;
       let namespaces = [];
 
-      if ( !val ) {
+      if ( !val || reset ) {
         set(val, 'spec', { });
         set(val, 'metadata', { labels: {}, annotations: {} });
       }
-      if (!val.spec.topology) {
+      if (!val.spec.topology || reset) {
         set(val.spec, 'topology', clone(defaultTopologyConfig));
       }
       this.$emit('update:value', { k: 'spec', val: val.spec });
 
-      if (this.preselectedClass) {
-        this.setClassInfo(this.preselectedClass);
+      if (!reset) {
+        if (this.preselectedClass) {
+          this.setClassInfo(this.preselectedClass);
+        }
+
+        const schema = this.$store.getters[`management/schemaFor`](
+          CAPI.CLUSTER
+        );
+
+        await schema.fetchResourceFields();
+        if ( schema.schemaDefinitions?.[`${ schema.schemaDefinition.type }.spec.topology`]?.resourceFields?.classNamespace ) {
+          this.classNamespaceSupported = true;
+          namespaces = await this.$store.dispatch(`${ inStore }/findAll`, { type: NAMESPACE });
+        }
+
+        this.allNamespaces = namespaces || [];
       }
-
-      const schema = this.$store.getters[`management/schemaFor`](
-        CAPI.CLUSTER
-      );
-
-      await schema.fetchResourceFields();
-      if ( schema.schemaDefinitions?.[`${ schema.schemaDefinition.type }.spec.topology`]?.resourceFields?.classNamespace ) {
-        this.classNamespaceSupported = true;
-        namespaces = await this.$store.dispatch(`${ inStore }/findAll`, { type: NAMESPACE });
-      }
-
-      this.allNamespaces = namespaces || [];
     },
 
     cancelCredential() {
@@ -550,210 +574,212 @@ export default {
       </CardGrid>
     </template>
     <template #stepConfiguration>
-      <Accordion
-        class="mt-20 section-accordion"
-        open-initially
-        :title="t(`capi.cluster.section.${formSections.GENERAL}`)"
-      >
-        <!-- GENERAL CONFIGURATION -->
-        <NameNsDescription
-          v-if="!isView"
-          :value="value"
-          :mode="mode"
-          :namespaced="classNamespaceSupported"
-          :namespace-options="allNamespaces"
-          name-label="cluster.name.label"
-          name-placeholder="cluster.name.placeholder"
-          description-label="cluster.description.label"
-          description-placeholder="cluster.description.placeholder"
-          :rules="{ name: fvGetAndReportPathRules('metadata.name') }"
-          @update:value="$emit('update:value', { k: 'metadata', val: $event.metadata })"
-        />
-        <div class="mt-30">
-          <Checkbox
-            v-model:value="autoImport"
+      <div :key="topology.class">
+        <Accordion
+          class="mt-20 section-accordion"
+          open-initially
+          :title="t(`capi.cluster.section.${formSections.GENERAL}`)"
+        >
+          <!-- GENERAL CONFIGURATION -->
+          <NameNsDescription
+            v-if="!isView"
+            :value="value"
             :mode="mode"
-            label-key="capi.cluster.labels.autoimport.label"
-            :disabled="clusterIsAlreadyCreated"
-            @update:value="enableAutoImport"
+            :namespaced="classNamespaceSupported"
+            :namespace-options="allNamespaces"
+            name-label="cluster.name.label"
+            name-placeholder="cluster.name.placeholder"
+            description-label="cluster.description.label"
+            description-placeholder="cluster.description.placeholder"
+            :rules="{ name: fvGetAndReportPathRules('metadata.name') }"
+            @update:value="$emit('update:value', { k: 'metadata', val: $event.metadata })"
           />
-        </div>
-        <div class="row mb-20">
-          <div class="col col-half mt-20">
-            <LabeledSelect
-              v-if="versionOptions.length"
+          <div class="mt-30">
+            <Checkbox
+              v-model:value="autoImport"
               :mode="mode"
-              :value="value.spec.topology.version"
-              label-key="cluster.kubernetesVersion.label"
-              required
-              searchable
-              taggable
-              :rules="fvGetAndReportPathRules('spec.topology.version')"
-              :options="versionOptions"
-              @selecting="$emit('update:value', {k: 'spec.topology.version', val: $event})"
-            />
-            <LabeledInput
-              v-else
-              v-model:value="value.spec.topology.version"
-              :mode="mode"
-              label-key="cluster.kubernetesVersion.label"
-              required
-              :rules="fvGetAndReportPathRules('spec.topology.version')"
-              @update:value="$emit('update:value', { k: 'spec.topology.version', val: $event })"
+              label-key="capi.cluster.labels.autoimport.label"
+              :disabled="clusterIsAlreadyCreated"
+              @update:value="enableAutoImport"
             />
           </div>
-        </div>
-        <ClusterClassVariables
-          :will-open="configHighlightOpen"
-          :value="variables"
-          :section="formSections.GENERAL"
-          :cluster-class="clusterClassObj"
-          :cluster-namespace="value.metadata?.namespace"
-
-          @update-variables="setVariables"
-          @validation-passed="e => variableSectionReady.general = e"
-        />
-      </Accordion>
-
-      <Accordion
-        class="mt-20 section-accordion"
-        open-initially
-        :title="t(`capi.cluster.section.${formSections.CONTROL_PLANE}`)"
-      >
-        <!-- CONTROL PLANE CONFIGURATION -->
-        <div class="row row-config">
-          <div class="col col-half">
-            <ControlPlaneEndpointSection
-              v-model:value="controlPlaneEndpoint"
-              :mode="mode"
-              :rules="{ host: fvGetAndReportPathRules('spec.controlPlaneEndpoint.host'), port: fvGetAndReportPathRules('spec.controlPlaneEndpoint.port') }"
-            />
+          <div class="row mb-20">
+            <div class="col col-half mt-20">
+              <LabeledSelect
+                v-if="versionOptions.length"
+                :mode="mode"
+                :value="value.spec.topology.version"
+                label-key="cluster.kubernetesVersion.label"
+                required
+                searchable
+                taggable
+                :rules="fvGetAndReportPathRules('spec.topology.version')"
+                :options="versionOptions"
+                @selecting="$emit('update:value', {k: 'spec.topology.version', val: $event})"
+              />
+              <LabeledInput
+                v-else
+                v-model:value="value.spec.topology.version"
+                :mode="mode"
+                label-key="cluster.kubernetesVersion.label"
+                required
+                :rules="fvGetAndReportPathRules('spec.topology.version')"
+                @update:value="$emit('update:value', { k: 'spec.topology.version', val: $event })"
+              />
+            </div>
           </div>
-        </div>
-        <div class="row  row-config">
-          <div class="col col-half">
-            <ControlPlaneSection
-              v-model:value="controlPlane"
-              :mode="mode"
-              :rules="{ replicas: fvGetAndReportPathRules('spec.topology.controlPlane.replicas') }"
-            />
-          </div>
-        </div>
-        <ClusterClassVariables
-          :will-open="controlPlaneHighlightOpen"
-          :value="variables"
-          :section="formSections.CONTROL_PLANE"
-          :cluster-class="clusterClassObj"
-          :cluster-namespace="value.metadata?.namespace"
-
-          @update-variables="setVariables"
-          @validation-passed="e => variableSectionReady.controlPlane = e"
-        />
-      </Accordion>
-
-      <Accordion
-        class="mt-20"
-        open-initially
-        :title="t(`capi.cluster.section.${formSections.NETWORKING}`)"
-      >
-        <!-- NETWORKING CONFIGURATION -->
-        <div class="col col-half mt-20">
-          <NetworkSection
-            v-model:value="network"
-            :mode="mode"
-            :rules="{
-              serviceDomain: fvGetAndReportPathRules('spec.clusterNetwork.serviceDomain'),
-              apiServerPort: fvGetAndReportPathRules('spec.clusterNetwork.apiServerPort'),
-              pods: fvGetAndReportPathRules('spec.clusterNetwork.pods.cidrBlocks'),
-              services: fvGetAndReportPathRules('spec.clusterNetwork.services.cidrBlocks')
-            }"
-          />
-        </div>
-        <ClusterClassVariables
-          :will-open="networkingHighlightOpen"
-          :value="variables"
-          :cluster-class="clusterClassObj"
-          :section="formSections.NETWORKING"
-          :cluster-namespace="value.metadata?.namespace"
-          @validation-passed="e => variableSectionReady.networking = e"
-
-          @update-variables="setVariables"
-        />
-      </Accordion>
-
-      <!-- WORKERS -->
-      <Accordion
-        class="mt-20 section-accordion"
-        open-initially
-        :title="t(`capi.cluster.section.${formSections.WORKERS}`)"
-      >
-        <div class="col span-12 mb-20">
           <ClusterClassVariables
+            :will-open="configHighlightOpen"
             :value="variables"
-            :section="formSections.WORKERS"
+            :section="formSections.GENERAL"
             :cluster-class="clusterClassObj"
             :cluster-namespace="value.metadata?.namespace"
 
             @update-variables="setVariables"
-            @validation-passed="e => variableSectionReady.workers = e"
+            @validation-passed="e => variableSectionReady.general = e"
           />
-          <div class="span-12">
-            <div
-              v-if="!!machineDeploymentOptions"
-              class="row"
-            >
-              <WorkerItem
-                v-model:value="machineDeployments"
-                :global-variables="variables"
+        </Accordion>
+
+        <Accordion
+          class="mt-20 section-accordion"
+          open-initially
+          :title="t(`capi.cluster.section.${formSections.CONTROL_PLANE}`)"
+        >
+          <!-- CONTROL PLANE CONFIGURATION -->
+          <div class="row row-config">
+            <div class="col col-half">
+              <ControlPlaneEndpointSection
+                v-model:value="controlPlaneEndpoint"
                 :mode="mode"
-                :title="t('capi.cluster.workers.machineDeployments.title')"
-                :default-add-value="defaultDeploymentAddValue"
-                :class-options="machineDeploymentOptions"
-                :initial-empty-row="true"
-                :cluster-class="clusterClassObj"
-                @update:value="$emit('update:value', { k: 'spec.topology.workers.machineDeployments', val: $event })"
-              />
-            </div>
-            <div
-              v-if="!!machinePoolOptions"
-              class="row"
-            >
-              <WorkerItem
-                v-model:value="machinePools"
-                :global-variables="variables"
-                :mode="mode"
-                :title="t('capi.cluster.workers.machinePools.title')"
-                :default-add-value="defaultPoolAddValue"
-                :class-options="machinePoolOptions"
-                :initial-empty-row="true"
-                :cluster-class="clusterClassObj"
-                @update:value="$emit('update:value', { k: 'spec.topology.workers.machinePools', val: $event })"
+                :rules="{ host: fvGetAndReportPathRules('spec.controlPlaneEndpoint.host'), port: fvGetAndReportPathRules('spec.controlPlaneEndpoint.port') }"
               />
             </div>
           </div>
-        </div>
-      </Accordion>
+          <div class="row  row-config">
+            <div class="col col-half">
+              <ControlPlaneSection
+                v-model:value="controlPlane"
+                :mode="mode"
+                :rules="{ replicas: fvGetAndReportPathRules('spec.topology.controlPlane.replicas') }"
+              />
+            </div>
+          </div>
+          <ClusterClassVariables
+            :will-open="controlPlaneHighlightOpen"
+            :value="variables"
+            :section="formSections.CONTROL_PLANE"
+            :cluster-class="clusterClassObj"
+            :cluster-namespace="value.metadata?.namespace"
 
-      <!-- GENERIC VARIABLES -->
+            @update-variables="setVariables"
+            @validation-passed="e => variableSectionReady.controlPlane = e"
+          />
+        </Accordion>
 
-      <ClusterClassVariables
-        :value="variables"
-        :cluster-class="clusterClassObj"
-        :cluster-namespace="value.metadata?.namespace"
-        @update-variables="setVariables"
+        <Accordion
+          class="mt-20"
+          open-initially
+          :title="t(`capi.cluster.section.${formSections.NETWORKING}`)"
+        >
+          <!-- NETWORKING CONFIGURATION -->
+          <div class="col col-half mt-20">
+            <NetworkSection
+              v-model:value="network"
+              :mode="mode"
+              :rules="{
+                serviceDomain: fvGetAndReportPathRules('spec.clusterNetwork.serviceDomain'),
+                apiServerPort: fvGetAndReportPathRules('spec.clusterNetwork.apiServerPort'),
+                pods: fvGetAndReportPathRules('spec.clusterNetwork.pods.cidrBlocks'),
+                services: fvGetAndReportPathRules('spec.clusterNetwork.services.cidrBlocks')
+              }"
+            />
+          </div>
+          <ClusterClassVariables
+            :will-open="networkingHighlightOpen"
+            :value="variables"
+            :cluster-class="clusterClassObj"
+            :section="formSections.NETWORKING"
+            :cluster-namespace="value.metadata?.namespace"
+            @validation-passed="e => variableSectionReady.networking = e"
 
-        @validation-passed="e => variableSectionReady.misc = e"
-      />
+            @update-variables="setVariables"
+          />
+        </Accordion>
 
-      <Accordion
-        class="mt-20 section-accordion"
-        :title="t(`capi.cluster.section.${formSections.LABELS}`)"
-      >
-        <Labels
-          :value="value"
-          :mode="mode"
+        <!-- WORKERS -->
+        <Accordion
+          class="mt-20 section-accordion"
+          open-initially
+          :title="t(`capi.cluster.section.${formSections.WORKERS}`)"
+        >
+          <div class="col span-12 mb-20">
+            <ClusterClassVariables
+              :value="variables"
+              :section="formSections.WORKERS"
+              :cluster-class="clusterClassObj"
+              :cluster-namespace="value.metadata?.namespace"
+
+              @update-variables="setVariables"
+              @validation-passed="e => variableSectionReady.workers = e"
+            />
+            <div class="span-12">
+              <div
+                v-if="!!machineDeploymentOptions"
+                class="row"
+              >
+                <WorkerItem
+                  v-model:value="machineDeployments"
+                  :global-variables="variables"
+                  :mode="mode"
+                  :title="t('capi.cluster.workers.machineDeployments.title')"
+                  :default-add-value="defaultDeploymentAddValue"
+                  :class-options="machineDeploymentOptions"
+                  :initial-empty-row="true"
+                  :cluster-class="clusterClassObj"
+                  @update:value="$emit('update:value', { k: 'spec.topology.workers.machineDeployments', val: $event })"
+                />
+              </div>
+              <div
+                v-if="!!machinePoolOptions"
+                class="row"
+              >
+                <WorkerItem
+                  v-model:value="machinePools"
+                  :global-variables="variables"
+                  :mode="mode"
+                  :title="t('capi.cluster.workers.machinePools.title')"
+                  :default-add-value="defaultPoolAddValue"
+                  :class-options="machinePoolOptions"
+                  :initial-empty-row="true"
+                  :cluster-class="clusterClassObj"
+                  @update:value="$emit('update:value', { k: 'spec.topology.workers.machinePools', val: $event })"
+                />
+              </div>
+            </div>
+          </div>
+        </Accordion>
+
+        <!-- GENERIC VARIABLES -->
+
+        <ClusterClassVariables
+          :value="variables"
+          :cluster-class="clusterClassObj"
+          :cluster-namespace="value.metadata?.namespace"
+          @update-variables="setVariables"
+
+          @validation-passed="e => variableSectionReady.misc = e"
         />
-      </Accordion>
+
+        <Accordion
+          class="mt-20 section-accordion"
+          :title="t(`capi.cluster.section.${formSections.LABELS}`)"
+        >
+          <Labels
+            :value="value"
+            :mode="mode"
+          />
+        </Accordion>
+      </div>
     </template>
   </CruResource>
 </template>

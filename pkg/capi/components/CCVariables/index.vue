@@ -418,7 +418,7 @@ export default {
         <div
           v-if="isMachineScoped"
           :style="{cursor: 'pointer'}"
-          class="expander"
+          class="expander mt-10"
           @click="()=>expanded=!expanded"
         >
           <h4>

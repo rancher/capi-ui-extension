@@ -138,7 +138,7 @@ export default {
         <label v-else />
         <i
           v-if="highlightColor === 'warning' || highlightColor === 'error'"
-          class="icon icon-toggle"
+          class="icon icon-toggle ml-5"
           :class="{['icon-warning']: highlightColor === 'warning',['icon-error']: highlightColor === 'error',}"
           @click="toggleOpen(!open)"
         >
