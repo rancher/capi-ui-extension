@@ -5,6 +5,7 @@ import LabeledInput from '@components/Form/LabeledInput/LabeledInput.vue';
 import NameNsDescription from '@shell/components/form/NameNsDescription.vue';
 import FormValidation from '@shell/mixins/form-validation';
 import CruResource from '@shell/components/CruResource.vue';
+import LabeledSelect from '@shell/components/form/LabeledSelect';
 import CreateEditView from '@shell/mixins/create-edit-view';
 import Labels from '@shell/components/form/Labels.vue';
 import { _EDIT } from '@shell/config/query-params';
@@ -19,12 +20,22 @@ import ControlPlaneSection from './ControlPlaneSection.vue';
 import { mapGetters } from 'vuex';
 import { LABELS, CAPI } from '../../types/capi';
 import Loading from '@shell/components/Loading.vue';
-import { NAMESPACE } from '@shell/config/types';
+import { NAMESPACE, FLEET } from '@shell/config/types';
+import Accordion from '@components/Accordion/Accordion.vue';
+import merge from 'lodash/merge';
 
 const defaultTopologyConfig = {
   version: '',
   class:   '',
   workers: { machineDeployments: [], machinePools: [] }
+};
+
+export const FORM_SECTIONS = {
+  GENERAL:       'general',
+  CONTROL_PLANE: 'controlplane',
+  NETWORKING:    'networking',
+  WORKERS:       'workers',
+  LABELS:        'labels'
 };
 
 export default {
@@ -41,7 +52,9 @@ export default {
     Labels,
     ControlPlaneSection,
     Checkbox,
-    Loading
+    Loading,
+    LabeledSelect,
+    Accordion
   },
   mixins: [CreateEditView, FormValidation],
   emits:  ['update:value'],
@@ -64,6 +77,7 @@ export default {
       required: true
     }
   },
+
   beforeMount() {
     this.initSpecs().then(() => {
     }).catch((err) => {
@@ -71,10 +85,18 @@ export default {
       this.loading = false;
     });
 
+    this.$store.dispatch('management/request', { url: '/v1-k3s-release/releases' }).then((res) => {
+      this.k3sVersions = res;
+    });
+
+    this.$store.dispatch('management/request', { url: '/v1-rke2-release/releases' }).then((res) => {
+      this.rke2Versions = res;
+    });
     this.$nextTick(() => {
       this.loading = false;
     });
   },
+
   data() {
     const store = this.$store;
     const t = store.getters['i18n/t'];
@@ -96,16 +118,7 @@ export default {
       ready:          false,
       weight:         30
     };
-    const stepVariables = {
-      name:           'stepVariables',
-      title:          t('capi.cluster.steps.variables.title'),
-      label:          t('capi.cluster.steps.variables.label'),
-      subtext:        '',
-      descriptionKey: 'capi.cluster.steps.variables.description',
-      ready:          true,
-      weight:         30
-    };
-    const addSteps = !!this.preselectedClass ? [stepConfiguration, stepVariables] : [stepClusterClass, stepConfiguration, stepVariables];
+    const addSteps = !!this.preselectedClass ? [stepConfiguration] : [stepClusterClass, stepConfiguration];
 
     return {
       addSteps,
@@ -120,19 +133,26 @@ export default {
         { path: 'spec.clusterNetwork.pods.cidrBlocks', rules: ['cidr'] },
         { path: 'spec.clusterNetwork.services.cidrBlocks', rules: ['cidr'] }
       ],
-      credentialId:          '',
-      credential:            null,
-      versionInfo:           {},
-      defaultWorkerAddValue: {
-        name:  '',
-        class: ''
+      credentialId:              '',
+      credential:                null,
+      versionInfo:               {},
+      variableSectionReady: {
+        general:      true,
+        controlPlane: true,
+        networking:   true,
+        misc:         true,
+        workers:      true
       },
-      variablesReady:          true,
-      clusterClassObj:         null,
-      loading:                 true,
-      autoImport:              !!this.value?.metadata?.labels && !!this.value?.metadata?.labels[LABELS.AUTO_IMPORT],
-      classNamespaceSupported: false,
-      allNamespaces:           [],
+      clusterClassObj:           null,
+      loading:                   true,
+      k3sVersions:               [],
+      rke2Versions:              [],
+      autoImport:                !!this.value?.metadata?.labels && !!this.value?.metadata?.labels[LABELS.AUTO_IMPORT],
+      classNamespaceSupported:   false,
+      allNamespaces:             [],
+      configHighlightOpen:       true,
+      controlPlaneHighlightOpen:  true,
+      networkingHighlightOpen:   true,
     };
   },
 
@@ -150,16 +170,10 @@ export default {
 
       step.ready = !!neu;
     },
-
-    variablesReady(neu) {
-      const step = this.addSteps.find((s) => s.name === 'stepVariables');
-
-      step.ready = !!neu;
-    }
   },
 
   computed: {
-    ...mapGetters({ t: 'i18n/t' }),
+    ...mapGetters({ t: 'i18n/t', schemaFor: 'management/schemaFor' }),
     fvExtraRules() {
       return {
         version:   versionValidator(this.t, this.clusterClassControlPlane),
@@ -167,6 +181,10 @@ export default {
         port:      portValidator(this.t),
         cidr:      cidrValidator(this.t)
       };
+    },
+
+    formSections() {
+      return FORM_SECTIONS;
     },
 
     machineDeploymentsValid() {
@@ -180,6 +198,7 @@ export default {
 
       return true;
     },
+
     machinePoolsValid() {
       if (this.value?.spec?.topology?.workers?.machinePools && this.value?.spec?.topology?.workers?.machinePools.length > 0) {
         for (const pool of this.value?.spec?.topology?.workers?.machinePools) {
@@ -192,12 +211,16 @@ export default {
       return true;
     },
 
+    variablesValid() {
+      return !Object.values(this.variableSectionReady).includes(false);
+    },
+
     stepConfigurationRequires() {
       const workersValid = ((this.value?.spec?.topology?.workers?.machinePools && this.value?.spec?.topology?.workers?.machinePools.length > 0) ||
          (this.value?.spec?.topology?.workers?.machineDeployments && this.value?.spec?.topology?.workers?.machineDeployments.length > 0)) &&
          this.machineDeploymentsValid && this.machinePoolsValid;
 
-      return this.fvFormIsValid & workersValid;
+      return this.fvFormIsValid && workersValid && this.variablesValid ;
     },
     clusterIsAlreadyCreated() {
       return this.mode === _EDIT;
@@ -215,6 +238,7 @@ export default {
         }
       }
     },
+
     controlPlaneEndpoint: {
       get() {
         return this.value?.spec?.controlPlaneEndpoint || {};
@@ -227,6 +251,7 @@ export default {
         }
       }
     },
+
     network: {
       get() {
         return this.value?.spec?.clusterNetwork || {};
@@ -239,21 +264,58 @@ export default {
         }
       }
     },
-    machineDeployments() {
-      return this.value.spec.topology.workers.machineDeployments;
+
+    topology() {
+      return this.value?.spec?.topology;
     },
-    machinePools() {
-      return this.value.spec.topology.workers.machinePools;
+
+    machineDeployments: {
+      get() {
+        return this.value?.spec?.topology?.workers?.machineDeployments || [];
+      },
+      set(neu) {
+        if (!this.value?.spec?.topology?.workers?.machineDeployments) {
+          this.value.spec.topology = merge(defaultTopologyConfig, this.value.spec.topology);
+        }
+        this.value.spec.topology.workers.machineDeployments = neu;
+      }
     },
+
+    machinePools: {
+      get() {
+        return this.value?.spec?.topology?.workers?.machinePools || [];
+      },
+      set(neu) {
+        if (!this.value?.spec?.topology?.workers?.machinePools) {
+          this.value.spec.topology = merge(defaultTopologyConfig, this.value.spec.topology );
+        }
+        this.value.spec.topology.workers.machinePools = neu;
+      }
+    },
+
+    variables: {
+      get() {
+        return this?.value?.spec?.topology?.variables || [];
+      },
+      set(neu) {
+        if (!this.value.spec.topology) {
+          this.value.spec.topology = {};
+        }
+        this.value.spec.topology.variables = neu;
+      }
+    },
+
     machineDeploymentOptions() {
       return this.clusterClassObj?.spec?.workers?.machineDeployments?.map((w) => w.class);
     },
+
     machinePoolOptions() {
       return this.clusterClassObj?.spec?.workers?.machinePools?.map((w) => w.class);
     },
     clusterClassControlPlane() {
       return this.clusterClassObj?.spec?.controlPlane?.ref?.kind;
     },
+
     clusterClassOptions() {
       const out = [];
       const currentObject = this.clusterClassObj;
@@ -275,9 +337,67 @@ export default {
         out.push(subtype);
       }
     },
+
+    canCreateGitRepos() {
+      const gitRepoSchema = this.$store.getters[`management/schemaFor`](FLEET.GIT_REPO);
+
+      return gitRepoSchema && gitRepoSchema?.collectionMethods.find((x) => x.toLowerCase() === 'post') ;
+    },
+
+    isk3s() {
+      return this.clusterClassControlPlane === CAPI.K3S_CP;
+    },
+
+    isRke2() {
+      return this.clusterClassControlPlane === CAPI.RKE2_CP;
+    },
+
+    // if k3s or rke2 use release channel endpoint to get a list of version choices
+    // if this property is [] show a plain text input for cp version
+    versionOptions() {
+      if (this.isk3s) {
+        return (this.k3sVersions?.data || []).map((d) => d.version).reverse();
+      }
+
+      if (this.isRke2) {
+        return (this.rke2Versions?.data || []).map((d) => d.version).reverse();
+      }
+
+      return [];
+    },
+
+    defaultDeploymentAddValue() {
+      let cclass = '';
+
+      if (this.machineDeploymentOptions && this.machineDeploymentOptions.length === 1 ) {
+        cclass = this.machineDeploymentOptions[0];
+      }
+
+      return {
+        name:      '',
+        class:     cclass,
+        variables: { overrides: [] }
+      };
+    },
+
+    defaultPoolAddValue() {
+      let cclass = '';
+
+      if (this.machinePoolOptions && this.machinePoolOptions.length === 1 ) {
+        cclass = this.machinePoolOptions[0];
+      }
+
+      return {
+        name:      '',
+        class:     cclass,
+        variables: { overrides: [] }
+      };
+    },
   },
+
   methods: {
     set,
+
     setClassInfo(name) {
       this.clusterClassObj = this.clusterClasses.find((x) => {
         const split = unescape(name).split('/');
@@ -291,11 +411,17 @@ export default {
         this.errors.push(this.t('error.clusterClassNotFound'));
       }
     },
-    setClass() {
+
+    async setClass() {
+      // if switching cluster classes, re-initialize the cluster object and form
+      if (this.topology.class) {
+        await this.initSpecs(true);
+      }
       const clusterClassName = this.clusterClassObj?.metadata?.name;
 
       this.$emit('update:value', { k: 'spec.topology.class', val: clusterClassName });
     },
+
     setClassNamespace() {
       const clusterClassNs = this.clusterClassObj?.metadata?.namespace;
 
@@ -304,6 +430,15 @@ export default {
         this.value.spec.topology.classNamespace = clusterClassNs;
       }
     },
+
+    setVariables(vars, names) {
+      const removed = (this.value?.spec?.topology?.variables || []).filter((v) => !names.includes(v.name));
+
+      this.value.spec.topology.variables = removed;
+
+      this.value.spec.topology.variables.push(...vars);
+    },
+
     async saveOverride() {
       if (this.errors) {
         clear(this.errors);
@@ -317,53 +452,59 @@ export default {
       }
     },
 
-    async initSpecs() {
+    async initSpecs(reset = false) {
       const inStore = this.$store.getters['currentStore'](NAMESPACE);
       const val = this.value;
       let namespaces = [];
 
-      if ( !val ) {
+      if ( !val || reset ) {
         set(val, 'spec', { });
         set(val, 'metadata', { labels: {}, annotations: {} });
       }
-      if (!val.spec.topology) {
+      if (!val.spec.topology || reset) {
         set(val.spec, 'topology', clone(defaultTopologyConfig));
       }
       this.$emit('update:value', { k: 'spec', val: val.spec });
 
-      if (this.preselectedClass) {
-        this.setClassInfo(this.preselectedClass);
+      if (!reset) {
+        if (this.preselectedClass) {
+          this.setClassInfo(this.preselectedClass);
+        }
+
+        const schema = this.$store.getters[`management/schemaFor`](
+          CAPI.CLUSTER
+        );
+
+        await schema.fetchResourceFields();
+        if ( schema.schemaDefinitions?.[`${ schema.schemaDefinition.type }.spec.topology`]?.resourceFields?.classNamespace ) {
+          this.classNamespaceSupported = true;
+          namespaces = await this.$store.dispatch(`${ inStore }/findAll`, { type: NAMESPACE });
+        }
+
+        this.allNamespaces = namespaces || [];
       }
-
-      const schema = this.$store.getters[`management/schemaFor`](
-        CAPI.CLUSTER
-      );
-
-      await schema.fetchResourceFields();
-      if ( schema.schemaDefinitions?.[`${ schema.schemaDefinition.type }.spec.topology`]?.resourceFields?.classNamespace ) {
-        this.classNamespaceSupported = true;
-        namespaces = await this.$store.dispatch(`${ inStore }/findAll`, { type: NAMESPACE });
-      }
-
-      this.allNamespaces = namespaces || [];
     },
+
     cancelCredential() {
       if (this.$refs.cruresource) {
         this.$refs.cruresource.emitOrRoute();
       }
     },
+
     cancel() {
       this.$router.push({
         name:   'c-cluster-manager-capi',
         params: {},
       });
     },
+
     done() {
       this.$router.push({
         name:   'c-cluster-manager-capi',
         params: {},
       });
     },
+
     clickedType(obj) {
       this.clusterClassObj = this.clusterClasses.find((x) => x.id === obj.id) || null;
       this.setClass();
@@ -375,6 +516,10 @@ export default {
       } else {
         delete this.value.metadata.labels['cluster-api.cattle.io/rancher-auto-import'];
       }
+    },
+
+    openRepoModal() {
+      this.$store.dispatch('management/promptModal', { component: 'AddExampleRepoDialog', modalWidth: '800px' });
     }
   }
 };
@@ -406,152 +551,235 @@ export default {
         name-field="label"
         side-label-field="tag"
         @clicked="clickedType"
-      />
+      >
+        <template #no-rows>
+          <div v-if="canCreateGitRepos">
+            <t
+              raw
+              k="capi.exampleClasses.noClass"
+            />
+            <div class="mt-20">
+              <button
+                type="button"
+                class="btn role-secondary"
+                @click="openRepoModal"
+              >
+                <t
+                  k="capi.exampleClasses.addExamples"
+                />
+              </button>
+            </div>
+          </div>
+        </template>
+      </CardGrid>
     </template>
     <template #stepConfiguration>
-      <NameNsDescription
-        v-if="!isView"
-        :value="value"
-        :mode="mode"
-        :namespaced="classNamespaceSupported"
-        :namespace-options="allNamespaces"
-        name-label="cluster.name.label"
-        name-placeholder="cluster.name.placeholder"
-        description-label="cluster.description.label"
-        description-placeholder="cluster.description.placeholder"
-        :rules="{ name: fvGetAndReportPathRules('metadata.name') }"
-        @update:value="$emit('update:value', { k: 'metadata', val: $event.metadata })"
-      />
-      <div class="row mb-20 span-12">
-        <div class="col col-config span-6 mt-20">
-          <h2>
-            <t k="capi.cluster.version.title" />
-          </h2>
-          <div class="mr-10">
-            <LabeledInput
-              v-model:value="value.spec.topology.version"
-              :mode="mode"
-              label-key="cluster.kubernetesVersion.label"
-              required
-              :rules="fvGetAndReportPathRules('spec.topology.version')"
-              class="version"
-              @update:value="$emit('update:value', { k: 'spec.topology.version', val: $event })"
-            />
-          </div>
-        </div>
-      </div>
-      <div class="row span-12 row-config">
-        <div class="col span-6 mt-20">
-          <h2>
-            <t k="capi.cluster.controlPlaneEndpoint.title" />
-          </h2>
-          <ControlPlaneEndpointSection
-            v-model:value="controlPlaneEndpoint"
+      <div :key="topology.class">
+        <Accordion
+          class="mt-20 section-accordion"
+          open-initially
+          :title="t(`capi.cluster.section.${formSections.GENERAL}`)"
+        >
+          <!-- GENERAL CONFIGURATION -->
+          <NameNsDescription
+            v-if="!isView"
+            :value="value"
             :mode="mode"
-            :rules="{ host: fvGetAndReportPathRules('spec.controlPlaneEndpoint.host'), port: fvGetAndReportPathRules('spec.controlPlaneEndpoint.port') }"
+            :namespaced="classNamespaceSupported"
+            :namespace-options="allNamespaces"
+            name-label="cluster.name.label"
+            name-placeholder="cluster.name.placeholder"
+            description-label="cluster.description.label"
+            description-placeholder="cluster.description.placeholder"
+            :rules="{ name: fvGetAndReportPathRules('metadata.name') }"
+            @update:value="$emit('update:value', { k: 'metadata', val: $event.metadata })"
           />
-        </div>
-        <div class="col span-6 mt-20">
-          <h2>
-            <t k="capi.cluster.topology.controlPlane.title" />
-          </h2>
-          <ControlPlaneSection
-            v-model:value="controlPlane"
+          <div class="mt-30">
+            <Checkbox
+              v-model:value="autoImport"
+              :mode="mode"
+              label-key="capi.cluster.labels.autoimport.label"
+              :disabled="clusterIsAlreadyCreated"
+              @update:value="enableAutoImport"
+            />
+          </div>
+          <div class="row mb-20">
+            <div class="col col-half mt-20">
+              <LabeledSelect
+                v-if="versionOptions.length"
+                :mode="mode"
+                :value="value.spec.topology.version"
+                label-key="cluster.kubernetesVersion.label"
+                required
+                searchable
+                taggable
+                :rules="fvGetAndReportPathRules('spec.topology.version')"
+                :options="versionOptions"
+                @selecting="$emit('update:value', {k: 'spec.topology.version', val: $event})"
+              />
+              <LabeledInput
+                v-else
+                v-model:value="value.spec.topology.version"
+                :mode="mode"
+                label-key="cluster.kubernetesVersion.label"
+                required
+                :rules="fvGetAndReportPathRules('spec.topology.version')"
+                @update:value="$emit('update:value', { k: 'spec.topology.version', val: $event })"
+              />
+            </div>
+          </div>
+          <ClusterClassVariables
+            :will-open="configHighlightOpen"
+            :value="variables"
+            :section="formSections.GENERAL"
+            :cluster-class="clusterClassObj"
+            :cluster-namespace="value.metadata?.namespace"
+
+            @update-variables="setVariables"
+            @validation-passed="e => variableSectionReady.general = e"
+          />
+        </Accordion>
+
+        <Accordion
+          class="mt-20 section-accordion"
+          open-initially
+          :title="t(`capi.cluster.section.${formSections.CONTROL_PLANE}`)"
+        >
+          <!-- CONTROL PLANE CONFIGURATION -->
+          <div class="row row-config">
+            <div class="col col-half">
+              <ControlPlaneEndpointSection
+                v-model:value="controlPlaneEndpoint"
+                :mode="mode"
+                :rules="{ host: fvGetAndReportPathRules('spec.controlPlaneEndpoint.host'), port: fvGetAndReportPathRules('spec.controlPlaneEndpoint.port') }"
+              />
+            </div>
+          </div>
+          <div class="row  row-config">
+            <div class="col col-half">
+              <ControlPlaneSection
+                v-model:value="controlPlane"
+                :mode="mode"
+                :rules="{ replicas: fvGetAndReportPathRules('spec.topology.controlPlane.replicas') }"
+              />
+            </div>
+          </div>
+          <ClusterClassVariables
+            :will-open="controlPlaneHighlightOpen"
+            :value="variables"
+            :section="formSections.CONTROL_PLANE"
+            :cluster-class="clusterClassObj"
+            :cluster-namespace="value.metadata?.namespace"
+
+            @update-variables="setVariables"
+            @validation-passed="e => variableSectionReady.controlPlane = e"
+          />
+        </Accordion>
+
+        <Accordion
+          class="mt-20"
+          open-initially
+          :title="t(`capi.cluster.section.${formSections.NETWORKING}`)"
+        >
+          <!-- NETWORKING CONFIGURATION -->
+          <div class="col col-half mt-20">
+            <NetworkSection
+              v-model:value="network"
+              :mode="mode"
+              :rules="{
+                serviceDomain: fvGetAndReportPathRules('spec.clusterNetwork.serviceDomain'),
+                apiServerPort: fvGetAndReportPathRules('spec.clusterNetwork.apiServerPort'),
+                pods: fvGetAndReportPathRules('spec.clusterNetwork.pods.cidrBlocks'),
+                services: fvGetAndReportPathRules('spec.clusterNetwork.services.cidrBlocks')
+              }"
+            />
+          </div>
+          <ClusterClassVariables
+            :will-open="networkingHighlightOpen"
+            :value="variables"
+            :cluster-class="clusterClassObj"
+            :section="formSections.NETWORKING"
+            :cluster-namespace="value.metadata?.namespace"
+            @validation-passed="e => variableSectionReady.networking = e"
+
+            @update-variables="setVariables"
+          />
+        </Accordion>
+
+        <!-- WORKERS -->
+        <Accordion
+          class="mt-20 section-accordion"
+          open-initially
+          :title="t(`capi.cluster.section.${formSections.WORKERS}`)"
+        >
+          <div class="col span-12 mb-20">
+            <ClusterClassVariables
+              :value="variables"
+              :section="formSections.WORKERS"
+              :cluster-class="clusterClassObj"
+              :cluster-namespace="value.metadata?.namespace"
+
+              @update-variables="setVariables"
+              @validation-passed="e => variableSectionReady.workers = e"
+            />
+            <div class="span-12">
+              <div
+                v-if="!!machineDeploymentOptions"
+                class="row"
+              >
+                <WorkerItem
+                  v-model:value="machineDeployments"
+                  :global-variables="variables"
+                  :mode="mode"
+                  :title="t('capi.cluster.workers.machineDeployments.title')"
+                  :default-add-value="defaultDeploymentAddValue"
+                  :class-options="machineDeploymentOptions"
+                  :initial-empty-row="true"
+                  :cluster-class="clusterClassObj"
+                  @update:value="$emit('update:value', { k: 'spec.topology.workers.machineDeployments', val: $event })"
+                />
+              </div>
+              <div
+                v-if="!!machinePoolOptions"
+                class="row"
+              >
+                <WorkerItem
+                  v-model:value="machinePools"
+                  :global-variables="variables"
+                  :mode="mode"
+                  :title="t('capi.cluster.workers.machinePools.title')"
+                  :default-add-value="defaultPoolAddValue"
+                  :class-options="machinePoolOptions"
+                  :initial-empty-row="true"
+                  :cluster-class="clusterClassObj"
+                  @update:value="$emit('update:value', { k: 'spec.topology.workers.machinePools', val: $event })"
+                />
+              </div>
+            </div>
+          </div>
+        </Accordion>
+
+        <!-- GENERIC VARIABLES -->
+
+        <ClusterClassVariables
+          :value="variables"
+          :cluster-class="clusterClassObj"
+          :cluster-namespace="value.metadata?.namespace"
+          @update-variables="setVariables"
+
+          @validation-passed="e => variableSectionReady.misc = e"
+        />
+
+        <Accordion
+          class="mt-20 section-accordion"
+          :title="t(`capi.cluster.section.${formSections.LABELS}`)"
+        >
+          <Labels
+            :value="value"
             :mode="mode"
-            :rules="{ replicas: fvGetAndReportPathRules('spec.topology.controlPlane.replicas') }"
           />
-        </div>
+        </Accordion>
       </div>
-      <div class="col span-6 mt-20">
-        <h2>
-          <t k="capi.cluster.networking.title" />
-        </h2>
-        <NetworkSection
-          v-model:value="network"
-          :mode="mode"
-          :rules="{
-            serviceDomain: fvGetAndReportPathRules('spec.clusterNetwork.serviceDomain'),
-            apiServerPort: fvGetAndReportPathRules('spec.clusterNetwork.apiServerPort'),
-            pods: fvGetAndReportPathRules('spec.clusterNetwork.pods.cidrBlocks'),
-            services: fvGetAndReportPathRules('spec.clusterNetwork.services.cidrBlocks')
-          }"
-        />
-      </div>
-      <div class="col span-12 mt-20 mb-20">
-        <h2>
-          <t k="capi.cluster.workers.title" />
-          <span class="required">*</span>
-        </h2>
-        <div class="span-12">
-          <div
-            v-if="!!machineDeploymentOptions"
-            class="row"
-          >
-            <WorkerItem
-              v-model:value="machineDeployments"
-              :mode="mode"
-              :title="t('capi.cluster.workers.machineDeployments.title')"
-              :default-add-value="defaultWorkerAddValue"
-              :add-btn-title="t('capi.cluster.workers.machineDeployments.add')"
-              :class-options="machineDeploymentOptions"
-              :initial-empty-row="true"
-              component-testid="machine-deployments-item"
-              @update:value="$emit('update:value', { k: 'spec.topology.workers.machineDeployments', val: $event })"
-            />
-          </div>
-          <div
-            v-if="!!machinePoolOptions"
-            class="row"
-          >
-            <WorkerItem
-              v-model:value="machinePools"
-              :mode="mode"
-              :title="t('capi.cluster.workers.machinePools.title')"
-              :default-add-value="defaultWorkerAddValue"
-              :add-btn-title="t('capi.cluster.workers.machinePools.add')"
-              :class-options="machinePoolOptions"
-              :initial-empty-row="true"
-              component-testid="machine-pools-item"
-              @update:value="$emit('update:value', { k: 'spec.topology.workers.machinePools', val: $event })"
-            />
-          </div>
-        </div>
-      </div>
-      <div class="mt-40">
-        <h2>
-          <t
-            k="capi.cluster.labels.title"
-            :raw="true"
-          />
-        </h2>
-      </div>
-      <div class="mt-20">
-        <Labels
-          :value="value"
-          :mode="mode"
-        />
-      </div>
-      <div class="mt-30">
-        <Checkbox
-          v-model:value="autoImport"
-          :mode="mode"
-          label-key="capi.cluster.labels.autoimport.label"
-          :disabled="clusterIsAlreadyCreated"
-          @update:value="enableAutoImport"
-        />
-      </div>
-    </template>
-    <template #stepVariables>
-      <h2>
-        <t k="capi.cluster.variables.title" />
-      </h2>
-      <ClusterClassVariables
-        v-model:value="value.spec.topology.variables"
-        :cluster-class="clusterClassObj"
-        @validation-passed="e => variablesReady = e"
-        @update:value="$emit('update:value', { k: 'spec.topology.variables', val: $event })"
-        @error="e=>errors.push(e)"
-      />
     </template>
   </CruResource>
 </template>
@@ -563,16 +791,23 @@ export default {
     width: 65%
 }
 
-@media screen and (max-width: 1100px) {
+//custom width for input columns instead of the usual classes (span-*) to simplify variable sizing
+:deep(.col-half)  {
+  margin-right: 0px;
+  width: 50%;
+}
+
+:deep(.accordion-container){
+  border-radius: 5px;
+}
+
+@media screen and (max-width: 1000px) {
   .row-config {
     flex-direction: column;
     width: 100%
   }
 
   .col-config {
-    width: 100%
-  }
-  .version {
     width: 100%
   }
 }

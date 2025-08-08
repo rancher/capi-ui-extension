@@ -1,6 +1,5 @@
 import { CAPI as RANCHER_CAPI } from '@shell/config/types';
 import { CAPI as TURTLES_CAPI } from '../types/capi';
-
 const CLUSTER_MGMT_PRODUCT = 'manager';
 
 export function init($plugin: any, store: any) {
@@ -9,8 +8,10 @@ export function init($plugin: any, store: any) {
     weightType,
     weightGroup,
     virtualType,
+    configureType
     // headers,
   } = $plugin.DSL(store, CLUSTER_MGMT_PRODUCT);
+
 
   virtualType({
     label:       'CAPI Turtles',
@@ -25,6 +26,8 @@ export function init($plugin: any, store: any) {
     overview: true,
     exact:    true,
   });
+
+  configureType(RANCHER_CAPI.CAPI_CLUSTER, {showConfigView: false})
 
   // Interestingly, types can only appear in one place, so by adding machine deployment
   // and others here, they will no longer show up in the Advanced section, which is
@@ -42,6 +45,5 @@ export function init($plugin: any, store: any) {
 
   weightType(RANCHER_CAPI.CAPI_CLUSTER, 10, true);
 
-  // Ensure CAPI group appears before the Advanced group
   weightGroup('CAPITurtles', 10, true);
 }
