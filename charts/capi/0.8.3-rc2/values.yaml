@@ -1,0 +1,16 @@
+nameOverride: ""
+fullnameOverride: ""
+plugin:
+  enabled: true
+  versionOverride: ""
+  endpoint: >-
+    https://raw.githubusercontent.com/rancher/capi-ui-extension/gh-pages/extensions/capi/0.8.3-rc2
+  compressedEndpoint: >-
+    https://raw.githubusercontent.com/rancher/capi-ui-extension/gh-pages/extensions/capi/0.8.3-rc2.tgz
+  noCache: false
+  noAuth: false
+  metadata:
+    catalog.cattle.io/rancher-version: ">= 2.10.0-0"
+    catalog.cattle.io/display-name: CAPI UI
+    catalog.cattle.io/ui-extensions-version: ">= 3.0.0 < 4.0.0"
+    catalog.cattle.io/certified: rancher
