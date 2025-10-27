@@ -1,13 +1,13 @@
 {
   "name": "capi-ui",
   "description": "UI for CAPI cluster provisioning using the Rancher Turtles extension",
-  "version": "0.8.3-rc2",
+  "version": "0.8.3",
   "private": false,
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
-    "@rancher/components": "^0.3.0-alpha.1",
+    "@rancher/components": "0.3.0-alpha.1",
     "@rancher/shell": "3.0.5-rc.3",
     "@types/lodash": "4.14.196",
     "cache-loader": "4.1.0",
