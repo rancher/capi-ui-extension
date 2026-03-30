@@ -1,5 +1,8 @@
-# capi-ui-extension
-Rancher Extension used in [rancher/dashboard](https://github.com/rancher/dashboard) for [Rancher Turtles](https://turtles.docs.rancher.com/turtles/v0.16/en/getting-started/install-rancher-turtles/using_rancher_dashboard.html) CAPI Provisioning UI.
+# capi-ui-extension (Deprecated)
+
+This extension has been deprecated and the Turtles project ships with Rancher by default: read more in the [Rancher 2.13.0 release notes](https://github.com/rancher/rancher/releases/tag/v2.13.0).
+
+Rancher Extension used in [rancher/dashboard](https://github.com/rancher/dashboard) for [Rancher Turtles](https://turtles.docs.rancher.com/turtles/v0.16/en/getting-started/install-rancher-turtles/using_rancher_dashboard.html) CAPI Provisioning UI. 
 
 ## Running for Development
 This is what you probably want to get started.
